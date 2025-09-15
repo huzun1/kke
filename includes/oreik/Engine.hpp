@@ -7,7 +7,7 @@ namespace oreik {
 class Engine {
 	ID2D1DeviceContext* deviceContext;
 
-	ID2D1Bitmap1* rendererTarget;
+	ID2D1Bitmap1* renderTarget;
 	ID2D1Bitmap* screenBitmap;
 
 public:

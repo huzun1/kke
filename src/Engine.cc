@@ -24,16 +24,18 @@ void oreik::Engine::begin(ID2D1Bitmap* screen) {
 		nullptr,
 		0,
 		properties,
-		&rendererTarget);
+		&renderTarget);
 	D2D1_POINT_2U destPoint(0, 0);
 	D2D1_RECT_U srcRectangle(0, 0, screenSize.width, screenSize.height);
-	rendererTarget->CopyFromBitmap(&destPoint, screen, &srcRectangle);
 
 	deviceContext->BeginDraw();
-	deviceContext->SetTarget(rendererTarget);
+	deviceContext->SetTarget(renderTarget);
+	deviceContext->Clear();
+
+	renderTarget->CopyFromBitmap(&destPoint, screen, &srcRectangle);
 }
 
 void oreik::Engine::end(ID2D1Image** output) {
 	deviceContext->EndDraw();
-	*output = rendererTarget;
+	*output = renderTarget;
 }
