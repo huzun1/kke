@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#include "D2D1.hpp"
+#include "backend/D2D1.hpp"
 #include "oreik/Engine.hpp"
 
 namespace application {
@@ -21,8 +21,14 @@ public:
 
 private:
 	/**
+	 * @brief Pre-Render test with the default context
+	 */
+	void preRender();
+
+	/**
 	 * @brief Rendering a frame by using the engine instance
 	 */
-	void renderFrame();
+	void
+	renderFrame();
 };
 };	// namespace application

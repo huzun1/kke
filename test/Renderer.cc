@@ -11,13 +11,13 @@ application::Renderer::Renderer(application::D2D1& d2d1)
 }
 
 void application::Renderer::render() {
+	preRender();
+
 	ID2D1DeviceContext* deviceContext = d2d1.getDeviceContext();
 	ID2D1Bitmap1* renderTarget = d2d1.getRenderTarget();
 
 	this->engine->begin(renderTarget);
-
 	renderFrame();
-
 	ID2D1Image* output;
 	this->engine->end(&output);
 
@@ -28,6 +28,22 @@ void application::Renderer::render() {
 	deviceContext->EndDraw();
 
 	output->Release();
+}
+
+void application::Renderer::preRender() {
+	ID2D1DeviceContext* deviceContext = d2d1.getDeviceContext();
+	ID2D1Bitmap1* renderTarget = d2d1.getRenderTarget();
+
+	deviceContext->SetTarget(renderTarget);
+	deviceContext->BeginDraw();
+
+	D2D1_RECT_F rect{90, 90, 200, 200};
+	D2D1_COLOR_F color{1.0f, 0.0f, 0.0f, 1.0f};
+	ID2D1SolidColorBrush* brush;
+	deviceContext->CreateSolidColorBrush(&color, nullptr, &brush);
+	deviceContext->FillRectangle(rect, brush);
+
+	deviceContext->EndDraw();
 }
 
 void application::Renderer::renderFrame() {
