@@ -39,3 +39,9 @@ void oreik::Engine::end(ID2D1Image** output) {
 	deviceContext->EndDraw();
 	*output = renderTarget;
 }
+
+void oreik::Engine::drawRect(D2D1_RECT_F rect, D2D1_COLOR_F color, float strokeWidth) const {
+	ID2D1SolidColorBrush* brush;
+	deviceContext->CreateSolidColorBrush(&color, nullptr, &brush);
+	deviceContext->DrawRectangle(rect, brush, strokeWidth);
+}

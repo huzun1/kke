@@ -1,8 +1,8 @@
-#include "window.hpp"
+#include "Window.hpp"
 
 #include <stdio.h>
 
-HWND window::createWindow(HINSTANCE instance) {
+HWND application::Window::createWindow(HINSTANCE instance) {
 	printf("creating window\n");
 
 	WNDCLASSEXW winClass = {};
@@ -35,7 +35,7 @@ HWND window::createWindow(HINSTANCE instance) {
 	return hwnd;
 }
 
-LRESULT CALLBACK window::wndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
+LRESULT CALLBACK application::Window::wndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	LRESULT result = 0;
 	switch (msg) {
 		case WM_KEYDOWN: {

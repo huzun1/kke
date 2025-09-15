@@ -16,5 +16,7 @@ public:
 	void begin(ID2D1Bitmap* screen);
 
 	void end(ID2D1Image** output);
+
+	void drawRect(D2D1_RECT_F rect, D2D1_COLOR_F color, float strokeWidth) const;
 };
 };	// namespace oreik
