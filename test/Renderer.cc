@@ -5,6 +5,9 @@
 
 #include <memory>
 
+#include "oreik/brush/SolidColorBrush.hpp"
+
+
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
 	this->engine = std::make_unique<oreik::Engine>(d2d1.getDeviceContext());
@@ -47,5 +50,5 @@ void application::Renderer::preRender() {
 }
 
 void application::Renderer::renderFrame() {
-	this->engine->drawRect({20, 20, 100, 100}, {0.0f, 1.0f, 0.0f, 1.0f}, 10.0f);
+	this->engine->drawRect({20, 20, 100, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}), 10.0f);
 }

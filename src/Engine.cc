@@ -5,8 +5,10 @@
 
 #include <oreik/Engine.hpp>
 
+#include "oreik/ResourceAllocator.hpp"
+
 oreik::Engine::Engine(ID2D1DeviceContext* deviceContext)
-	: deviceContext(deviceContext) {
+	: deviceContext(deviceContext), resourceAllocator(deviceContext) {
 }
 
 void oreik::Engine::begin(ID2D1Bitmap* screen) {
@@ -40,8 +42,6 @@ void oreik::Engine::end(ID2D1Image** output) {
 	*output = renderTarget;
 }
 
-void oreik::Engine::drawRect(D2D1_RECT_F rect, D2D1_COLOR_F color, float strokeWidth) const {
-	ID2D1SolidColorBrush* brush;
-	deviceContext->CreateSolidColorBrush(&color, nullptr, &brush);
-	deviceContext->DrawRectangle(rect, brush, strokeWidth);
+void oreik::Engine::drawRect(D2D1_RECT_F rect, oreik::Brush const& brush, float strokeWidth) {
+	deviceContext->DrawRectangle(rect, resourceAllocator.aquireOrCreate(brush), strokeWidth);
 }

@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.10.0)
 
 add_library(oreik STATIC
     Engine.cc
+    ResourceAllocator.cc
+    brush/SolidColorBrush.cc
 )
 
 target_include_directories(oreik PUBLIC

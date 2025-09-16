@@ -3,12 +3,16 @@
 #include <d2d1.h>
 #include <d2d1_1.h>
 
+#include "brush/Brush.hpp"
+#include "oreik/ResourceAllocator.hpp"
+
 namespace oreik {
 class Engine {
 	ID2D1DeviceContext* deviceContext;
 
 	ID2D1Bitmap1* renderTarget;
 	ID2D1Bitmap* screenBitmap;
+	oreik::ResourceAllocator resourceAllocator;
 
 public:
 	Engine(ID2D1DeviceContext* deviceContext);
@@ -17,6 +21,6 @@ public:
 
 	void end(ID2D1Image** output);
 
-	void drawRect(D2D1_RECT_F rect, D2D1_COLOR_F color, float strokeWidth) const;
+	void drawRect(D2D1_RECT_F rect, oreik::Brush const& brush, float strokeWidth);
 };
 };	// namespace oreik
