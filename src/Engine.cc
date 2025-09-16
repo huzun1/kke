@@ -42,6 +42,32 @@ void oreik::Engine::end(ID2D1Image** output) {
 	*output = renderTarget;
 }
 
-void oreik::Engine::drawRect(D2D1_RECT_F rect, oreik::Brush const& brush, float strokeWidth) {
-	deviceContext->DrawRectangle(rect, resourceAllocator.aquireOrCreate(brush), strokeWidth);
+void oreik::Engine::drawLine(oreik::Point2f start, oreik::Point2f end, oreik::Brush const& brush, float strokeWidth) {
+	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.aquireOrCreate(brush), strokeWidth);
+}
+
+void oreik::Engine::drawRect(oreik::Rect const& rect, oreik::Brush const& brush, float strokeWidth) {
+	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.aquireOrCreate(brush), strokeWidth);
+}
+
+void oreik::Engine::drawRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush, float strokeWidth) {
+	D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(rect.rectF(), radius, radius);
+	deviceContext->DrawRoundedRectangle(roundedRect, resourceAllocator.aquireOrCreate(brush), strokeWidth);
+}
+
+void oreik::Engine::drawEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush, float strokeWidth) {
+	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreate(brush), strokeWidth);
+}
+
+void oreik::Engine::fillRect(oreik::Rect const& rect, oreik::Brush const& brush) {
+	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.aquireOrCreate(brush));
+}
+
+void oreik::Engine::fillRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush) {
+	D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(rect.rectF(), radius, radius);
+	deviceContext->FillRoundedRectangle(roundedRect, resourceAllocator.aquireOrCreate(brush));
+}
+
+void oreik::Engine::fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush) {
+	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreate(brush));
 }

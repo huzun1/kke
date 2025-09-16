@@ -3,8 +3,11 @@
 #include <d2d1.h>
 #include <d2d1_1.h>
 
+#include "ResourceAllocator.hpp"
 #include "brush/Brush.hpp"
-#include "oreik/ResourceAllocator.hpp"
+#include "common/Ellipse.hpp"
+#include "common/Point.hpp"
+#include "common/Rect.hpp"
 
 namespace oreik {
 class Engine {
@@ -21,6 +24,18 @@ public:
 
 	void end(ID2D1Image** output);
 
-	void drawRect(D2D1_RECT_F rect, oreik::Brush const& brush, float strokeWidth);
+	void drawLine(oreik::Point2f start, oreik::Point2f end, oreik::Brush const& brush, float strokeWidth);
+
+	void drawRect(oreik::Rect const& rect, oreik::Brush const& brush, float strokeWidth);
+
+	void drawRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush, float strokeWidth);
+
+	void drawEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush, float strokeWidth);
+
+	void fillRect(oreik::Rect const& rect, oreik::Brush const& brush);
+
+	void fillRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush);
+
+	void fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush);
 };
 };	// namespace oreik
