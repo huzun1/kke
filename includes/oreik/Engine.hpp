@@ -24,18 +24,39 @@ public:
 
 	void end(ID2D1Image** output);
 
-	void drawLine(oreik::Point2f start, oreik::Point2f end, oreik::Brush const& brush, float strokeWidth);
+	void drawLine(
+		oreik::Point2f start,
+		oreik::Point2f end,
+		oreik::Brush const& brush,
+		float strokeWidth);
 
-	void drawRect(oreik::Rect const& rect, oreik::Brush const& brush, float strokeWidth);
+	void drawRect(
+		oreik::Rect const& rect,
+		oreik::Brush const& brush,
+		float strokeWidth);
 
-	void drawRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush, float strokeWidth);
+	void drawRounded(
+		oreik::Rect const& rect,
+		float radius,
+		oreik::Brush const& brush,
+		float strokeWidth);
 
-	void drawEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush, float strokeWidth);
+	void drawEllipse(
+		oreik::Ellipse const& ellipse,
+		oreik::Brush const& brush,
+		float strokeWidth);
 
-	void fillRect(oreik::Rect const& rect, oreik::Brush const& brush);
+	void fillRect(
+		oreik::Rect const& rect,
+		oreik::Brush const& brush);
 
-	void fillRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush);
+	void fillRounded(
+		oreik::Rect const& rect,
+		float radius,
+		oreik::Brush const& brush);
 
-	void fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush);
+	void fillEllipse(
+		oreik::Ellipse const& ellipse,
+		oreik::Brush const& brush);
 };
 };	// namespace oreik
