@@ -8,6 +8,7 @@
 #include "common/Ellipse.hpp"
 #include "common/Point.hpp"
 #include "common/Rect.hpp"
+#include "oreik/effect/EffectContainer.hpp"
 
 namespace oreik {
 class Engine {
@@ -16,6 +17,7 @@ class Engine {
 	ID2D1Bitmap1* renderTarget;
 	ID2D1Bitmap* screenBitmap;
 	oreik::ResourceAllocator resourceAllocator;
+	oreik::EffectContainer effectContainer;
 
 public:
 	Engine(ID2D1DeviceContext* deviceContext);
@@ -58,5 +60,7 @@ public:
 	void fillEllipse(
 		oreik::Ellipse const& ellipse,
 		oreik::Brush const& brush);
+
+	void blur();
 };
 };	// namespace oreik

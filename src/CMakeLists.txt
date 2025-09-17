@@ -7,6 +7,7 @@ add_library(oreik STATIC
     common/Point.cc
     common/Rect.cc
     brush/SolidColorBrush.cc
+    effect/impl/BlurEffect.cc
 )
 
 target_include_directories(oreik PUBLIC

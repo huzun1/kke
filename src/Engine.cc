@@ -3,12 +3,15 @@
 #include <d2d1helper.h>
 #include <dcommon.h>
 
+#include <memory>
 #include <oreik/Engine.hpp>
 
 #include "oreik/ResourceAllocator.hpp"
+#include "oreik/effect/EffectContainer.hpp"
+#include "oreik/effect/impl/BlurEffect.hpp"
 
 oreik::Engine::Engine(ID2D1DeviceContext* deviceContext)
-	: deviceContext(deviceContext), resourceAllocator(deviceContext) {
+	: deviceContext(deviceContext), resourceAllocator(deviceContext), effectContainer(deviceContext) {
 }
 
 void oreik::Engine::begin(ID2D1Bitmap* screen) {
@@ -70,4 +73,8 @@ void oreik::Engine::fillRounded(oreik::Rect const& rect, float radius, oreik::Br
 
 void oreik::Engine::fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush) {
 	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreate(brush));
+}
+
+void oreik::Engine::blur() {
+	std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
 }
