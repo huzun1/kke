@@ -9,6 +9,7 @@
 
 #include "oreik/ResourceAllocator.hpp"
 #include "oreik/effect/EffectContainer.hpp"
+#include "oreik/effect/impl/BlurEffect.hpp"
 
 oreik::Engine::Engine(ID2D1DeviceContext* deviceContext)
 	: deviceContext(deviceContext), resourceAllocator(deviceContext), effectContainer(deviceContext) {
@@ -82,21 +83,28 @@ void oreik::Engine::fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush cons
 	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreate(brush));
 }
 
-void oreik::Engine::effect(std::shared_ptr<Effect> effect) {
-	copyRenderTargetToTemp();
-
-	Microsoft::WRL::ComPtr<ID2D1Effect> d2d1Effect = effect->getEffect();
-	d2d1Effect->SetInput(0, effectScreenBitmap);
-	effect->setProperties(d2d1Effect.Get());
-
-	deviceContext->DrawImage(d2d1Effect.Get());
+void oreik::Engine::blur(
+	float deviation,
+	oreik::BlurBorderMode borderMode,
+	oreik::BlurOptimization optimization) {
+	std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
+	blurEffect->setDeviation(deviation);
+	blurEffect->setBorderMode(borderMode);
+	blurEffect->setOptimization(optimization);
+	effect(blurEffect);
 }
 
-void oreik::Engine::copyRenderTargetToTemp() {
+void oreik::Engine::effect(std::shared_ptr<Effect> effect) {
+	// Copy the render target to the temp buffer
 	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
 	D2D1_POINT_2U destPoint(0, 0);
 	D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
-
-	deviceContext->Flush();
+	deviceContext->Flush();	 // To apply current commands to the render target
 	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
+
+	// Render the effect
+	Microsoft::WRL::ComPtr<ID2D1Effect> d2d1Effect = effect->getEffect();
+	d2d1Effect->SetInput(0, effectScreenBitmap);
+	effect->setProperties(d2d1Effect.Get());
+	deviceContext->DrawImage(d2d1Effect.Get());
 }

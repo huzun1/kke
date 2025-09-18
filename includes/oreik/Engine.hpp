@@ -12,6 +12,7 @@
 #include "common/Rect.hpp"
 #include "oreik/effect/Effect.hpp"
 #include "oreik/effect/EffectContainer.hpp"
+#include "oreik/effect/impl/BlurEffect.hpp"
 
 namespace oreik {
 class Engine {
@@ -69,9 +70,11 @@ public:
 		return effectContainer.acquireOrCreateEffect<T>();
 	}
 
-	void effect(std::shared_ptr<Effect> effect);
+	void blur(
+		float deviation,
+		oreik::BlurBorderMode borderMode = oreik::BlurBorderMode::HARD,
+		oreik::BlurOptimization optimization = oreik::BlurOptimization::BALANCED);
 
-private:
-	void copyRenderTargetToTemp();
+	void effect(std::shared_ptr<Effect> effect);
 };
 };	// namespace oreik

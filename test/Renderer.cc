@@ -57,9 +57,5 @@ void application::Renderer::renderFrame() {
 	this->engine->fillRounded({20, 60, 160, 220}, 10.0f, oreik::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
 	this->engine->fillEllipse(oreik::Ellipse(300, 300, 30), oreik::SolidColorBrush({1.0, 0.0f, 0.0f, 1.0f}));
 
-	std::shared_ptr<oreik::BlurEffect> blurEffect = this->engine->aquireOrCreateEffect<oreik::BlurEffect>();
-	blurEffect->setDeviation(4.0f);
-	blurEffect->setBorderMode(oreik::BlurBorderMode::SOFT);
-	blurEffect->setOptimization(oreik::BlurOptimization::SPEED);
-	this->engine->effect(blurEffect);
+	this->engine->blur(20.0f);
 }
