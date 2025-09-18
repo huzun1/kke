@@ -1,9 +1,9 @@
 #pragma once
 
-#define DEFINE_GETTER_SETTER(type, field_name) \
-	const type& get##field_name() {            \
-		return field_name;                     \
-	}                                          \
-	void set##field_name(type const& val) {    \
-		field_name = val;                      \
+#define DEFINE_GETTER_SETTER(type, func_name, field_name) \
+	const type& get##func_name() {                        \
+		return field_name;                                \
+	}                                                     \
+	void set##func_name(type const& val) {                \
+		field_name = val;                                 \
 	}

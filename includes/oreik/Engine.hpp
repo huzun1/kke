@@ -3,11 +3,14 @@
 #include <d2d1.h>
 #include <d2d1_1.h>
 
+#include <memory>
+
 #include "ResourceAllocator.hpp"
 #include "brush/Brush.hpp"
 #include "common/Ellipse.hpp"
 #include "common/Point.hpp"
 #include "common/Rect.hpp"
+#include "oreik/effect/Effect.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 
 namespace oreik {
@@ -15,7 +18,7 @@ class Engine {
 	ID2D1DeviceContext* deviceContext;
 
 	ID2D1Bitmap1* renderTarget;
-	ID2D1Bitmap* screenBitmap;
+	ID2D1Bitmap1* effectScreenBitmap;  // Temporary bitmap for holding screen copies
 	oreik::ResourceAllocator resourceAllocator;
 	oreik::EffectContainer effectContainer;
 
@@ -61,6 +64,14 @@ public:
 		oreik::Ellipse const& ellipse,
 		oreik::Brush const& brush);
 
-	void blur();
+	template <typename T>
+	std::shared_ptr<T> aquireOrCreateEffect() {
+		return effectContainer.acquireOrCreateEffect<T>();
+	}
+
+	void effect(std::shared_ptr<Effect> effect);
+
+private:
+	void copyRenderTargetToTemp();
 };
 };	// namespace oreik

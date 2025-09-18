@@ -26,9 +26,9 @@ class BlurEffect : public Effect {
 public:
 	GUID effectGuid() const override;
 
-	DEFINE_GETTER_SETTER(float, deviation);
-	DEFINE_GETTER_SETTER(BlurOptimization, optimization);
-	DEFINE_GETTER_SETTER(BlurBorderMode, borderMode);
+	DEFINE_GETTER_SETTER(float, Deviation, deviation);
+	DEFINE_GETTER_SETTER(BlurOptimization, Optimization, optimization);
+	DEFINE_GETTER_SETTER(BlurBorderMode, BorderMode, borderMode);
 
 	void setProperties(ID2D1Effect* effect) const override;
 };

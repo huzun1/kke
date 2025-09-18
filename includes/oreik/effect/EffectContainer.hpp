@@ -38,7 +38,7 @@ public:
 	std::shared_ptr<T> findEffect() {
 		for (auto& effect : effectContainer) {
 			if (auto casted = std::dynamic_pointer_cast<T>(effect)) {
-				return effect;
+				return casted;
 			}
 		}
 		return nullptr;

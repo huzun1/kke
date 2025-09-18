@@ -7,6 +7,7 @@
 
 #include "oreik/brush/SolidColorBrush.hpp"
 #include "oreik/common/Ellipse.hpp"
+#include "oreik/effect/impl/BlurEffect.hpp"
 
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
@@ -55,4 +56,10 @@ void application::Renderer::renderFrame() {
 	this->engine->fillRect({60, 20, 160, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 1.0f, 1.0f}));
 	this->engine->fillRounded({20, 60, 160, 220}, 10.0f, oreik::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
 	this->engine->fillEllipse(oreik::Ellipse(300, 300, 30), oreik::SolidColorBrush({1.0, 0.0f, 0.0f, 1.0f}));
+
+	std::shared_ptr<oreik::BlurEffect> blurEffect = this->engine->aquireOrCreateEffect<oreik::BlurEffect>();
+	blurEffect->setDeviation(4.0f);
+	blurEffect->setBorderMode(oreik::BlurBorderMode::SOFT);
+	blurEffect->setOptimization(oreik::BlurOptimization::SPEED);
+	this->engine->effect(blurEffect);
 }
