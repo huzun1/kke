@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10.0)
 add_library(oreik STATIC
     Engine.cc
     ResourceAllocator.cc
+    TextureRepository.cc
     common/Ellipse.cc
     common/Point.cc
     common/Rect.cc

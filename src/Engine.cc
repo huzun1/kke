@@ -8,12 +8,13 @@
 #include <oreik/Engine.hpp>
 
 #include "oreik/ResourceAllocator.hpp"
+#include "oreik/TextureRepository.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 #include "oreik/effect/impl/BlurEffect.hpp"
 #include "oreik/transform/Matrix.hpp"
 
 oreik::Engine::Engine(ID2D1DeviceContext* deviceContext)
-	: deviceContext(deviceContext), resourceAllocator(deviceContext), effectContainer(deviceContext) {
+	: deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(deviceContext), effectContainer(deviceContext) {
 }
 
 void oreik::Engine::begin(ID2D1Bitmap* screen) {
@@ -86,6 +87,53 @@ void oreik::Engine::fillRounded(oreik::Rect const& rect, float radius, oreik::Br
 
 void oreik::Engine::fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush) {
 	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreate(brush));
+}
+
+uint64_t oreik::Engine::loadTexture(const void* data, size_t size) {
+	return textureRepository.load(data, size);
+}
+
+void oreik::Engine::drawTexture(size_t index, oreik::Rect const& dimension, float opacity, oreik::InterpolationMode interpolationMode, std::optional<oreik::Rect> srcRect) {
+	Microsoft::WRL::ComPtr<ID2D1Bitmap> texture = textureRepository.fetchTexture(index);
+	if (!texture) {
+		return;
+	}
+
+	D2D1_INTERPOLATION_MODE mode;
+	switch (interpolationMode) {
+		case oreik::InterpolationMode::NEAREST:
+			mode = D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
+			break;
+		case oreik::InterpolationMode::LINEAR:
+			mode = D2D1_INTERPOLATION_MODE_LINEAR;
+			break;
+		case oreik::InterpolationMode::CUBIC:
+			mode = D2D1_INTERPOLATION_MODE_CUBIC;
+			break;
+		case oreik::InterpolationMode::MULTI_SAMPLE_LINEAR:
+			mode = D2D1_INTERPOLATION_MODE_MULTI_SAMPLE_LINEAR;
+			break;
+		case oreik::InterpolationMode::ANISOTROPIC:
+			mode = D2D1_INTERPOLATION_MODE_ANISOTROPIC;
+			break;
+		case oreik::InterpolationMode::HIGH_QUALITY_CUBIC:
+			mode = D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC;
+			break;
+		default:
+			mode = D2D1_INTERPOLATION_MODE_FORCE_DWORD;
+			break;
+	}
+
+	D2D1_RECT_F rect = dimension.rectF();
+
+	D2D1_RECT_F srcRectangle;
+	D2D1_RECT_F* srcRectanglePtr = nullptr;
+	if (srcRect) {
+		srcRectangle = srcRect->rectF();
+		srcRectanglePtr = &srcRectangle;
+	}
+
+	deviceContext->DrawBitmap(texture.Get(), &rect, opacity, mode, srcRectanglePtr);
 }
 
 void oreik::Engine::blur(
