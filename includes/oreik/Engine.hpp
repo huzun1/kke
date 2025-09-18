@@ -10,9 +10,11 @@
 #include "common/Ellipse.hpp"
 #include "common/Point.hpp"
 #include "common/Rect.hpp"
+#include "oreik/common/Scale.hpp"
 #include "oreik/effect/Effect.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 #include "oreik/effect/impl/BlurEffect.hpp"
+#include "oreik/transform/Matrix.hpp"
 
 namespace oreik {
 class Engine {
@@ -20,6 +22,7 @@ class Engine {
 
 	ID2D1Bitmap1* renderTarget;
 	ID2D1Bitmap1* effectScreenBitmap;  // Temporary bitmap for holding screen copies
+	oreik::Matrix matrix;
 	oreik::ResourceAllocator resourceAllocator;
 	oreik::EffectContainer effectContainer;
 
@@ -76,5 +79,11 @@ public:
 		oreik::BlurOptimization optimization = oreik::BlurOptimization::BALANCED);
 
 	void effect(std::shared_ptr<Effect> effect);
+
+	void pushScale(oreik::Point2f const& center, oreik::Scale2f const& scale);
+
+	void pushRotate(oreik::Point2f const& center, float angle);
+
+	void popTransform();
 };
 };	// namespace oreik

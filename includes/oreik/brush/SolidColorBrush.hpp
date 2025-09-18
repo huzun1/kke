@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../common/Color4f.hpp"
+#include "../common/Color.hpp"
 #include "Brush.hpp"
 
 namespace oreik {

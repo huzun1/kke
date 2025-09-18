@@ -3,11 +3,12 @@
 #include <D2D1.h>
 #include <d2d1_1.h>
 
+#include <cmath>
 #include <memory>
 
 #include "oreik/brush/SolidColorBrush.hpp"
 #include "oreik/common/Ellipse.hpp"
-#include "oreik/effect/impl/BlurEffect.hpp"
+#include "oreik/common/Rect.hpp"
 
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
@@ -51,7 +52,23 @@ void application::Renderer::preRender() {
 }
 
 void application::Renderer::renderFrame() {
-	this->engine->drawLine({90, 90}, {700, 700}, oreik::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}), 3.0f);
+	// Scale Test
+	static int angle = 0;
+	angle++;
+	oreik::Rect rotRect{300, 90, 500, 200};
+	this->engine->pushRotate(rotRect.center(), angle);
+	this->engine->fillRounded(rotRect, 3.0f, oreik::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
+	this->engine->popTransform();
+
+	// Rotate Test
+	static float theta = 0;
+	theta += 0.01f;
+	oreik::Rect scaleRect{200, 400, 400, 600};
+	this->engine->pushScale(scaleRect.center(), {std::sin(theta) * 0.5f + 1.0f, std::sin(theta) * 0.5f + 1.0f});
+	this->engine->fillRounded(scaleRect, 3.0f, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
+	this->engine->popTransform();
+
+	// Generic Rendering Test
 	this->engine->drawRect({20, 20, 100, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}), 10.0f);
 	this->engine->fillRect({60, 20, 160, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 1.0f, 1.0f}));
 	this->engine->fillRounded({20, 60, 160, 220}, 10.0f, oreik::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
