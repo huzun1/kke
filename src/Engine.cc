@@ -2,18 +2,20 @@
 #include <d2d1_1.h>
 #include <d2d1helper.h>
 #include <dcommon.h>
+#include <wrl/client.h>
 
+#include <memory>
 #include <oreik/Engine.hpp>
 
 #include "oreik/ResourceAllocator.hpp"
+#include "oreik/effect/EffectContainer.hpp"
+#include "oreik/effect/impl/BlurEffect.hpp"
 
 oreik::Engine::Engine(ID2D1DeviceContext* deviceContext)
-	: deviceContext(deviceContext), resourceAllocator(deviceContext) {
+	: deviceContext(deviceContext), resourceAllocator(deviceContext), effectContainer(deviceContext) {
 }
 
 void oreik::Engine::begin(ID2D1Bitmap* screen) {
-	this->screenBitmap = screen;
-
 	// Create a bitmap of the same size as the current screen
 	// and use it as the target
 	D2D1_SIZE_U screenSize = screen->GetPixelSize();
@@ -35,11 +37,20 @@ void oreik::Engine::begin(ID2D1Bitmap* screen) {
 	deviceContext->Clear();
 
 	renderTarget->CopyFromBitmap(&destPoint, screen, &srcRectangle);
+
+	// Create a temp bitmap
+	deviceContext->CreateBitmap(
+		screenSize,
+		nullptr,
+		0,
+		properties,
+		&effectScreenBitmap);
 }
 
 void oreik::Engine::end(ID2D1Image** output) {
 	deviceContext->EndDraw();
 	*output = renderTarget;
+	effectScreenBitmap->Release();
 }
 
 void oreik::Engine::drawLine(oreik::Point2f start, oreik::Point2f end, oreik::Brush const& brush, float strokeWidth) {
@@ -70,4 +81,30 @@ void oreik::Engine::fillRounded(oreik::Rect const& rect, float radius, oreik::Br
 
 void oreik::Engine::fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush) {
 	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreate(brush));
+}
+
+void oreik::Engine::blur(
+	float deviation,
+	oreik::BlurBorderMode borderMode,
+	oreik::BlurOptimization optimization) {
+	std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
+	blurEffect->setDeviation(deviation);
+	blurEffect->setBorderMode(borderMode);
+	blurEffect->setOptimization(optimization);
+	effect(blurEffect);
+}
+
+void oreik::Engine::effect(std::shared_ptr<Effect> effect) {
+	// Copy the render target to the temp buffer
+	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
+	D2D1_POINT_2U destPoint(0, 0);
+	D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
+	deviceContext->Flush();	 // To apply current commands to the render target
+	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
+
+	// Render the effect
+	Microsoft::WRL::ComPtr<ID2D1Effect> d2d1Effect = effect->getEffect();
+	d2d1Effect->SetInput(0, effectScreenBitmap);
+	effect->setProperties(d2d1Effect.Get());
+	deviceContext->DrawImage(d2d1Effect.Get());
 }
