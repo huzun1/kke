@@ -1,5 +1,9 @@
 #include <oreik/common/Rect.hpp>
 
+oreik::Point2f oreik::Rect::center() const {
+	return {x1 + (x2 - x1) * 0.5f, y1 + (y2 - y1) * 0.5f};
+}
+
 void oreik::Rect::offset(float x1, float y1, float x2, float y2) {
 	this->x1 += x1;
 	this->y1 += y1;

@@ -10,6 +10,7 @@
 #include "oreik/ResourceAllocator.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 #include "oreik/effect/impl/BlurEffect.hpp"
+#include "oreik/transform/Matrix.hpp"
 
 oreik::Engine::Engine(ID2D1DeviceContext* deviceContext)
 	: deviceContext(deviceContext), resourceAllocator(deviceContext), effectContainer(deviceContext) {
@@ -45,6 +46,10 @@ void oreik::Engine::begin(ID2D1Bitmap* screen) {
 		0,
 		properties,
 		&effectScreenBitmap);
+
+	// Reset the matrix
+	matrix = oreik::Matrix();
+	deviceContext->SetTransform(matrix.build());
 }
 
 void oreik::Engine::end(ID2D1Image** output) {
@@ -107,4 +112,19 @@ void oreik::Engine::effect(std::shared_ptr<Effect> effect) {
 	d2d1Effect->SetInput(0, effectScreenBitmap);
 	effect->setProperties(d2d1Effect.Get());
 	deviceContext->DrawImage(d2d1Effect.Get());
+}
+
+void oreik::Engine::pushScale(oreik::Point2f const& center, oreik::Scale2f const& scale) {
+	matrix.pushScale(center, scale);
+	deviceContext->SetTransform(matrix.build());
+}
+
+void oreik::Engine::pushRotate(oreik::Point2f const& center, float angle) {
+	matrix.pushRotate(center, angle);
+	deviceContext->SetTransform(matrix.build());
+}
+
+void oreik::Engine::popTransform() {
+	matrix.pop();
+	deviceContext->SetTransform(matrix.build());
 }
