@@ -2,7 +2,7 @@
 
 #include <d2d1.h>
 
-#include "Point.hpp"
+#include "oreik/common/Point.hpp"
 
 namespace oreik {
 struct Ellipse {

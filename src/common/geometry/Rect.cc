@@ -1,4 +1,4 @@
-#include <oreik/common/Rect.hpp>
+#include <oreik/common/geometry/Rect.hpp>
 
 oreik::Point2f oreik::Rect::center() const {
 	return {x1 + (x2 - x1) * 0.5f, y1 + (y2 - y1) * 0.5f};

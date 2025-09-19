@@ -7,7 +7,9 @@
 #include <cstdint>
 #include <memory>
 #include <optional>
+#include <stack>
 
+#include "RenderSurface.hpp"
 #include "ResourceAllocator.hpp"
 #include "TextureRepository.hpp"
 #include "brush/Brush.hpp"
@@ -39,6 +41,7 @@ class Engine {
 	oreik::TextureRepository textureRepository;
 	oreik::ResourceAllocator resourceAllocator;
 	oreik::EffectContainer effectContainer;
+	std::stack<RenderSurface*> surfaceStack;
 
 public:
 	Engine(ID2D1DeviceContext* deviceContext);
@@ -46,6 +49,8 @@ public:
 	void begin(ID2D1Bitmap* screen);
 
 	void end(ID2D1Image** output);
+
+	void clear();
 
 	void drawLine(
 		oreik::Point2f start,
@@ -84,6 +89,10 @@ public:
 
 	uint64_t loadTexture(const void* data, size_t size);
 
+	void drawImage(
+		ID2D1Image* image,
+		oreik::InterpolationMode interpolationMode = oreik::InterpolationMode::LINEAR);
+
 	void drawTexture(
 		size_t index,
 		oreik::Rect const& dimension,
@@ -101,6 +110,8 @@ public:
 		return effectContainer.acquireOrCreateEffect<T>();
 	}
 
+	void effect(ID2D1Image* image, std::shared_ptr<Effect> effect);
+
 	void effect(std::shared_ptr<Effect> effect);
 
 	void pushScale(oreik::Point2f const& center, oreik::Scale2f const& scale);
@@ -108,5 +119,19 @@ public:
 	void pushRotate(oreik::Point2f const& center, float angle);
 
 	void popTransform();
+
+	void pushSurface();
+
+	void popSurface(ID2D1Bitmap1** output);
+
+private:
+	void drawBitmap(
+		ID2D1Bitmap* bitmap,
+		oreik::Rect const& dimension,
+		float opacity = 1.0f,
+		oreik::InterpolationMode interpolationMode = oreik::InterpolationMode::LINEAR,
+		std::optional<oreik::Rect> srcRect = std::nullopt);
+
+	static D2D1_INTERPOLATION_MODE toD2D1InterpolationMode(oreik::InterpolationMode mode);
 };
 };	// namespace oreik

@@ -7,6 +7,7 @@
 #include <memory>
 #include <oreik/Engine.hpp>
 
+#include "oreik/RenderSurface.hpp"
 #include "oreik/ResourceAllocator.hpp"
 #include "oreik/TextureRepository.hpp"
 #include "oreik/effect/EffectContainer.hpp"
@@ -59,38 +60,51 @@ void oreik::Engine::end(ID2D1Image** output) {
 	effectScreenBitmap->Release();
 }
 
+void oreik::Engine::clear() {
+	deviceContext->Clear();
+}
+
 void oreik::Engine::drawLine(oreik::Point2f start, oreik::Point2f end, oreik::Brush const& brush, float strokeWidth) {
-	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.aquireOrCreate(brush), strokeWidth);
+	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
 }
 
 void oreik::Engine::drawRect(oreik::Rect const& rect, oreik::Brush const& brush, float strokeWidth) {
-	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.aquireOrCreate(brush), strokeWidth);
+	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
 }
 
 void oreik::Engine::drawRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush, float strokeWidth) {
 	D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(rect.rectF(), radius, radius);
-	deviceContext->DrawRoundedRectangle(roundedRect, resourceAllocator.aquireOrCreate(brush), strokeWidth);
+	deviceContext->DrawRoundedRectangle(roundedRect, resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
 }
 
 void oreik::Engine::drawEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush, float strokeWidth) {
-	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreate(brush), strokeWidth);
+	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
 }
 
 void oreik::Engine::fillRect(oreik::Rect const& rect, oreik::Brush const& brush) {
-	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.aquireOrCreate(brush));
+	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush));
 }
 
 void oreik::Engine::fillRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush) {
 	D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(rect.rectF(), radius, radius);
-	deviceContext->FillRoundedRectangle(roundedRect, resourceAllocator.aquireOrCreate(brush));
+	deviceContext->FillRoundedRectangle(roundedRect, resourceAllocator.aquireOrCreateBrush(brush));
 }
 
 void oreik::Engine::fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush) {
-	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreate(brush));
+	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush));
 }
 
 uint64_t oreik::Engine::loadTexture(const void* data, size_t size) {
 	return textureRepository.load(data, size);
+}
+
+void oreik::Engine::drawImage(ID2D1Image* image, oreik::InterpolationMode interpolationMode) {
+	deviceContext->DrawImage(
+		image,
+		nullptr,
+		nullptr,
+		toD2D1InterpolationMode(interpolationMode),
+		D2D1_COMPOSITE_MODE_SOURCE_OVER);
 }
 
 void oreik::Engine::drawTexture(size_t index, oreik::Rect const& dimension, float opacity, oreik::InterpolationMode interpolationMode, std::optional<oreik::Rect> srcRect) {
@@ -98,42 +112,7 @@ void oreik::Engine::drawTexture(size_t index, oreik::Rect const& dimension, floa
 	if (!texture) {
 		return;
 	}
-
-	D2D1_INTERPOLATION_MODE mode;
-	switch (interpolationMode) {
-		case oreik::InterpolationMode::NEAREST:
-			mode = D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
-			break;
-		case oreik::InterpolationMode::LINEAR:
-			mode = D2D1_INTERPOLATION_MODE_LINEAR;
-			break;
-		case oreik::InterpolationMode::CUBIC:
-			mode = D2D1_INTERPOLATION_MODE_CUBIC;
-			break;
-		case oreik::InterpolationMode::MULTI_SAMPLE_LINEAR:
-			mode = D2D1_INTERPOLATION_MODE_MULTI_SAMPLE_LINEAR;
-			break;
-		case oreik::InterpolationMode::ANISOTROPIC:
-			mode = D2D1_INTERPOLATION_MODE_ANISOTROPIC;
-			break;
-		case oreik::InterpolationMode::HIGH_QUALITY_CUBIC:
-			mode = D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC;
-			break;
-		default:
-			mode = D2D1_INTERPOLATION_MODE_FORCE_DWORD;
-			break;
-	}
-
-	D2D1_RECT_F rect = dimension.rectF();
-
-	D2D1_RECT_F srcRectangle;
-	D2D1_RECT_F* srcRectanglePtr = nullptr;
-	if (srcRect) {
-		srcRectangle = srcRect->rectF();
-		srcRectanglePtr = &srcRectangle;
-	}
-
-	deviceContext->DrawBitmap(texture.Get(), &rect, opacity, mode, srcRectanglePtr);
+	drawBitmap(texture.Get(), dimension, opacity, interpolationMode, srcRect);
 }
 
 void oreik::Engine::blur(
@@ -147,6 +126,13 @@ void oreik::Engine::blur(
 	effect(blurEffect);
 }
 
+void oreik::Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
+	Microsoft::WRL::ComPtr<ID2D1Effect> d2d1Effect = effect->getEffect();
+	d2d1Effect->SetInput(0, image);
+	effect->setProperties(d2d1Effect.Get());
+	deviceContext->DrawImage(d2d1Effect.Get());
+}
+
 void oreik::Engine::effect(std::shared_ptr<Effect> effect) {
 	// Copy the render target to the temp buffer
 	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
@@ -155,11 +141,7 @@ void oreik::Engine::effect(std::shared_ptr<Effect> effect) {
 	deviceContext->Flush();	 // To apply current commands to the render target
 	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
 
-	// Render the effect
-	Microsoft::WRL::ComPtr<ID2D1Effect> d2d1Effect = effect->getEffect();
-	d2d1Effect->SetInput(0, effectScreenBitmap);
-	effect->setProperties(d2d1Effect.Get());
-	deviceContext->DrawImage(d2d1Effect.Get());
+	this->effect(effectScreenBitmap, effect);
 }
 
 void oreik::Engine::pushScale(oreik::Point2f const& center, oreik::Scale2f const& scale) {
@@ -175,4 +157,64 @@ void oreik::Engine::pushRotate(oreik::Point2f const& center, float angle) {
 void oreik::Engine::popTransform() {
 	matrix.pop();
 	deviceContext->SetTransform(matrix.build());
+}
+
+void oreik::Engine::pushSurface() {
+	RenderSurface* surface = resourceAllocator.aquireOrCreateSurface(deviceContext);
+	surface->setLocking(true);
+	deviceContext->SetTarget(surface->getRenderTarget());
+
+	surfaceStack.push(surface);
+}
+
+void oreik::Engine::popSurface(ID2D1Bitmap1** output) {
+	deviceContext->Flush();	 // To apply current commands to the render target
+
+	RenderSurface* currentSurface = surfaceStack.top();
+	currentSurface->setLocking(false);
+	surfaceStack.pop();
+
+	// Restore the render target
+	if (surfaceStack.empty()) {
+		deviceContext->SetTarget(renderTarget);
+	} else {
+		deviceContext->SetTarget(surfaceStack.top()->getRenderTarget());
+	}
+
+	*output = currentSurface->getRenderTarget();
+}
+
+void oreik::Engine::drawBitmap(
+	ID2D1Bitmap* bitmap,
+	oreik::Rect const& dimension,
+	float opacity,
+	oreik::InterpolationMode interpolationMode,
+	std::optional<oreik::Rect> srcRect) {
+	D2D1_RECT_F rect = dimension.rectF();
+	D2D1_RECT_F srcRectangle;
+	D2D1_RECT_F* srcRectanglePtr = nullptr;
+	if (srcRect) {
+		srcRectangle = srcRect->rectF();
+		srcRectanglePtr = &srcRectangle;
+	}
+	deviceContext->DrawBitmap(bitmap, &rect, opacity, toD2D1InterpolationMode(interpolationMode), srcRectanglePtr);
+}
+
+D2D1_INTERPOLATION_MODE oreik::Engine::toD2D1InterpolationMode(oreik::InterpolationMode mode) {
+	switch (mode) {
+		case oreik::InterpolationMode::NEAREST:
+			return D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
+		case oreik::InterpolationMode::LINEAR:
+			return D2D1_INTERPOLATION_MODE_LINEAR;
+		case oreik::InterpolationMode::CUBIC:
+			return D2D1_INTERPOLATION_MODE_CUBIC;
+		case oreik::InterpolationMode::MULTI_SAMPLE_LINEAR:
+			return D2D1_INTERPOLATION_MODE_MULTI_SAMPLE_LINEAR;
+		case oreik::InterpolationMode::ANISOTROPIC:
+			return D2D1_INTERPOLATION_MODE_ANISOTROPIC;
+		case oreik::InterpolationMode::HIGH_QUALITY_CUBIC:
+			return D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC;
+		default:
+			return D2D1_INTERPOLATION_MODE_FORCE_DWORD;
+	}
 }

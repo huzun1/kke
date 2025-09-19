@@ -9,6 +9,7 @@
 #include "oreik/brush/SolidColorBrush.hpp"
 #include "oreik/common/Ellipse.hpp"
 #include "oreik/common/Rect.hpp"
+#include "oreik/effect/impl/BlurEffect.hpp"
 #include "resources/resources.h"
 
 application::Renderer::Renderer(application::D2D1& d2d1)
@@ -89,6 +90,19 @@ void application::Renderer::renderFrame() {
 	this->engine->pushRotate(dyconRect.center(), dyconAngle);
 	this->engine->drawTexture(dyconTexId, dyconRect);
 	this->engine->popTransform();
+
+	for (int i = 0; i < 10; i++) {
+		// Surface Test
+		ID2D1Bitmap1* output;
+		this->engine->pushSurface();
+		this->engine->drawRect({300, 300, 500, 500}, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}), 5.0f);
+		this->engine->popSurface(&output);
+
+		// With blur effect
+		std::shared_ptr<oreik::BlurEffect> effect = this->engine->aquireOrCreateEffect<oreik::BlurEffect>();
+		effect->setDeviation(3.0f);
+		this->engine->effect(output, effect);
+	}
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {
