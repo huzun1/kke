@@ -83,6 +83,15 @@ void application::Renderer::renderFrame() {
 	this->engine->fillRounded({scaleRect, 3.0f}, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
 	this->engine->popTransform();
 
+	// Shadow Test
+	oreik::Rect movingRect{300, 300, 400, 400};
+	static float movingTheta = 0;
+	movingTheta += 0.03f;
+	movingRect.offset(std::sin(movingTheta) * 100, 0, std::sin(movingTheta) * 100, 0);
+	this->engine->drawRectShadow(movingRect, oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
+
+	this->engine->drawRectShadow({600, 300, 800, 400}, oreik::SolidColorBrush({1.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
+
 	// Texture Test
 	static int dyconAngle = 0;
 	dyconAngle += 3;
@@ -90,10 +99,6 @@ void application::Renderer::renderFrame() {
 	this->engine->pushRotate(dyconRect.center(), dyconAngle);
 	this->engine->drawTexture(dyconTexId, dyconRect);
 	this->engine->popTransform();
-
-	// Shadow Test
-	this->engine->drawRectShadow({300, 300, 400, 400}, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}), 3.0f);
-	this->engine->fillRect({300, 300, 400, 400}, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {

@@ -14,8 +14,8 @@ struct RoundedRect : public Rect {
 
 	RoundedRect(Rect const& rect, float rounding);
 
-	uint64_t hash() const override;
-
 	D2D1_ROUNDED_RECT roundedRect() const;
+
+	uint64_t hash(bool positionDependent) const override;
 };
 };	// namespace oreik

@@ -1,5 +1,7 @@
+#include <cstdint>
 #include <oreik/common/geometry/Rect.hpp>
 
+#include "oreik/common/Geometry.hpp"
 #include "oreik/internal/Hasher.hpp"
 
 oreik::Rect::Rect(float x1, float y1, float x2, float y2)
@@ -24,11 +26,18 @@ D2D1_RECT_F oreik::Rect::rectF() const {
 	return {x1, y1, x2, y2};
 }
 
-uint64_t oreik::Rect::hash() const {
+uint64_t oreik::Rect::hash(bool positionDependent) const {
 	Hasher hasher;
-	hasher.combine(x1);
-	hasher.combine(y1);
-	hasher.combine(x2);
-	hasher.combine(y2);
+	hasher.combine(static_cast<uint32_t>(GeometryType::RECT));
+	hasher.combine(positionDependent);
+	if (positionDependent) {
+		hasher.combine(x1);
+		hasher.combine(y1);
+		hasher.combine(x2);
+		hasher.combine(y2);
+	} else {
+		hasher.combine(static_cast<uint32_t>(x2 - x1));
+		hasher.combine(static_cast<uint32_t>(y2 - y1));
+	}
 	return hasher.get();
 }

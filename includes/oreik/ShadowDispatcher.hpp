@@ -10,18 +10,17 @@
 #include "oreik/effect/EffectContainer.hpp"
 
 namespace oreik {
-struct ShadowDisaptcherResult {
-	Microsoft::WRL::ComPtr<ID2D1Image> output;
-	oreik::Point2f fixedOffset;
-};
-
 class ShadowDisaptcher {
+	const float bufferPad = 30.0f;
+
 	ID2D1DeviceContext* deviceContext;
 	EffectContainer* effectContainer;
 
 public:
 	ShadowDisaptcher(ID2D1DeviceContext* context, oreik::EffectContainer* container);
 
-	ShadowDisaptcherResult dispatch(oreik::Rect const& dimension, float deviation, std::function<void(oreik::Point2f const& start)> drawFunc);
+	void dispatch(oreik::Rect const& dimension, float deviation, std::function<void(oreik::Point2f const& start)> drawFunc, ID2D1Image** output);
+
+	oreik::Point2f computeOffset(oreik::Rect const& dimension) const;
 };
 };	// namespace oreik

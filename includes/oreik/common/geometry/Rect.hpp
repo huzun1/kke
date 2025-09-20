@@ -19,6 +19,6 @@ struct Rect : public Geometry {
 
 	D2D1_RECT_F rectF() const;
 
-	uint64_t hash() const override;
+	uint64_t hash(bool positionDependent) const override;
 };
 };	// namespace oreik

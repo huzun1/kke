@@ -1,3 +1,4 @@
+#include <d2d1_1.h>
 #include <wincodec.h>
 
 #include <oreik/effect/Effect.hpp>
@@ -10,6 +11,6 @@ void oreik::Effect::init(ID2D1DeviceContext* context) {
 	context->CreateEffect(effectGuid(), &effectInstance);
 }
 
-void oreik::Effect::createOutput(ID2D1Image** output) {
-	effectInstance->GetOutput(output);
+ID2D1Effect* oreik::Effect::output() {
+	return effectInstance.Get();
 }

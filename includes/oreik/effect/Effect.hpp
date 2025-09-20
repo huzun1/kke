@@ -21,6 +21,6 @@ public:
 
 	void init(ID2D1DeviceContext* context);
 
-	void createOutput(ID2D1Image** output);
+	ID2D1Effect* output();
 };
 };	// namespace oreik

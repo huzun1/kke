@@ -12,12 +12,9 @@ oreik::RoundedRect::RoundedRect(Rect const& rect, float rounding)
 	  rounding(rounding) {
 }
 
-uint64_t oreik::RoundedRect::hash() const {
+uint64_t oreik::RoundedRect::hash(bool positionDependent) const {
 	Hasher hasher;
-	hasher.combine(x1);
-	hasher.combine(y1);
-	hasher.combine(x2);
-	hasher.combine(y2);
+	hasher.combine(Rect::hash(positionDependent));
 	hasher.combine(rounding);
 	return hasher.get();
 }

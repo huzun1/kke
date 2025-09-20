@@ -74,42 +74,46 @@ void oreik::Engine::clear() {
 }
 
 void oreik::Engine::drawLine(oreik::Point2f start, oreik::Point2f end, oreik::Brush const& brush, float strokeWidth) {
-	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
+	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void oreik::Engine::drawRect(oreik::Rect const& rect, oreik::Brush const& brush, float strokeWidth) {
-	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
+	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void oreik::Engine::drawRounded(oreik::RoundedRect const& rect, oreik::Brush const& brush, float strokeWidth) {
-	deviceContext->DrawRoundedRectangle(rect.roundedRect(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
+	deviceContext->DrawRoundedRectangle(rect.roundedRect(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void oreik::Engine::drawEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush, float strokeWidth) {
-	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
+	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void oreik::Engine::fillRect(oreik::Rect const& rect, oreik::Brush const& brush) {
-	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush));
+	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush).Get());
 }
 
 void oreik::Engine::fillRounded(oreik::RoundedRect const& rect, oreik::Brush const& brush) {
-	deviceContext->FillRoundedRectangle(rect.roundedRect(), resourceAllocator.aquireOrCreateBrush(brush));
+	deviceContext->FillRoundedRectangle(rect.roundedRect(), resourceAllocator.aquireOrCreateBrush(brush).Get());
 }
 
 void oreik::Engine::fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush) {
-	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush));
+	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush).Get());
 }
 
 void oreik::Engine::drawRectShadow(
 	oreik::Rect const& rect,
 	oreik::Brush const& brush,
 	float deviation) {
-	ShadowDisaptcherResult result = shadowDispatcher.dispatch(rect, deviation, [&](oreik::Point2f const& start) {
-		fillRect(rect, brush);
+	oreik::Point2f offset = shadowDispatcher.computeOffset(rect);
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
+		shadowDispatcher.dispatch(rect, deviation, [&](oreik::Point2f const& start) {
+			fillRect(rect, brush);
+		}, output);
 	});
+
 	deviceContext->SetTransform(matrix.build());
-	deviceContext->DrawImage(result.output.Get(), result.fixedOffset.point2f());
+	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 }
 
 uint64_t oreik::Engine::loadTexture(const void* data, size_t size) {
@@ -147,10 +151,7 @@ void oreik::Engine::blur(
 void oreik::Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
 	effect->setInput(image);
 	effect->setProperties();
-
-	Microsoft::WRL::ComPtr<ID2D1Image> output;
-	effect->createOutput(&output);
-	deviceContext->DrawImage(output.Get());
+	deviceContext->DrawImage(effect->output());
 }
 
 void oreik::Engine::effect(std::shared_ptr<Effect> effect) {

@@ -10,7 +10,7 @@ class Brush {
 public:
 	virtual ~Brush() = default;
 
-	virtual ID2D1Brush* create(ID2D1DeviceContext* context) const = 0;
+	virtual void create(ID2D1DeviceContext* context, ID2D1Brush** output) const = 0;
 
 	virtual uint64_t hash() const = 0;
 };

@@ -16,6 +16,6 @@ struct Ellipse : public Geometry {
 
 	D2D1_ELLIPSE ellipse() const;
 
-	uint64_t hash() const;
+	uint64_t hash(bool positionDependent) const;
 };
 };	// namespace oreik
