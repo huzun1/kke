@@ -84,11 +84,12 @@ void application::Renderer::renderFrame() {
 	this->engine->popTransform();
 
 	// Shadow Test
-	oreik::Rect movingRect{300, 300, 400, 400};
+	oreik::Ellipse movingEllipse{200.0f, 200.0f, 50.0f};
 	static float movingTheta = 0;
 	movingTheta += 0.03f;
-	movingRect.offset(std::sin(movingTheta) * 100, 0, std::sin(movingTheta) * 100, 0);
-	this->engine->drawRectShadow(movingRect, oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
+	movingEllipse.point.x += std::sin(movingTheta) * 100;
+	this->engine->drawEllipseShadow(movingEllipse, oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
+	this->engine->fillEllipse(movingEllipse, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
 
 	this->engine->drawRectShadow({600, 300, 800, 400}, oreik::SolidColorBrush({1.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
 

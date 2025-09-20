@@ -116,6 +116,40 @@ void oreik::Engine::drawRectShadow(
 	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 }
 
+void oreik::Engine::drawRoundedShadow(
+	oreik::RoundedRect const& rect,
+	oreik::Brush const& brush,
+	float deviation) {
+	oreik::Point2f offset = shadowDispatcher.computeOffset(rect);
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
+		shadowDispatcher.dispatch(rect, deviation, [&](oreik::Point2f const& start) {
+			fillRounded(rect, brush);
+		}, output);
+	});
+
+	deviceContext->SetTransform(matrix.build());
+	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+}
+
+void oreik::Engine::drawEllipseShadow(
+	oreik::Ellipse const& ellipse,
+	oreik::Brush const& brush,
+	float deviation) {
+	oreik::Rect dimension = {ellipse.point.x - ellipse.radius,
+							 ellipse.point.y - ellipse.radius,
+							 ellipse.point.x + ellipse.radius,
+							 ellipse.point.y + ellipse.radius};
+	oreik::Point2f offset = shadowDispatcher.computeOffset(dimension);
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
+		shadowDispatcher.dispatch(dimension, deviation, [&](oreik::Point2f const& start) {
+			fillEllipse(ellipse, brush);
+		}, output);
+	});
+
+	deviceContext->SetTransform(matrix.build());
+	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+}
+
 uint64_t oreik::Engine::loadTexture(const void* data, size_t size) {
 	return textureRepository.load(data, size);
 }

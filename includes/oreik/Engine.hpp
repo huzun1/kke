@@ -21,6 +21,7 @@
 #include "common/geometry/Ellipse.hpp"
 #include "common/geometry/Rect.hpp"
 #include "oreik/common/Scale.hpp"
+#include "oreik/common/geometry/Ellipse.hpp"
 #include "oreik/common/geometry/RoundedRect.hpp"
 #include "oreik/effect/Effect.hpp"
 #include "oreik/effect/EffectContainer.hpp"
@@ -95,6 +96,16 @@ public:
 
 	void drawRectShadow(
 		oreik::Rect const& rect,
+		oreik::Brush const& brush,
+		float deviation);
+
+	void drawRoundedShadow(
+		oreik::RoundedRect const& rect,
+		oreik::Brush const& brush,
+		float deviation);
+
+	void drawEllipseShadow(
+		oreik::Ellipse const& ellipse,
 		oreik::Brush const& brush,
 		float deviation);
 

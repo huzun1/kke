@@ -39,7 +39,6 @@ Microsoft::WRL::ComPtr<ID2D1Image> oreik::ResourceAllocator::aquireOrDispatchSha
 	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput;
 	dispatchFunc(&shadowOutput);
 	shadowStorage.put(hasher.get(), shadowOutput);
-	printf("didn't hit\n");
 	return shadowOutput;
 }
 
