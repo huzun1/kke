@@ -12,6 +12,10 @@ D2D1_ELLIPSE oreik::Ellipse::ellipse() const {
 	return {point.point2f(), radius, radius};
 }
 
+oreik::Rect oreik::Ellipse::dimension() const {
+	return {point.x - radius, point.y - radius, point.x + radius, point.y + radius};
+}
+
 uint64_t oreik::Ellipse::hash(bool positionDependent) const {
 	Hasher hasher;
 	hasher.combine(static_cast<uint32_t>(GeometryType::ELLIPSE));

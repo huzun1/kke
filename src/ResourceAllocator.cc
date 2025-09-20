@@ -2,8 +2,6 @@
 #include <wrl/client.h>
 
 #include <cstdint>
-#include <cstdio>
-#include <optional>
 #include <oreik/ResourceAllocator.hpp>
 
 #include "oreik/RenderSurface.hpp"

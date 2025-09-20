@@ -4,6 +4,7 @@
 
 #include <cstdint>
 
+#include "Rect.hpp"
 #include "oreik/common/Geometry.hpp"
 #include "oreik/common/Point.hpp"
 
@@ -15,6 +16,8 @@ struct Ellipse : public Geometry {
 	Ellipse(float x, float y, float radius);
 
 	D2D1_ELLIPSE ellipse() const;
+
+	oreik::Rect dimension() const;
 
 	uint64_t hash(bool positionDependent) const;
 };

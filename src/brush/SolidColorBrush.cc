@@ -13,10 +13,11 @@ void oreik::SolidColorBrush::create(ID2D1DeviceContext* context, ID2D1Brush** ou
 }
 
 uint64_t oreik::SolidColorBrush::hash() const {
-	oreik::Hasher hasher;
-	hasher.combine(color.r);
-	hasher.combine(color.g);
-	hasher.combine(color.b);
-	hasher.combine(color.a);
-	return hasher.get();
+	oreik::Hasher hash;
+	hash.combine(static_cast<uint32_t>(oreik::BrushType::SOLID_BRUSH));
+	hash.combine(color.r);
+	hash.combine(color.g);
+	hash.combine(color.b);
+	hash.combine(color.a);
+	return hash.get();
 }

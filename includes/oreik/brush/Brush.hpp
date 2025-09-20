@@ -6,6 +6,11 @@
 #include <cstdint>
 
 namespace oreik {
+enum class BrushType : uint32_t {
+	SOLID_BRUSH,
+	LINEAR_GRADIENT_BRUSH
+};
+
 class Brush {
 public:
 	virtual ~Brush() = default;

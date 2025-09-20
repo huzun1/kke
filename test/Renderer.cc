@@ -6,7 +6,9 @@
 #include <cmath>
 #include <memory>
 
+#include "oreik/brush/LinearGradientBrush.hpp"
 #include "oreik/brush/SolidColorBrush.hpp"
+#include "oreik/common/Color.hpp"
 #include "oreik/common/geometry/Ellipse.hpp"
 #include "oreik/common/geometry/Rect.hpp"
 #include "oreik/common/geometry/RoundedRect.hpp"
@@ -86,10 +88,16 @@ void application::Renderer::renderFrame() {
 	// Shadow Test
 	oreik::Ellipse movingEllipse{200.0f, 200.0f, 50.0f};
 	static float movingTheta = 0;
-	movingTheta += 0.03f;
-	movingEllipse.point.x += std::sin(movingTheta) * 100;
-	this->engine->drawEllipseShadow(movingEllipse, oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
-	this->engine->fillEllipse(movingEllipse, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
+	movingTheta += 10;
+	oreik::Rect ellipseDimension = movingEllipse.dimension();
+
+	auto brush = oreik::LinearGradientBrush({oreik::Color4f(0x205034),
+											 oreik::Color4f(0x680620), oreik::Color4f(0xFF06FF)},
+											{ellipseDimension.x1, ellipseDimension.y1},
+											{ellipseDimension.x2, ellipseDimension.y2});
+	brush.setAngle(movingTheta);
+	this->engine->drawEllipseShadow(movingEllipse, brush, 10.0f);
+	this->engine->fillEllipse(movingEllipse, brush);
 
 	this->engine->drawRectShadow({600, 300, 800, 400}, oreik::SolidColorBrush({1.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
 

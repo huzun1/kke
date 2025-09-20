@@ -7,10 +7,12 @@ add_library(oreik STATIC
     RenderSurface.cc
     ShadowDispatcher.cc
     common/Point.cc
+    common/Color.cc
     common/geometry/Ellipse.cc
     common/geometry/Rect.cc
     common/geometry/RoundedRect.cc
     brush/SolidColorBrush.cc
+    brush/LinearGradientBrush.cc
     effect/EffectContainer.cc
     effect/Effect.cc
     effect/impl/BlurEffect.cc    
