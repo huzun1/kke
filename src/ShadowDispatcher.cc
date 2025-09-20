@@ -29,6 +29,8 @@ oreik::ShadowDisaptcherResult oreik::ShadowDisaptcher::dispatch(oreik::Rect cons
 
 	deviceContext->SetTarget(shadowRenderTarget);
 	deviceContext->Clear();
+
+	// This is incredibly confusing, but it's like magic—just draw shapes in drawFunc without worrying about anything, and it works.
 	deviceContext->SetTransform(D2D1::Matrix3x2F::Translation(-dimension.x1 + bufferPad / 2.0f, -dimension.y1 + bufferPad / 2.0f));
 	drawFunc(shadowRenderOffset);
 	deviceContext->Flush();	 // To apply current commands to the render target
