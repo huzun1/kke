@@ -2,21 +2,26 @@
 
 #include <d2d1.h>
 #include <d2d1_1.h>
+#include <wincodec.h>
+#include <wrl/client.h>
 
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
 #include <stack>
 
 #include "RenderSurface.hpp"
 #include "ResourceAllocator.hpp"
+#include "ShadowDispatcher.hpp"
 #include "TextureRepository.hpp"
 #include "brush/Brush.hpp"
-#include "common/Ellipse.hpp"
 #include "common/Point.hpp"
-#include "common/Rect.hpp"
+#include "common/geometry/Ellipse.hpp"
+#include "common/geometry/Rect.hpp"
 #include "oreik/common/Scale.hpp"
+#include "oreik/common/geometry/RoundedRect.hpp"
 #include "oreik/effect/Effect.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 #include "oreik/effect/impl/BlurEffect.hpp"
@@ -41,10 +46,13 @@ class Engine {
 	oreik::TextureRepository textureRepository;
 	oreik::ResourceAllocator resourceAllocator;
 	oreik::EffectContainer effectContainer;
+	oreik::ShadowDisaptcher shadowDispatcher;
 	std::stack<RenderSurface*> surfaceStack;
 
 public:
 	Engine(ID2D1DeviceContext* deviceContext);
+
+	~Engine();
 
 	void begin(ID2D1Bitmap* screen);
 
@@ -64,8 +72,7 @@ public:
 		float strokeWidth);
 
 	void drawRounded(
-		oreik::Rect const& rect,
-		float radius,
+		oreik::RoundedRect const& rect,
 		oreik::Brush const& brush,
 		float strokeWidth);
 
@@ -79,13 +86,17 @@ public:
 		oreik::Brush const& brush);
 
 	void fillRounded(
-		oreik::Rect const& rect,
-		float radius,
+		oreik::RoundedRect const& rect,
 		oreik::Brush const& brush);
 
 	void fillEllipse(
 		oreik::Ellipse const& ellipse,
 		oreik::Brush const& brush);
+
+	void drawRectShadow(
+		oreik::Rect const& rect,
+		oreik::Brush const& brush,
+		float deviation);
 
 	uint64_t loadTexture(const void* data, size_t size);
 

@@ -2,20 +2,29 @@
 #include <d2d1_1.h>
 #include <d2d1helper.h>
 #include <dcommon.h>
+#include <wincodec.h>
 #include <wrl/client.h>
 
+#include <cstdint>
 #include <memory>
 #include <oreik/Engine.hpp>
 
 #include "oreik/RenderSurface.hpp"
 #include "oreik/ResourceAllocator.hpp"
 #include "oreik/TextureRepository.hpp"
+#include "oreik/common/Point.hpp"
+#include "oreik/common/Scale.hpp"
+#include "oreik/common/geometry/Rect.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 #include "oreik/effect/impl/BlurEffect.hpp"
 #include "oreik/transform/Matrix.hpp"
 
 oreik::Engine::Engine(ID2D1DeviceContext* deviceContext)
-	: deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(deviceContext), effectContainer(deviceContext) {
+	: deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(deviceContext), effectContainer(deviceContext), shadowDispatcher(deviceContext, &effectContainer) {
+}
+
+oreik::Engine::~Engine() {
+	printf("releasing");
 }
 
 void oreik::Engine::begin(ID2D1Bitmap* screen) {
@@ -72,9 +81,8 @@ void oreik::Engine::drawRect(oreik::Rect const& rect, oreik::Brush const& brush,
 	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
 }
 
-void oreik::Engine::drawRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush, float strokeWidth) {
-	D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(rect.rectF(), radius, radius);
-	deviceContext->DrawRoundedRectangle(roundedRect, resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
+void oreik::Engine::drawRounded(oreik::RoundedRect const& rect, oreik::Brush const& brush, float strokeWidth) {
+	deviceContext->DrawRoundedRectangle(rect.roundedRect(), resourceAllocator.aquireOrCreateBrush(brush), strokeWidth);
 }
 
 void oreik::Engine::drawEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush, float strokeWidth) {
@@ -85,13 +93,28 @@ void oreik::Engine::fillRect(oreik::Rect const& rect, oreik::Brush const& brush)
 	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush));
 }
 
-void oreik::Engine::fillRounded(oreik::Rect const& rect, float radius, oreik::Brush const& brush) {
-	D2D1_ROUNDED_RECT roundedRect = D2D1::RoundedRect(rect.rectF(), radius, radius);
-	deviceContext->FillRoundedRectangle(roundedRect, resourceAllocator.aquireOrCreateBrush(brush));
+void oreik::Engine::fillRounded(oreik::RoundedRect const& rect, oreik::Brush const& brush) {
+	deviceContext->FillRoundedRectangle(rect.roundedRect(), resourceAllocator.aquireOrCreateBrush(brush));
 }
 
 void oreik::Engine::fillEllipse(oreik::Ellipse const& ellipse, oreik::Brush const& brush) {
 	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush));
+}
+
+void oreik::Engine::drawRectShadow(
+	oreik::Rect const& rect,
+	oreik::Brush const& brush,
+	float deviation) {
+	oreik::Scale2f geometryScale = {rect.x2 - rect.x1, rect.y2 - rect.y1};
+	oreik::Point2f geometryOffset = {rect.x1, rect.y1};
+	Microsoft::WRL::ComPtr<ID2D1Image> output = shadowDispatcher.dispatch(geometryScale, deviation, [&](oreik::Point2f const& start) {
+		fillRect({start.x,
+				  start.y,
+				  start.x + geometryScale.x,
+				  start.y + geometryScale.y},
+				 brush);
+	});
+	deviceContext->DrawImage(output.Get(), geometryOffset.point2f());
 }
 
 uint64_t oreik::Engine::loadTexture(const void* data, size_t size) {
@@ -127,10 +150,12 @@ void oreik::Engine::blur(
 }
 
 void oreik::Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
-	Microsoft::WRL::ComPtr<ID2D1Effect> d2d1Effect = effect->getEffect();
-	d2d1Effect->SetInput(0, image);
-	effect->setProperties(d2d1Effect.Get());
-	deviceContext->DrawImage(d2d1Effect.Get());
+	effect->setInput(image);
+	effect->setProperties();
+
+	Microsoft::WRL::ComPtr<ID2D1Image> output;
+	effect->createOutput(&output);
+	deviceContext->DrawImage(output.Get());
 }
 
 void oreik::Engine::effect(std::shared_ptr<Effect> effect) {

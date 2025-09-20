@@ -7,6 +7,6 @@ class Geometry {
 public:
 	virtual ~Geometry() = default;
 
-	uint64_t hash() const;
+	virtual uint64_t hash() const = 0;
 };
 };	// namespace oreik

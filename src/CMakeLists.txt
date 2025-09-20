@@ -5,6 +5,7 @@ add_library(oreik STATIC
     ResourceAllocator.cc
     TextureRepository.cc
     RenderSurface.cc
+    ShadowDispatcher.cc
     common/Point.cc
     common/geometry/Ellipse.cc
     common/geometry/Rect.cc

@@ -30,6 +30,6 @@ public:
 	DEFINE_GETTER_SETTER(BlurOptimization, Optimization, optimization);
 	DEFINE_GETTER_SETTER(BlurBorderMode, BorderMode, borderMode);
 
-	void setProperties(ID2D1Effect* effect) const override;
+	void setProperties() const override;
 };
 };	// namespace oreik

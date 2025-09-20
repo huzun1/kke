@@ -54,5 +54,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		Sleep(1000 / 180);
 	}
 
+	printf("Done\n");
+
 	return 0;
 }

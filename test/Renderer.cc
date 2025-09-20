@@ -7,9 +7,9 @@
 #include <memory>
 
 #include "oreik/brush/SolidColorBrush.hpp"
-#include "oreik/common/Ellipse.hpp"
-#include "oreik/common/Rect.hpp"
-#include "oreik/effect/impl/BlurEffect.hpp"
+#include "oreik/common/geometry/Ellipse.hpp"
+#include "oreik/common/geometry/Rect.hpp"
+#include "oreik/common/geometry/RoundedRect.hpp"
 #include "resources/resources.h"
 
 application::Renderer::Renderer(application::D2D1& d2d1)
@@ -62,9 +62,9 @@ void application::Renderer::preRender() {
 
 void application::Renderer::renderFrame() {
 	// Generic Rendering Test
-	this->engine->drawRect({20, 20, 100, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}), 10.0f);
-	this->engine->fillRect({60, 20, 160, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 1.0f, 1.0f}));
-	this->engine->fillRounded({20, 60, 160, 220}, 10.0f, oreik::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
+	this->engine->drawRect(oreik::Rect{20, 20, 100, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}), 10.0f);
+	this->engine->fillRect(oreik::Rect{60, 20, 160, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 1.0f, 1.0f}));
+	this->engine->fillRounded(oreik::RoundedRect({20, 60, 160, 220}, 3.0f), oreik::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
 	this->engine->fillEllipse(oreik::Ellipse(300, 300, 30), oreik::SolidColorBrush({1.0, 0.0f, 0.0f, 1.0f}));
 
 	// Scale Test
@@ -72,7 +72,7 @@ void application::Renderer::renderFrame() {
 	angle++;
 	oreik::Rect rotRect{300, 90, 500, 200};
 	this->engine->pushRotate(rotRect.center(), angle);
-	this->engine->fillRounded(rotRect, 3.0f, oreik::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
+	this->engine->fillRounded(oreik::RoundedRect(rotRect, 3.0f), oreik::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
 	this->engine->popTransform();
 
 	// Rotate Test
@@ -80,7 +80,7 @@ void application::Renderer::renderFrame() {
 	theta += 0.01f;
 	oreik::Rect scaleRect{200, 400, 400, 600};
 	this->engine->pushScale(scaleRect.center(), {std::sin(theta) * 0.5f + 1.0f, std::sin(theta) * 0.5f + 1.0f});
-	this->engine->fillRounded(scaleRect, 3.0f, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
+	this->engine->fillRounded(oreik::RoundedRect(scaleRect, 3.0f), oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
 	this->engine->popTransform();
 
 	// Texture Test
@@ -91,18 +91,8 @@ void application::Renderer::renderFrame() {
 	this->engine->drawTexture(dyconTexId, dyconRect);
 	this->engine->popTransform();
 
-	for (int i = 0; i < 10; i++) {
-		// Surface Test
-		ID2D1Bitmap1* output;
-		this->engine->pushSurface();
-		this->engine->drawRect({300, 300, 500, 500}, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}), 5.0f);
-		this->engine->popSurface(&output);
-
-		// With blur effect
-		std::shared_ptr<oreik::BlurEffect> effect = this->engine->aquireOrCreateEffect<oreik::BlurEffect>();
-		effect->setDeviation(3.0f);
-		this->engine->effect(output, effect);
-	}
+	// Shadow Test
+	this->engine->drawRectShadow({300, 300, 400, 400}, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}), 3.0f);
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {
