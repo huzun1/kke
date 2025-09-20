@@ -1,22 +1,26 @@
 #pragma once
 
 #include <d2d1_1.h>
+#include <wincodec.h>
 #include <winnt.h>
 #include <wrl/client.h>
 
 namespace oreik {
 class Effect {
+protected:
 	Microsoft::WRL::ComPtr<ID2D1Effect> effectInstance = nullptr;
 
 public:
 	virtual ~Effect() = default;
 
+	void setInput(ID2D1Image* input);
+
 	virtual GUID effectGuid() const = 0;
 
-	virtual void setProperties(ID2D1Effect* effect) const = 0;
+	virtual void setProperties() const = 0;
 
 	void init(ID2D1DeviceContext* context);
 
-	Microsoft::WRL::ComPtr<ID2D1Effect> getEffect();
+	ID2D1Effect* output();
 };
 };	// namespace oreik

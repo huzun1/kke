@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unknwnbase.h>
+#include <wrl/client.h>
 
 #include <algorithm>
 #include <cstdint>
@@ -8,13 +9,15 @@
 #include <unordered_map>
 
 namespace oreik {
-struct Cache {
-	uint32_t usageCount;
-	IUnknown* ptr;
-};
-
 template <typename T>
 class CacheStorage {
+	typedef Microsoft::WRL::ComPtr<T> Ptr_t;
+
+	struct Cache {
+		uint32_t usageCount;
+		Ptr_t ptr;
+	};
+
 	uint32_t limit;
 	std::unordered_map<uint64_t, Cache> storage;
 
@@ -26,7 +29,7 @@ public:
 	/**
 	 * @brief Store instances in the cache, and if the limit is exceeded, remove them starting with the lowest hit rate.
 	 */
-	void put(uint64_t key, T* val) {
+	void put(uint64_t key, Ptr_t val) {
 		storage[key] = {0, val};
 		clean();
 	}
@@ -34,13 +37,13 @@ public:
 	/**
 	 * @brief Attempting to retrieve an instance from the cache
 	 */
-	std::optional<T*> get(uint64_t key) {
+	Ptr_t get(uint64_t key) {
 		auto it = storage.find(key);
 		if (it == storage.end()) {
-			return std::nullopt;
+			return nullptr;
 		}
 		it->second.usageCount++;
-		return static_cast<T*>(it->second.ptr);
+		return it->second.ptr;
 	}
 
 private:
@@ -62,7 +65,6 @@ private:
 
 		size_t toRemove = storage.size() - limit;
 		for (size_t i = 0; i < toRemove; ++i) {
-			storage[usageList[i].first].ptr->Release();
 			storage.erase(usageList[i].first);
 		}
 	}

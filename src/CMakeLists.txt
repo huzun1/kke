@@ -4,9 +4,12 @@ add_library(oreik STATIC
     Engine.cc
     ResourceAllocator.cc
     TextureRepository.cc
-    common/Ellipse.cc
+    RenderSurface.cc
+    ShadowDispatcher.cc
     common/Point.cc
-    common/Rect.cc
+    common/geometry/Ellipse.cc
+    common/geometry/Rect.cc
+    common/geometry/RoundedRect.cc
     brush/SolidColorBrush.cc
     effect/EffectContainer.cc
     effect/Effect.cc

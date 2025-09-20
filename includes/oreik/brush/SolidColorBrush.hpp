@@ -10,8 +10,8 @@ class SolidColorBrush : public Brush {
 public:
 	SolidColorBrush(oreik::Color4f color);
 
-	ID2D1Brush* create(ID2D1DeviceContext* context) const;
+	void create(ID2D1DeviceContext* context, ID2D1Brush** output) const override;
 
-	uint64_t hash() const;
+	uint64_t hash() const override;
 };
 };	// namespace oreik
