@@ -1,5 +1,6 @@
 #include <oreik/ShadowDispatcher.hpp>
 
+#include "oreik/common/Scale.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 #include "oreik/effect/impl/BlurEffect.hpp"
 
@@ -7,8 +8,9 @@ oreik::ShadowDisaptcher::ShadowDisaptcher(ID2D1DeviceContext* context, oreik::Ef
 	: deviceContext(context), effectContainer(container) {
 }
 
-Microsoft::WRL::ComPtr<ID2D1Image> oreik::ShadowDisaptcher::dispatch(oreik::Scale2f const& geometryScale, float deviation, std::function<void(oreik::Point2f const& start)> drawFunc) {
+oreik::ShadowDisaptcherResult oreik::ShadowDisaptcher::dispatch(oreik::Rect const& dimension, float deviation, std::function<void(oreik::Point2f const& start)> drawFunc) {
 	constexpr float bufferPad = 20.0f;
+	const oreik::Scale2f geometryScale = {dimension.x2 - dimension.x1, dimension.y2 - dimension.y1};
 	const oreik::Point2f shadowRenderOffset = {bufferPad / 2.0f, bufferPad / 2.0f};
 
 	ID2D1Bitmap1* shadowRenderTarget;
@@ -27,6 +29,7 @@ Microsoft::WRL::ComPtr<ID2D1Image> oreik::ShadowDisaptcher::dispatch(oreik::Scal
 
 	deviceContext->SetTarget(shadowRenderTarget);
 	deviceContext->Clear();
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Translation(-dimension.x1 + bufferPad / 2.0f, -dimension.y1 + bufferPad / 2.0f));
 	drawFunc(shadowRenderOffset);
 	deviceContext->Flush();	 // To apply current commands to the render target
 
@@ -43,5 +46,6 @@ Microsoft::WRL::ComPtr<ID2D1Image> oreik::ShadowDisaptcher::dispatch(oreik::Scal
 
 	shadowRenderTarget->Release();
 
-	return output;
+	return {output,
+			{dimension.x1 - bufferPad / 2.0f, dimension.y1 - bufferPad / 2.0f}};
 }

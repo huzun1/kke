@@ -105,16 +105,11 @@ void oreik::Engine::drawRectShadow(
 	oreik::Rect const& rect,
 	oreik::Brush const& brush,
 	float deviation) {
-	oreik::Scale2f geometryScale = {rect.x2 - rect.x1, rect.y2 - rect.y1};
-	oreik::Point2f geometryOffset = {rect.x1, rect.y1};
-	Microsoft::WRL::ComPtr<ID2D1Image> output = shadowDispatcher.dispatch(geometryScale, deviation, [&](oreik::Point2f const& start) {
-		fillRect({start.x,
-				  start.y,
-				  start.x + geometryScale.x,
-				  start.y + geometryScale.y},
-				 brush);
+	ShadowDisaptcherResult result = shadowDispatcher.dispatch(rect, deviation, [&](oreik::Point2f const& start) {
+		fillRect(rect, brush);
 	});
-	deviceContext->DrawImage(output.Get(), geometryOffset.point2f());
+	deviceContext->SetTransform(matrix.build());
+	deviceContext->DrawImage(result.output.Get(), result.fixedOffset.point2f());
 }
 
 uint64_t oreik::Engine::loadTexture(const void* data, size_t size) {

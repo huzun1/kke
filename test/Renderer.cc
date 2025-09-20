@@ -72,7 +72,7 @@ void application::Renderer::renderFrame() {
 	angle++;
 	oreik::Rect rotRect{300, 90, 500, 200};
 	this->engine->pushRotate(rotRect.center(), angle);
-	this->engine->fillRounded(oreik::RoundedRect(rotRect, 3.0f), oreik::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
+	this->engine->fillRounded({rotRect, 3.0f}, oreik::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
 	this->engine->popTransform();
 
 	// Rotate Test
@@ -80,7 +80,7 @@ void application::Renderer::renderFrame() {
 	theta += 0.01f;
 	oreik::Rect scaleRect{200, 400, 400, 600};
 	this->engine->pushScale(scaleRect.center(), {std::sin(theta) * 0.5f + 1.0f, std::sin(theta) * 0.5f + 1.0f});
-	this->engine->fillRounded(oreik::RoundedRect(scaleRect, 3.0f), oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
+	this->engine->fillRounded({scaleRect, 3.0f}, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
 	this->engine->popTransform();
 
 	// Texture Test
@@ -93,6 +93,7 @@ void application::Renderer::renderFrame() {
 
 	// Shadow Test
 	this->engine->drawRectShadow({300, 300, 400, 400}, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}), 3.0f);
+	this->engine->fillRect({300, 300, 400, 400}, oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {

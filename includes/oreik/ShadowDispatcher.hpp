@@ -6,10 +6,15 @@
 #include <functional>
 
 #include "common/Point.hpp"
-#include "common/Scale.hpp"
+#include "common/geometry/Rect.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 
 namespace oreik {
+struct ShadowDisaptcherResult {
+	Microsoft::WRL::ComPtr<ID2D1Image> output;
+	oreik::Point2f fixedOffset;
+};
+
 class ShadowDisaptcher {
 	ID2D1DeviceContext* deviceContext;
 	EffectContainer* effectContainer;
@@ -17,6 +22,6 @@ class ShadowDisaptcher {
 public:
 	ShadowDisaptcher(ID2D1DeviceContext* context, oreik::EffectContainer* container);
 
-	Microsoft::WRL::ComPtr<ID2D1Image> dispatch(oreik::Scale2f const& geometryScale, float deviation, std::function<void(oreik::Point2f const& start)> drawFunc);
+	ShadowDisaptcherResult dispatch(oreik::Rect const& dimension, float deviation, std::function<void(oreik::Point2f const& start)> drawFunc);
 };
 };	// namespace oreik
