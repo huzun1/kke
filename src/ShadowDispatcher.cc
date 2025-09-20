@@ -31,6 +31,8 @@ Microsoft::WRL::ComPtr<ID2D1Image> oreik::ShadowDisaptcher::dispatch(oreik::Scal
 	deviceContext->Flush();	 // To apply current commands to the render target
 
 	deviceContext->SetTarget(previousTarget);
+	previousTarget->Release();
+
 	std::shared_ptr<BlurEffect> blurEffect = effectContainer->acquireOrCreateEffect<BlurEffect>();
 	blurEffect->setInput(shadowRenderTarget);
 	blurEffect->setDeviation(deviation);
