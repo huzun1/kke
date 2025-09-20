@@ -11,7 +11,7 @@
 
 namespace oreik {
 class ShadowDisaptcher {
-	const float bufferPad = 30.0f;
+	const float bufferPad = 40.0f;
 
 	ID2D1DeviceContext* deviceContext;
 	EffectContainer* effectContainer;

@@ -86,18 +86,17 @@ void application::Renderer::renderFrame() {
 	this->engine->popTransform();
 
 	// Shadow Test
-	oreik::Ellipse movingEllipse{200.0f, 200.0f, 50.0f};
-	static float movingTheta = 0;
-	movingTheta += 10;
-	oreik::Rect ellipseDimension = movingEllipse.dimension();
+	oreik::RoundedRect rect{{200.0f, 200.0f, 400.0f, 400.0f}, 15.0f};
+	static float gradientAngle = 0.0f;
+	gradientAngle += 0.5f;
 
 	auto brush = oreik::LinearGradientBrush({oreik::Color4f(0x205034),
 											 oreik::Color4f(0x680620), oreik::Color4f(0xFF06FF)},
-											{ellipseDimension.x1, ellipseDimension.y1},
-											{ellipseDimension.x2, ellipseDimension.y2});
-	brush.setAngle(movingTheta);
-	this->engine->drawEllipseShadow(movingEllipse, brush, 10.0f);
-	this->engine->fillEllipse(movingEllipse, brush);
+											{rect.x1, rect.y1},
+											{rect.x2, rect.y2});
+	brush.setAngle(gradientAngle);
+	this->engine->drawRoundedShadow(rect, brush, 10.0f);
+	this->engine->fillRounded(rect, brush);
 
 	this->engine->drawRectShadow({600, 300, 800, 400}, oreik::SolidColorBrush({1.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
 
