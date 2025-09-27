@@ -11,14 +11,22 @@ oreik::TextureRepository::TextureRepository(ID2D1DeviceContext* context)
 	: deviceContext(context) {
 }
 
-Microsoft::WRL::ComPtr<ID2D1Bitmap> oreik::TextureRepository::fetchTexture(size_t index) {
-	if (textures.empty() || index >= textures.size()) {
-		return nullptr;
+Microsoft::WRL::ComPtr<ID2D1Bitmap> oreik::TextureRepository::fetchTexture(TextureId id) {
+	if (auto it = textures.find(id); it != textures.end()) {
+		return it->second;
 	}
-	return textures[index];
+	return nullptr;
 }
 
-size_t oreik::TextureRepository::load(const void* data, size_t size) {
+bool oreik::TextureRepository::exists(TextureId id) const {
+	return textures.find(id) != textures.end();
+}
+
+void oreik::TextureRepository::release(TextureId id) {
+	textures.erase(id);
+}
+
+oreik::TextureId oreik::TextureRepository::load(const void* data, size_t size) {
 	static IWICImagingFactory* factory = nullptr;
 	if (!factory) {
 		CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
@@ -47,7 +55,13 @@ size_t oreik::TextureRepository::load(const void* data, size_t size) {
 
 	Microsoft::WRL::ComPtr<ID2D1Bitmap> bitmap;
 	deviceContext->CreateBitmapFromWicBitmap(converter, NULL, &bitmap);
-	textures.push_back(bitmap);
 
-	return textures.size() - 1;	 // Return index of loaded bitmap
+	TextureId id = assignTexId();
+	textures[id] = bitmap;
+
+	return id;
+}
+
+oreik::TextureId oreik::TextureRepository::assignTexId() {
+	return nextId++;
 }
