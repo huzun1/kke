@@ -1,4 +1,5 @@
 #include <Windows.h>
+#include <synchapi.h>
 #include <winuser.h>
 
 #include <cstdio>
@@ -45,13 +46,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		ID3D11RenderTargetView* targetView = d3d11.getFramebuffer();
 		IDXGISwapChain1* d3d11SwapChain = d3d11.getSwapChain();
 
-		FLOAT backgroundColor[4] = {0.1f, 0.2f, 0.6f, 1.0f};
+		FLOAT backgroundColor[4] = {0.3f, 0.4f, 0.6f, 1.0f};
 		d3d11DeviceContext->ClearRenderTargetView(targetView, backgroundColor);
 		renderer.render();
 		d3d11DeviceContext->Flush();
 
-		d3d11SwapChain->Present(1, 0);
-		Sleep(1000 / 180);
+		d3d11SwapChain->Present(0, 0);
+
+		Sleep(1);
 	}
 
 	printf("Done\n");

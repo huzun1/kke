@@ -79,16 +79,20 @@ void application::D3D11::createSwapChain(HWND hwnd, ID3D11Device1* device, IDXGI
 	DXGI_SWAP_CHAIN_DESC1 d3d11SwapChainDesc = {};
 	d3d11SwapChainDesc.Width = 0;	// use window width
 	d3d11SwapChainDesc.Height = 0;	// use window height
-	d3d11SwapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM_SRGB;
+	// Use UNORM (not _SRGB) for flip model compatibility
+	d3d11SwapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	d3d11SwapChainDesc.SampleDesc.Count = 1;
 	d3d11SwapChainDesc.SampleDesc.Quality = 0;
 	d3d11SwapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	// Flip model requires BufferCount >= 2
 	d3d11SwapChainDesc.BufferCount = 2;
 	d3d11SwapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-	d3d11SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	// Use flip sequential for modern presentation (required for tearing support)
+	d3d11SwapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
 	d3d11SwapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
-	d3d11SwapChainDesc.Flags = 0;
-
+	// Enable allow-tearing so Present can present without vsync when supported
+	d3d11SwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+	
 	HRESULT hResult = factory->CreateSwapChainForHwnd(device, hwnd, &d3d11SwapChainDesc, 0, 0, swapChainOut);
 	assert(SUCCEEDED(hResult));
 }

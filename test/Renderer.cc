@@ -8,6 +8,7 @@
 #include <cmath>
 #include <memory>
 
+#include "FpsCounter.hpp"
 #include "oreik/brush/LinearGradientBrush.hpp"
 #include "oreik/brush/SolidColorBrush.hpp"
 #include "oreik/common/Color.hpp"
@@ -16,6 +17,7 @@
 #include "oreik/common/geometry/RoundedRect.hpp"
 #include "resources/resources.h"
 
+static FpsCounter counter;
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
 	this->engine = std::make_unique<oreik::Engine>(d2d1.getDeviceContext());
@@ -30,7 +32,7 @@ application::Renderer::Renderer(application::D2D1& d2d1)
 }
 
 void application::Renderer::render() {
-	preRender();
+	//preRender();
 
 	ID2D1DeviceContext* deviceContext = d2d1.getDeviceContext();
 	ID2D1Bitmap1* renderTarget = d2d1.getRenderTarget();
@@ -135,6 +137,16 @@ void application::Renderer::renderFrame() {
 		L"Segoe UI",
 		32,
 		oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
+
+	// Draw FPS
+	counter.frame();
+	this->engine->drawText(
+		{10, 10},
+		L"FPS: " + std::to_wstring(static_cast<int>(counter.fps())),
+		oreik::FontWeight::NORMAL,
+		L"Segoe UI",
+		16,
+		oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {
