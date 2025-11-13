@@ -3,30 +3,30 @@
 #include <wincodec.h>
 #include <wrl/client.h>
 
-#include <oreik/TextureRepository.hpp>
+#include <kke/TextureRepository.hpp>
 
 #pragma comment(lib, "Shlwapi.lib")
 
-oreik::TextureRepository::TextureRepository(ID2D1DeviceContext* context)
+kke::TextureRepository::TextureRepository(ID2D1DeviceContext* context)
 	: deviceContext(context) {
 }
 
-Microsoft::WRL::ComPtr<ID2D1Bitmap> oreik::TextureRepository::fetchTexture(TextureId id) {
+Microsoft::WRL::ComPtr<ID2D1Bitmap> kke::TextureRepository::fetchTexture(TextureId id) {
 	if (auto it = textures.find(id); it != textures.end()) {
 		return it->second;
 	}
 	return nullptr;
 }
 
-bool oreik::TextureRepository::exists(TextureId id) const {
+bool kke::TextureRepository::exists(TextureId id) const {
 	return textures.find(id) != textures.end();
 }
 
-void oreik::TextureRepository::release(TextureId id) {
+void kke::TextureRepository::release(TextureId id) {
 	textures.erase(id);
 }
 
-oreik::TextureId oreik::TextureRepository::load(const void* data, size_t size) {
+kke::TextureId kke::TextureRepository::load(const void* data, size_t size) {
 	static IWICImagingFactory* factory = nullptr;
 	if (!factory) {
 		CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
@@ -62,6 +62,6 @@ oreik::TextureId oreik::TextureRepository::load(const void* data, size_t size) {
 	return id;
 }
 
-oreik::TextureId oreik::TextureRepository::assignTexId() {
+kke::TextureId kke::TextureRepository::assignTexId() {
 	return nextId++;
 }

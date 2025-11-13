@@ -12,7 +12,7 @@ HWND application::Window::createWindow(HINSTANCE instance) {
 	winClass.hInstance = instance;
 	winClass.hIcon = LoadIconA(0, IDI_APPLICATION);
 	winClass.hCursor = LoadCursorA(0, IDC_ARROW);
-	winClass.lpszClassName = L"oreik_window_class";
+	winClass.lpszClassName = L"kke_window_class";
 	winClass.hIconSm = LoadIconA(0, IDI_APPLICATION);
 	if (!RegisterClassExW(&winClass)) {
 		MessageBoxA(0, "RegisterClassEx failed", "Fatal Error", MB_OK);
@@ -25,7 +25,7 @@ HWND application::Window::createWindow(HINSTANCE instance) {
 	LONG initialHeight = initialRect.bottom - initialRect.top;
 	HWND hwnd = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW,
 								winClass.lpszClassName,
-								L"oreik",
+								L"kke",
 								WS_OVERLAPPEDWINDOW | WS_VISIBLE,
 								CW_USEDEFAULT, CW_USEDEFAULT,
 								initialWidth,

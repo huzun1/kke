@@ -1,5 +1,5 @@
-#include <oreik/effect/EffectContainer.hpp>
+#include <kke/effect/EffectContainer.hpp>
 
-oreik::EffectContainer::EffectContainer(ID2D1DeviceContext* context)
+kke::EffectContainer::EffectContainer(ID2D1DeviceContext* context)
 	: deviceContext(context) {
 }

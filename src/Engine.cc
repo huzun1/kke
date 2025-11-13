@@ -1,4 +1,4 @@
-#include "oreik/Engine.hpp"
+#include "kke/Engine.hpp"
 
 #include <d2d1.h>
 #include <d2d1_1.h>
@@ -9,18 +9,18 @@
 #include <cstdint>
 #include <memory>
 
-#include "oreik/RenderSurface.hpp"
-#include "oreik/ResourceAllocator.hpp"
-#include "oreik/TextureRepository.hpp"
-#include "oreik/common/Point.hpp"
-#include "oreik/common/Scale.hpp"
-#include "oreik/common/geometry/Rect.hpp"
-#include "oreik/effect/EffectContainer.hpp"
-#include "oreik/effect/impl/BlurEffect.hpp"
-#include "oreik/font/FontData.hpp"
-#include "oreik/transform/Matrix.hpp"
+#include "kke/RenderSurface.hpp"
+#include "kke/ResourceAllocator.hpp"
+#include "kke/TextureRepository.hpp"
+#include "kke/common/Point.hpp"
+#include "kke/common/Scale.hpp"
+#include "kke/common/geometry/Rect.hpp"
+#include "kke/effect/EffectContainer.hpp"
+#include "kke/effect/impl/BlurEffect.hpp"
+#include "kke/font/FontData.hpp"
+#include "kke/transform/Matrix.hpp"
 
-using namespace oreik;
+using namespace kke;
 
 Engine::Engine(ID2D1DeviceContext* deviceContext)
 	: deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &effectContainer) {

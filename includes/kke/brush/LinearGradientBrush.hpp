@@ -1,0 +1,28 @@
+#pragma once
+
+#include <optional>
+#include <vector>
+
+#include "Brush.hpp"
+#include "kke/common/Color.hpp"
+#include "kke/common/Point.hpp"
+
+namespace kke {
+class LinearGradientBrush : public Brush {
+	std::vector<kke::Color4f> colors;
+	kke::Point2f startPoint;
+	kke::Point2f endPoint;
+	std::optional<float> angle;
+
+public:
+	LinearGradientBrush(kke::Color4f const& startColor, kke::Color4f const& endColor, kke::Point2f const& startPoint, kke::Point2f const& endPoint);
+
+	LinearGradientBrush(std::vector<kke::Color4f> const& colors, kke::Point2f const& startPoint, kke::Point2f const& endPoint);
+
+	void setAngle(float angle);
+
+	void create(ID2D1DeviceContext* context, ID2D1Brush** output) const override;
+
+	uint64_t hash() const override;
+};
+};	// namespace kke

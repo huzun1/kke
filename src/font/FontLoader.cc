@@ -1,10 +1,10 @@
-#include "oreik/font/FontLoader.hpp"
+#include "kke/font/FontLoader.hpp"
 
 #include <dwrite.h>
 
 #include <stdexcept>
 
-using namespace oreik;
+using namespace kke;
 
 void FontLoader::preInit() {
 	if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(writeFactory), reinterpret_cast<IUnknown**>(&writeFactory)))) {
@@ -36,20 +36,20 @@ void FontLoader::init() {
 	}
 }
 
-IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, int32_t fontSize, oreik::FontWeight weight) {
+IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, int32_t fontSize, kke::FontWeight weight) {
 	IDWriteTextFormat* textFormat;
 	DWRITE_FONT_WEIGHT dwriteWeight = DWRITE_FONT_WEIGHT_NORMAL;
 	switch (weight) {
-		case oreik::FontWeight::LIGHT:
+		case kke::FontWeight::LIGHT:
 			dwriteWeight = DWRITE_FONT_WEIGHT_LIGHT;
 			break;
-		case oreik::FontWeight::NORMAL:
+		case kke::FontWeight::NORMAL:
 			dwriteWeight = DWRITE_FONT_WEIGHT_NORMAL;
 			break;
-		case oreik::FontWeight::MEDIUM:
+		case kke::FontWeight::MEDIUM:
 			dwriteWeight = DWRITE_FONT_WEIGHT_MEDIUM;
 			break;
-		case oreik::FontWeight::BOLD:
+		case kke::FontWeight::BOLD:
 			dwriteWeight = DWRITE_FONT_WEIGHT_BOLD;
 			break;
 		default:

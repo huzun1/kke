@@ -1,32 +1,32 @@
 #include <cstdint>
-#include <oreik/common/geometry/Rect.hpp>
+#include <kke/common/geometry/Rect.hpp>
 
-#include "oreik/common/Geometry.hpp"
-#include "oreik/internal/Hasher.hpp"
+#include "kke/common/Geometry.hpp"
+#include "kke/internal/Hasher.hpp"
 
-oreik::Rect::Rect(float x1, float y1, float x2, float y2)
+kke::Rect::Rect(float x1, float y1, float x2, float y2)
 	: x1(x1),
 	  y1(y1),
 	  x2(x2),
 	  y2(y2) {
 }
 
-oreik::Point2f oreik::Rect::center() const {
+kke::Point2f kke::Rect::center() const {
 	return {x1 + (x2 - x1) * 0.5f, y1 + (y2 - y1) * 0.5f};
 }
 
-void oreik::Rect::offset(float x1, float y1, float x2, float y2) {
+void kke::Rect::offset(float x1, float y1, float x2, float y2) {
 	this->x1 += x1;
 	this->y1 += y1;
 	this->x2 += x2;
 	this->y2 += y2;
 }
 
-D2D1_RECT_F oreik::Rect::rectF() const {
+D2D1_RECT_F kke::Rect::rectF() const {
 	return {x1, y1, x2, y2};
 }
 
-uint64_t oreik::Rect::hash(bool positionDependent) const {
+uint64_t kke::Rect::hash(bool positionDependent) const {
 	Hasher hasher;
 	hasher.combine(static_cast<uint32_t>(GeometryType::RECT));
 	hasher.combine(positionDependent);

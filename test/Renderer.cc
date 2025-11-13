@@ -9,18 +9,18 @@
 #include <memory>
 
 #include "FpsCounter.hpp"
-#include "oreik/brush/LinearGradientBrush.hpp"
-#include "oreik/brush/SolidColorBrush.hpp"
-#include "oreik/common/Color.hpp"
-#include "oreik/common/geometry/Ellipse.hpp"
-#include "oreik/common/geometry/Rect.hpp"
-#include "oreik/common/geometry/RoundedRect.hpp"
+#include "kke/brush/LinearGradientBrush.hpp"
+#include "kke/brush/SolidColorBrush.hpp"
+#include "kke/common/Color.hpp"
+#include "kke/common/geometry/Ellipse.hpp"
+#include "kke/common/geometry/Rect.hpp"
+#include "kke/common/geometry/RoundedRect.hpp"
 #include "resources/resources.h"
 
 static FpsCounter counter;
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
-	this->engine = std::make_unique<oreik::Engine>(d2d1.getDeviceContext());
+	this->engine = std::make_unique<kke::Engine>(d2d1.getDeviceContext());
 	this->engine->init({});
 
 	auto [data, size] = loadResource(TEXTURE_DYCONTRAST);
@@ -69,46 +69,46 @@ void application::Renderer::preRender() {
 
 void application::Renderer::renderFrame() {
 	// Generic Rendering Test
-	this->engine->drawRect(oreik::Rect{20, 20, 100, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}), 10.0f);
-	this->engine->fillRect(oreik::Rect{60, 20, 160, 100}, oreik::SolidColorBrush({0.0f, 1.0f, 1.0f, 1.0f}));
-	this->engine->fillRounded(oreik::RoundedRect({20, 60, 160, 220}, 3.0f), oreik::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
-	this->engine->fillEllipse(oreik::Ellipse(300, 300, 30), oreik::SolidColorBrush({1.0, 0.0f, 0.0f, 1.0f}));
+	this->engine->drawRect(kke::Rect{20, 20, 100, 100}, kke::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}), 10.0f);
+	this->engine->fillRect(kke::Rect{60, 20, 160, 100}, kke::SolidColorBrush({0.0f, 1.0f, 1.0f, 1.0f}));
+	this->engine->fillRounded(kke::RoundedRect({20, 60, 160, 220}, 3.0f), kke::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
+	this->engine->fillEllipse(kke::Ellipse(300, 300, 30), kke::SolidColorBrush({1.0, 0.0f, 0.0f, 1.0f}));
 
 	// Scale Test
 	static int angle = 0;
 	angle++;
-	oreik::Rect rotRect{300, 90, 500, 200};
+	kke::Rect rotRect{300, 90, 500, 200};
 	this->engine->pushRotate(rotRect.center(), angle);
-	this->engine->fillRounded({rotRect, 3.0f}, oreik::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
+	this->engine->fillRounded({rotRect, 3.0f}, kke::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
 	this->engine->popTransform();
 
 	// Rotate Test
 	static float theta = 0;
 	theta += 0.01f;
-	oreik::Rect scaleRect{200, 400, 400, 600};
+	kke::Rect scaleRect{200, 400, 400, 600};
 	this->engine->pushScale(scaleRect.center(), {std::sin(theta) * 0.5f + 1.0f, std::sin(theta) * 0.5f + 1.0f});
-	this->engine->fillRounded({scaleRect, 3.0f}, oreik::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
+	this->engine->fillRounded({scaleRect, 3.0f}, kke::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
 	this->engine->popTransform();
 
 	// Shadow Test
-	oreik::RoundedRect rect{{200.0f, 200.0f, 400.0f, 400.0f}, 15.0f};
+	kke::RoundedRect rect{{200.0f, 200.0f, 400.0f, 400.0f}, 15.0f};
 	static float gradientAngle = 0.0f;
 	gradientAngle += 0.5f;
 
-	auto brush = oreik::LinearGradientBrush({oreik::Color4f(0x205034),
-											 oreik::Color4f(0x680620), oreik::Color4f(0xFF06FF)},
+	auto brush = kke::LinearGradientBrush({kke::Color4f(0x205034),
+											 kke::Color4f(0x680620), kke::Color4f(0xFF06FF)},
 											{rect.x1, rect.y1},
 											{rect.x2, rect.y2});
 	brush.setAngle(gradientAngle);
 	this->engine->drawRoundedShadow(rect, brush, 10.0f);
 	this->engine->fillRounded(rect, brush);
 
-	this->engine->drawRectShadow({600, 300, 800, 400}, oreik::SolidColorBrush({1.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
+	this->engine->drawRectShadow({600, 300, 800, 400}, kke::SolidColorBrush({1.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
 
 	// Texture Test
 	static int dyconAngle = 0;
 	dyconAngle += 3;
-	oreik::Rect dyconRect{500, 500, 700, 700};
+	kke::Rect dyconRect{500, 500, 700, 700};
 	this->engine->pushRotate(dyconRect.center(), dyconAngle);
 	this->engine->drawTexture(dyconTexId, dyconRect);
 	this->engine->popTransform();
@@ -116,37 +116,37 @@ void application::Renderer::renderFrame() {
 	// Text Test
 	this->engine->drawText(
 		{50, 300},
-		L"Hello, Oreik!",
-		oreik::FontWeight::BOLD,
+		L"Hello, kke!",
+		kke::FontWeight::BOLD,
 		L"Segoe UI",
 		32,
-		oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
+		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
 
 	this->engine->drawTextShadow(
 		{50, 350},
-		L"Hello, Oreik with Shadow!",
-		oreik::FontWeight::BOLD,
+		L"Hello, kke with Shadow!",
+		kke::FontWeight::BOLD,
 		L"Segoe UI",
 		32,
-		oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}),
+		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}),
 		5.0f);
 	this->engine->drawText(
 		{50, 350},
-		L"Hello, Oreik with Shadow!",
-		oreik::FontWeight::BOLD,
+		L"Hello, kke with Shadow!",
+		kke::FontWeight::BOLD,
 		L"Segoe UI",
 		32,
-		oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
+		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
 
 	// Draw FPS
 	counter.frame();
 	this->engine->drawText(
 		{10, 10},
 		L"FPS: " + std::to_wstring(static_cast<int>(counter.fps())),
-		oreik::FontWeight::NORMAL,
+		kke::FontWeight::NORMAL,
 		L"Segoe UI",
 		16,
-		oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
+		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {

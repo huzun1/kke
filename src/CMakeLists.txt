@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10.0)
 
-add_library(oreik STATIC
+add_library(kke STATIC
     Engine.cc
     ResourceAllocator.cc
     TextureRepository.cc
@@ -22,12 +22,12 @@ add_library(oreik STATIC
     font/FontLoader.cc
 )
 
-target_include_directories(oreik PUBLIC
+target_include_directories(kke PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../includes>
     $<INSTALL_INTERFACE:include>
 )
-install(TARGETS oreik
-    EXPORT oreikTargets
+install(TARGETS kke
+    EXPORT kkeTargets
     ARCHIVE DESTINATION lib
 )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../includes/

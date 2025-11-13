@@ -1,22 +1,22 @@
 #include <cstdint>
-#include <oreik/common/geometry/Ellipse.hpp>
+#include <kke/common/geometry/Ellipse.hpp>
 
-#include "oreik/common/Geometry.hpp"
-#include "oreik/internal/Hasher.hpp"
+#include "kke/common/Geometry.hpp"
+#include "kke/internal/Hasher.hpp"
 
-oreik::Ellipse::Ellipse(float x, float y, float radius)
-	: point(oreik::Point2f{x, y}), radius(radius) {
+kke::Ellipse::Ellipse(float x, float y, float radius)
+	: point(kke::Point2f{x, y}), radius(radius) {
 }
 
-D2D1_ELLIPSE oreik::Ellipse::ellipse() const {
+D2D1_ELLIPSE kke::Ellipse::ellipse() const {
 	return {point.point2f(), radius, radius};
 }
 
-oreik::Rect oreik::Ellipse::dimension() const {
+kke::Rect kke::Ellipse::dimension() const {
 	return {point.x - radius, point.y - radius, point.x + radius, point.y + radius};
 }
 
-uint64_t oreik::Ellipse::hash(bool positionDependent) const {
+uint64_t kke::Ellipse::hash(bool positionDependent) const {
 	Hasher hasher;
 	hasher.combine(static_cast<uint32_t>(GeometryType::ELLIPSE));
 	hasher.combine(positionDependent);

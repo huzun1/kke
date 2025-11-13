@@ -1,25 +1,25 @@
 #include <d2d1_1.h>
 #include <wrl/client.h>
 
-#include <oreik/RenderSurface.hpp>
+#include <kke/RenderSurface.hpp>
 
-oreik::RenderSurface::RenderSurface(Microsoft::WRL::ComPtr<ID2D1Bitmap1> renderTarget)
+kke::RenderSurface::RenderSurface(Microsoft::WRL::ComPtr<ID2D1Bitmap1> renderTarget)
 	: renderTarget(renderTarget) {
 }
 
-void oreik::RenderSurface::setLocking(bool locking) {
+void kke::RenderSurface::setLocking(bool locking) {
 	this->locking = locking;
 }
 
-bool oreik::RenderSurface::isLocking() const {
+bool kke::RenderSurface::isLocking() const {
 	return locking;
 }
 
-ID2D1Bitmap1* oreik::RenderSurface::getRenderTarget() {
+ID2D1Bitmap1* kke::RenderSurface::getRenderTarget() {
 	return renderTarget.Get();
 }
 
-oreik::RenderSurface oreik::RenderSurface::createSurface(ID2D1DeviceContext* context) {
+kke::RenderSurface kke::RenderSurface::createSurface(ID2D1DeviceContext* context) {
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> renderTarget;
 
 	D2D1_SIZE_U screenSize = context->GetPixelSize();
@@ -33,5 +33,5 @@ oreik::RenderSurface oreik::RenderSurface::createSurface(ID2D1DeviceContext* con
 		properties,
 		&renderTarget);
 
-	return oreik::RenderSurface(renderTarget);
+	return kke::RenderSurface(renderTarget);
 }

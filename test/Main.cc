@@ -46,7 +46,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		ID3D11RenderTargetView* targetView = d3d11.getFramebuffer();
 		IDXGISwapChain1* d3d11SwapChain = d3d11.getSwapChain();
 
-		FLOAT backgroundColor[4] = {0.3f, 0.4f, 0.6f, 1.0f};
+		FLOAT backgroundColor[4] = {0.3f, 0.6f, 0.8f, 1.0f};
 		d3d11DeviceContext->ClearRenderTargetView(targetView, backgroundColor);
 		renderer.render();
 		d3d11DeviceContext->Flush();

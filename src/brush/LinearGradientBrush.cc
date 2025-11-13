@@ -3,36 +3,36 @@
 #include <cstdint>
 #include <cstdlib>
 #include <numbers>
-#include <oreik/brush/LinearGradientBrush.hpp>
+#include <kke/brush/LinearGradientBrush.hpp>
 
-#include "oreik/common/Color.hpp"
-#include "oreik/common/Point.hpp"
-#include "oreik/internal/Hasher.hpp"
+#include "kke/common/Color.hpp"
+#include "kke/common/Point.hpp"
+#include "kke/internal/Hasher.hpp"
 
-oreik::LinearGradientBrush::LinearGradientBrush(oreik::Color4f const& startColor,
-												oreik::Color4f const& endColor,
-												oreik::Point2f const& startPoint,
-												oreik::Point2f const& endPoint)
+kke::LinearGradientBrush::LinearGradientBrush(kke::Color4f const& startColor,
+												kke::Color4f const& endColor,
+												kke::Point2f const& startPoint,
+												kke::Point2f const& endPoint)
 	: colors({startColor, endColor}),
 	  startPoint(startPoint),
 	  endPoint(endPoint) {
 }
 
-oreik::LinearGradientBrush::LinearGradientBrush(std::vector<oreik::Color4f> const& colors,
-												oreik::Point2f const& startPoint,
-												oreik::Point2f const& endPoint)
+kke::LinearGradientBrush::LinearGradientBrush(std::vector<kke::Color4f> const& colors,
+												kke::Point2f const& startPoint,
+												kke::Point2f const& endPoint)
 	: colors(colors),
 	  startPoint(startPoint),
 	  endPoint(endPoint) {
 }
 
-void oreik::LinearGradientBrush::setAngle(float angle) {
+void kke::LinearGradientBrush::setAngle(float angle) {
 	this->angle = angle;
 }
 
-void oreik::LinearGradientBrush::create(ID2D1DeviceContext* context, ID2D1Brush** output) const {
-	oreik::Point2f startPoint = this->startPoint;
-	oreik::Point2f endPoint = this->endPoint;
+void kke::LinearGradientBrush::create(ID2D1DeviceContext* context, ID2D1Brush** output) const {
+	kke::Point2f startPoint = this->startPoint;
+	kke::Point2f endPoint = this->endPoint;
 	if (this->angle) {
 		float width = endPoint.x - startPoint.x;
 		float height = endPoint.y - startPoint.y;
@@ -41,8 +41,8 @@ void oreik::LinearGradientBrush::create(ID2D1DeviceContext* context, ID2D1Brush*
 		float centerY = height / 2 + startPoint.y;
 		float offsetX = dist * cosf(*angle / 180.0f * static_cast<float>(std::numbers::pi));
 		float offsetY = dist * sinf(*angle / 180.0f * static_cast<float>(std::numbers::pi));
-		startPoint = oreik::Point2f{centerX + offsetX, centerY + offsetY};
-		endPoint = oreik::Point2f{centerX - offsetX, centerY - offsetY};
+		startPoint = kke::Point2f{centerX + offsetX, centerY + offsetY};
+		endPoint = kke::Point2f{centerX - offsetX, centerY - offsetY};
 	}
 
 	ID2D1GradientStopCollection* gradientStopCollection;
@@ -63,10 +63,10 @@ void oreik::LinearGradientBrush::create(ID2D1DeviceContext* context, ID2D1Brush*
 	*output = brush;
 }
 
-uint64_t oreik::LinearGradientBrush::hash() const {
-	oreik::Hasher hash;
-	hash.combine(static_cast<uint32_t>(oreik::BrushType::LINEAR_GRADIENT_BRUSH));
-	for (oreik::Color4f const& color : colors) {
+uint64_t kke::LinearGradientBrush::hash() const {
+	kke::Hasher hash;
+	hash.combine(static_cast<uint32_t>(kke::BrushType::LINEAR_GRADIENT_BRUSH));
+	for (kke::Color4f const& color : colors) {
 		hash.combine(color.r);
 		hash.combine(color.g);
 		hash.combine(color.b);

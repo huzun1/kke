@@ -3,19 +3,19 @@
 #include <wincodec.h>
 #include <wrl/client.h>
 
-#include <oreik/ShadowDispatcher.hpp>
+#include <kke/ShadowDispatcher.hpp>
 
-#include "oreik/common/Scale.hpp"
-#include "oreik/effect/EffectContainer.hpp"
-#include "oreik/effect/impl/BlurEffect.hpp"
+#include "kke/common/Scale.hpp"
+#include "kke/effect/EffectContainer.hpp"
+#include "kke/effect/impl/BlurEffect.hpp"
 
-oreik::ShadowDisaptcher::ShadowDisaptcher(ID2D1DeviceContext* context, oreik::EffectContainer* container)
+kke::ShadowDisaptcher::ShadowDisaptcher(ID2D1DeviceContext* context, kke::EffectContainer* container)
 	: deviceContext(context), effectContainer(container) {
 }
 
-void oreik::ShadowDisaptcher::dispatch(oreik::Rect const& dimension, float deviation, std::function<void(oreik::Point2f const& start)> drawFunc, ID2D1Image** output) {
-	const oreik::Scale2f geometryScale = {dimension.x2 - dimension.x1, dimension.y2 - dimension.y1};
-	const oreik::Point2f shadowRenderOffset = {bufferPad / 2.0f, bufferPad / 2.0f};
+void kke::ShadowDisaptcher::dispatch(kke::Rect const& dimension, float deviation, std::function<void(kke::Point2f const& start)> drawFunc, ID2D1Image** output) {
+	const kke::Scale2f geometryScale = {dimension.x2 - dimension.x1, dimension.y2 - dimension.y1};
+	const kke::Point2f shadowRenderOffset = {bufferPad / 2.0f, bufferPad / 2.0f};
 
 	ID2D1Bitmap1* shadowRenderTarget;
 	float dpiX, dpiY;
@@ -66,6 +66,6 @@ void oreik::ShadowDisaptcher::dispatch(oreik::Rect const& dimension, float devia
 	*output = finalOutputRenderTarget;
 }
 
-oreik::Point2f oreik::ShadowDisaptcher::computeOffset(oreik::Rect const& dimension) const {
+kke::Point2f kke::ShadowDisaptcher::computeOffset(kke::Rect const& dimension) const {
 	return {dimension.x1 - bufferPad / 2.0f, dimension.y1 - bufferPad / 2.0f};
 }

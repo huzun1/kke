@@ -6,13 +6,13 @@
 #include <utility>
 
 #include "backend/D2D1.hpp"
-#include "oreik/Engine.hpp"
+#include "kke/Engine.hpp"
 
 namespace application {
 class Renderer {
 	application::D2D1& d2d1;
 
-	std::unique_ptr<oreik::Engine> engine;
+	std::unique_ptr<kke::Engine> engine;
 	uint64_t dyconTexId;
 
 public:
