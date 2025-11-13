@@ -2,6 +2,8 @@
 
 #include <D2D1.h>
 #include <d2d1_1.h>
+#include <d2d1_2.h>
+#include <wincodec.h>
 
 #include <cmath>
 #include <memory>
@@ -17,6 +19,7 @@
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
 	this->engine = std::make_unique<oreik::Engine>(d2d1.getDeviceContext());
+	this->engine->init({});
 
 	auto [data, size] = loadResource(TEXTURE_DYCONTRAST);
 	if (data) {
@@ -107,6 +110,31 @@ void application::Renderer::renderFrame() {
 	this->engine->pushRotate(dyconRect.center(), dyconAngle);
 	this->engine->drawTexture(dyconTexId, dyconRect);
 	this->engine->popTransform();
+
+	// Text Test
+	this->engine->drawText(
+		{50, 300},
+		L"Hello, Oreik!",
+		oreik::FontWeight::BOLD,
+		L"Segoe UI",
+		32,
+		oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
+
+	this->engine->drawTextShadow(
+		{50, 350},
+		L"Hello, Oreik with Shadow!",
+		oreik::FontWeight::BOLD,
+		L"Segoe UI",
+		32,
+		oreik::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}),
+		5.0f);
+	this->engine->drawText(
+		{50, 350},
+		L"Hello, Oreik with Shadow!",
+		oreik::FontWeight::BOLD,
+		L"Segoe UI",
+		32,
+		oreik::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {

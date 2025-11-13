@@ -5,7 +5,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <optional>
 #include <unordered_map>
 
 namespace oreik {
@@ -51,7 +50,6 @@ private:
 		if (storage.size() <= limit) {
 			return;
 		}
-
 		// key, usageCount
 		std::vector<std::pair<uint64_t, uint32_t>> usageList;
 		usageList.reserve(storage.size());

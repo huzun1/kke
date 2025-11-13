@@ -11,6 +11,8 @@
 #include <memory>
 #include <optional>
 #include <stack>
+#include <string>
+#include <vector>
 
 #include "RenderSurface.hpp"
 #include "ResourceAllocator.hpp"
@@ -26,6 +28,9 @@
 #include "oreik/effect/Effect.hpp"
 #include "oreik/effect/EffectContainer.hpp"
 #include "oreik/effect/impl/BlurEffect.hpp"
+#include "oreik/font/FontData.hpp"
+#include "oreik/font/FontLoader.hpp"
+#include "oreik/font/FontWeight.hpp"
 #include "oreik/transform/Matrix.hpp"
 
 namespace oreik {
@@ -43,6 +48,7 @@ class Engine {
 
 	ID2D1Bitmap1* renderTarget;
 	ID2D1Bitmap1* effectScreenBitmap;  // Temporary bitmap for holding screen copies
+	oreik::FontLoader fontLoader;
 	oreik::Matrix matrix;
 	oreik::TextureRepository textureRepository;
 	oreik::ResourceAllocator resourceAllocator;
@@ -54,6 +60,8 @@ public:
 	Engine(ID2D1DeviceContext* deviceContext);
 
 	~Engine();
+
+	void init(std::vector<FontData> loadFonts);
 
 	void begin(ID2D1Bitmap* screen);
 
@@ -82,6 +90,15 @@ public:
 		oreik::Brush const& brush,
 		float strokeWidth);
 
+	void drawText(
+	    oreik::Point2f const& position,
+		std::wstring const& text,
+		FontWeight weight,
+		std::wstring const& fontFamily,
+		int32_t fontSize,
+        oreik::Brush const& brush
+	);
+
 	void fillRect(
 		oreik::Rect const& rect,
 		oreik::Brush const& brush);
@@ -108,6 +125,16 @@ public:
 		oreik::Ellipse const& ellipse,
 		oreik::Brush const& brush,
 		float deviation);
+
+	void drawTextShadow(
+        oreik::Point2f const& position,
+        std::wstring const& text,
+        FontWeight weight,
+        std::wstring const& fontFamily,
+        int32_t fontSize,
+        oreik::Brush const& brush,
+        float deviation
+    );
 
 	uint64_t loadTexture(const void* data, size_t size);
 

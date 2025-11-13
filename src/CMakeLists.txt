@@ -15,10 +15,11 @@ add_library(oreik STATIC
     brush/LinearGradientBrush.cc
     effect/EffectContainer.cc
     effect/Effect.cc
-    effect/impl/BlurEffect.cc    
+    effect/impl/BlurEffect.cc
     transform/impl/RotateTransform.cc
     transform/impl/ScaleTransform.cc
     transform/Matrix.cc
+    font/FontLoader.cc
 )
 
 target_include_directories(oreik PUBLIC
