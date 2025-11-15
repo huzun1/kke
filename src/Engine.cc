@@ -27,10 +27,6 @@ Engine::Engine(ID2D1DeviceContext* deviceContext)
 	: deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &effectContainer) {
 }
 
-Engine::~Engine() {
-	printf("releasing");
-}
-
 void Engine::init(std::vector<FontData> loadFonts) {
 	fontLoader.preInit();
 	for (const auto& font : loadFonts) {
@@ -53,14 +49,13 @@ void Engine::begin(ID2D1Bitmap* screen) {
 		0,
 		properties,
 		&renderTarget);
-	D2D1_POINT_2U destPoint(0, 0);
-	D2D1_RECT_U srcRectangle(0, 0, screenSize.width, screenSize.height);
 
 	deviceContext->BeginDraw();
 	deviceContext->SetTarget(renderTarget);
 	deviceContext->Clear();
 
-	renderTarget->CopyFromBitmap(&destPoint, screen, &srcRectangle);
+	D2D1_RECT_F destRectangle(0, 0, (float)screenSize.width, (float)screenSize.height);
+	deviceContext->DrawBitmap(screen, destRectangle);
 
 	// Create a temp bitmap
 	deviceContext->CreateBitmap(
@@ -79,6 +74,10 @@ void Engine::end(ID2D1Image** output) {
 	deviceContext->EndDraw();
 	*output = renderTarget;
 	effectScreenBitmap->Release();
+}
+
+void Engine::flush() {
+    deviceContext->Flush();
 }
 
 void Engine::clear() {
@@ -239,6 +238,18 @@ void Engine::blur(
 	effect(blurEffect);
 }
 
+void Engine::blur(
+    ID2D1Image* input,
+    float deviation,
+    BlurBorderMode borderMode,
+    BlurOptimization optimization) {
+    std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
+    blurEffect->setDeviation(deviation);
+    blurEffect->setBorderMode(borderMode);
+    blurEffect->setOptimization(optimization);
+    effect(input, blurEffect);
+}
+
 void Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
 	effect->setInput(image);
 	effect->setProperties();
@@ -250,7 +261,6 @@ void Engine::effect(std::shared_ptr<Effect> effect) {
 	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
 	D2D1_POINT_2U destPoint(0, 0);
 	D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
-	deviceContext->Flush();	 // To apply current commands to the render target
 	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
 	this->effect(effectScreenBitmap, effect);
 }

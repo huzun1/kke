@@ -61,13 +61,13 @@ class Engine {
 public:
 	Engine(ID2D1DeviceContext* deviceContext);
 
-	~Engine();
-
 	void init(std::vector<FontData> loadFonts);
 
 	void begin(ID2D1Bitmap* screen);
 
 	void end(ID2D1Image** output);
+
+	void flush();
 
 	void clear();
 
@@ -152,6 +152,12 @@ public:
 		std::optional<kke::Rect> srcRect = std::nullopt);
 
 	void blur(
+		float deviation,
+		kke::BlurBorderMode borderMode = kke::BlurBorderMode::HARD,
+		kke::BlurOptimization optimization = kke::BlurOptimization::BALANCED);
+
+	void blur(
+		ID2D1Image* input,
 		float deviation,
 		kke::BlurBorderMode borderMode = kke::BlurBorderMode::HARD,
 		kke::BlurOptimization optimization = kke::BlurOptimization::BALANCED);

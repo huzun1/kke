@@ -22,10 +22,6 @@ public:
 	 */
 	void render();
 
-	void flush() {
-        d2d1.getDeviceContext()->Flush();
-    }
-
 private:
 	/**
 	 * @brief Pre-Render test with the default context

@@ -32,7 +32,7 @@ application::Renderer::Renderer(application::D2D1& d2d1)
 }
 
 void application::Renderer::render() {
-	//preRender();
+	// preRender();
 
 	ID2D1DeviceContext* deviceContext = d2d1.getDeviceContext();
 	ID2D1Bitmap1* renderTarget = d2d1.getRenderTarget();
@@ -96,9 +96,9 @@ void application::Renderer::renderFrame() {
 	gradientAngle += 0.5f;
 
 	auto brush = kke::LinearGradientBrush({kke::Color4f(0x205034),
-											 kke::Color4f(0x680620), kke::Color4f(0xFF06FF)},
-											{rect.x1, rect.y1},
-											{rect.x2, rect.y2});
+										   kke::Color4f(0x680620), kke::Color4f(0xFF06FF)},
+										  {rect.x1, rect.y1},
+										  {rect.x2, rect.y2});
 	brush.setAngle(gradientAngle);
 	this->engine->drawRoundedShadow(rect, brush, 10.0f);
 	this->engine->fillRounded(rect, brush);
@@ -137,6 +137,16 @@ void application::Renderer::renderFrame() {
 		L"Segoe UI",
 		32,
 		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
+
+	// Surface Test
+	for (int i = 0; i < 100; i++) {
+		this->engine->pushSurface();
+		this->engine->fillRect({800, 50, 1000, 250},
+							   kke::SolidColorBrush({0.5f, 0.2f, 0.8f, 1.0f}));
+		ID2D1Bitmap1* surfaceBitmap;
+		this->engine->popSurface(&surfaceBitmap);
+		this->engine->blur(surfaceBitmap, 3.0f);
+	}
 
 	// Draw FPS
 	counter.frame();
