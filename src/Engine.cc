@@ -5,6 +5,7 @@
 #include <d2d1helper.h>
 #include <dcommon.h>
 #include <wincodec.h>
+#include <wrl/client.h>
 
 #include <cstdint>
 #include <memory>
@@ -31,11 +32,11 @@ Engine::~Engine() {
 }
 
 void Engine::init(std::vector<FontData> loadFonts) {
-    fontLoader.preInit();
-    for (const auto& font : loadFonts) {
-        fontLoader.loadFont(font.data, font.size);
-    }
-    fontLoader.init();
+	fontLoader.preInit();
+	for (const auto& font : loadFonts) {
+		fontLoader.loadFont(font.data, font.size);
+	}
+	fontLoader.init();
 }
 
 void Engine::begin(ID2D1Bitmap* screen) {
@@ -101,21 +102,20 @@ void Engine::drawEllipse(Ellipse const& ellipse, Brush const& brush, float strok
 }
 
 void Engine::drawText(
-    Point2f const& position,
-    std::wstring const& text,
-    FontWeight weight,
-    std::wstring const& fontFamily,
-    int32_t fontSize,
-    Brush const& brush
-) {
-    Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
-    Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
-    D2D1_POINT_2F origin = position.point2f();
-    deviceContext->DrawTextLayout(
-        origin,
-        layout.Get(),
-        resourceAllocator.aquireOrCreateBrush(brush).Get(),
-        D2D1_DRAW_TEXT_OPTIONS_NONE);
+	Point2f const& position,
+	std::wstring const& text,
+	FontWeight weight,
+	std::wstring const& fontFamily,
+	int32_t fontSize,
+	Brush const& brush) {
+	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
+	D2D1_POINT_2F origin = position.point2f();
+	deviceContext->DrawTextLayout(
+		origin,
+		layout.Get(),
+		resourceAllocator.aquireOrCreateBrush(brush).Get(),
+		D2D1_DRAW_TEXT_OPTIONS_NONE);
 }
 
 void Engine::fillRect(Rect const& rect, Brush const& brush) {
@@ -163,9 +163,9 @@ void Engine::drawEllipseShadow(
 	Brush const& brush,
 	float deviation) {
 	Rect dimension = {ellipse.point.x - ellipse.radius,
-							 ellipse.point.y - ellipse.radius,
-							 ellipse.point.x + ellipse.radius,
-							 ellipse.point.y + ellipse.radius};
+					  ellipse.point.y - ellipse.radius,
+					  ellipse.point.x + ellipse.radius,
+					  ellipse.point.y + ellipse.radius};
 	Point2f offset = shadowDispatcher.computeOffset(dimension);
 	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
 		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
@@ -177,36 +177,38 @@ void Engine::drawEllipseShadow(
 }
 
 void Engine::drawTextShadow(
-    Point2f const& position,
-    std::wstring const& text,
-    FontWeight weight,
-    std::wstring const& fontFamily,
-    int32_t fontSize,
-    Brush const& brush,
-    float deviation
-) {
-    Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
-    Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
-    DWRITE_TEXT_METRICS metrics;
-    layout->GetMetrics(&metrics);
-    Rect dimension = {
-        position.x,
-        position.y,
-        position.x + metrics.width,
-        position.y + metrics.height
-    };
-    Point2f offset = shadowDispatcher.computeOffset(dimension);
-    Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
-        shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
-            drawText(position, text, weight, fontFamily, fontSize, brush);
-        }, output);
-    });
-    deviceContext->SetTransform(matrix.build());
-    deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	Point2f const& position,
+	std::wstring const& text,
+	FontWeight weight,
+	std::wstring const& fontFamily,
+	int32_t fontSize,
+	Brush const& brush,
+	float deviation) {
+	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
+	DWRITE_TEXT_METRICS metrics;
+	layout->GetMetrics(&metrics);
+	Rect dimension = {
+		position.x,
+		position.y,
+		position.x + metrics.width,
+		position.y + metrics.height};
+	Point2f offset = shadowDispatcher.computeOffset(dimension);
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
+		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
+			drawText(position, text, weight, fontFamily, fontSize, brush);
+		}, output);
+	});
+	deviceContext->SetTransform(matrix.build());
+	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 }
 
 uint64_t Engine::loadTexture(const void* data, size_t size) {
 	return textureRepository.load(data, size);
+}
+
+void Engine::releaseTexture(uint64_t index) {
+	textureRepository.release(index);
 }
 
 void Engine::drawImage(ID2D1Image* image, InterpolationMode interpolationMode) {
@@ -219,7 +221,7 @@ void Engine::drawImage(ID2D1Image* image, InterpolationMode interpolationMode) {
 }
 
 void Engine::drawTexture(size_t index, Rect const& dimension, float opacity, InterpolationMode interpolationMode, std::optional<Rect> srcRect) {
-	Microsoft::WRL::ComPtr<ID2D1Bitmap> texture = textureRepository.fetchTexture(index);
+	ComPtr<ID2D1Bitmap> texture = textureRepository.getTexture(index);
 	if (!texture) {
 		return;
 	}

@@ -11,7 +11,7 @@ kke::TextureRepository::TextureRepository(ID2D1DeviceContext* context)
 	: deviceContext(context) {
 }
 
-Microsoft::WRL::ComPtr<ID2D1Bitmap> kke::TextureRepository::fetchTexture(TextureId id) {
+ComPtr<ID2D1Bitmap> kke::TextureRepository::getTexture(TextureId id) {
 	if (auto it = textures.find(id); it != textures.end()) {
 		return it->second;
 	}
@@ -32,32 +32,27 @@ kke::TextureId kke::TextureRepository::load(const void* data, size_t size) {
 		CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
 	}
 
-	auto stream = SHCreateMemStream(reinterpret_cast<const unsigned char*>(data), size);
-
-	IWICBitmapDecoder* decoder;
+	auto stream = SHCreateMemStream(reinterpret_cast<const uint8_t*>(data), size);
+	ComPtr<IWICBitmapDecoder> decoder;
 	factory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnLoad, &decoder);
-
-	IWICBitmapFrameDecode* frame;
+	ComPtr<IWICBitmapFrameDecode> frame;
 	decoder->GetFrame(0, &frame);
-
-	IWICFormatConverter* converter;
+	ComPtr<IWICFormatConverter> converter;
 	factory->CreateFormatConverter(&converter);
+
 	converter->Initialize(
-		frame,
+		frame.Get(),
 		GUID_WICPixelFormat32bppPBGRA,
 		WICBitmapDitherTypeNone,
 		NULL,
 		0.0f,
 		WICBitmapPaletteTypeCustom);
-	stream->Release();
-	frame->Release();
-	decoder->Release();
 
-	Microsoft::WRL::ComPtr<ID2D1Bitmap> bitmap;
-	deviceContext->CreateBitmapFromWicBitmap(converter, NULL, &bitmap);
+	ComPtr<ID2D1Bitmap> bitmap;
+	deviceContext->CreateBitmapFromWicBitmap(converter.Get(), NULL, &bitmap);
 
 	TextureId id = assignTexId();
-	textures[id] = bitmap;
+	textures.emplace(id, bitmap);
 
 	return id;
 }

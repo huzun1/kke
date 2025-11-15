@@ -30,16 +30,21 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 	d3d11.init(hwnd);
 	d2d1.init(d3d11);
 
-	application::Renderer renderer(d2d1);
+	application::Renderer* renderer = new application::Renderer(d2d1);
 
 	bool isRunning = true;
 	while (isRunning) {
 		MSG msg;
 		while (PeekMessageW(&msg, 0, 0, 0, PM_REMOVE)) {
-			if (msg.message == WM_QUIT)
+			if (msg.message == WM_QUIT) {
 				isRunning = false;
+			}
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
+		}
+
+		if (!isRunning) {
+			break;
 		}
 
 		ID3D11DeviceContext1* d3d11DeviceContext = d3d11.getDeviceContext();
@@ -48,7 +53,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 
 		FLOAT backgroundColor[4] = {0.3f, 0.6f, 0.8f, 1.0f};
 		d3d11DeviceContext->ClearRenderTargetView(targetView, backgroundColor);
-		renderer.render();
+		renderer->render();
 		d3d11DeviceContext->Flush();
 
 		d3d11SwapChain->Present(0, 0);
@@ -56,7 +61,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 		Sleep(1);
 	}
 
-	printf("Done\n");
+	delete renderer;
 
 	return 0;
 }

@@ -7,7 +7,7 @@
 using namespace kke;
 
 void FontLoader::preInit() {
-	if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(writeFactory), reinterpret_cast<IUnknown**>(&writeFactory)))) {
+	if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(writeFactory), reinterpret_cast<IUnknown**>(writeFactory.GetAddressOf())))) {
 		throw std::runtime_error("couldn't create dwrite factory");
 	}
 	if (FAILED(writeFactory->CreateFontSetBuilder(&fontSetBuilder))) {
@@ -20,7 +20,7 @@ void FontLoader::preInit() {
 
 void FontLoader::loadFont(const void* data, size_t size) {
 	IDWriteFontFile* fontFile;
-	if (FAILED(fontFileLoader->CreateInMemoryFontFileReference(writeFactory, data, size, nullptr, &fontFile))) {
+	if (FAILED(fontFileLoader->CreateInMemoryFontFileReference(writeFactory.Get(), data, size, nullptr, &fontFile))) {
 		return;
 	}
 	fontSetBuilder->AddFontFile(fontFile);
@@ -57,7 +57,7 @@ IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, 
 	}
 	if (FAILED(writeFactory->CreateTextFormat(
 			fontFamily.c_str(),
-			fontCollection,
+			fontCollection.Get(),
 			dwriteWeight,
 			DWRITE_FONT_STYLE_NORMAL,
 			DWRITE_FONT_STRETCH_NORMAL,

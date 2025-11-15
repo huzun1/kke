@@ -33,6 +33,8 @@
 #include "kke/font/FontWeight.hpp"
 #include "kke/transform/Matrix.hpp"
 
+using namespace Microsoft::WRL;
+
 namespace kke {
 enum class InterpolationMode {
 	NEAREST,
@@ -50,8 +52,8 @@ class Engine {
 	ID2D1Bitmap1* effectScreenBitmap;  // Temporary bitmap for holding screen copies
 	kke::FontLoader fontLoader;
 	kke::Matrix matrix;
-	kke::TextureRepository textureRepository;
 	kke::ResourceAllocator resourceAllocator;
+	kke::TextureRepository textureRepository;
 	kke::EffectContainer effectContainer;
 	kke::ShadowDisaptcher shadowDispatcher;
 	std::stack<RenderSurface*> surfaceStack;
@@ -91,13 +93,12 @@ public:
 		float strokeWidth);
 
 	void drawText(
-	    kke::Point2f const& position,
+		kke::Point2f const& position,
 		std::wstring const& text,
 		FontWeight weight,
 		std::wstring const& fontFamily,
 		int32_t fontSize,
-        kke::Brush const& brush
-	);
+		kke::Brush const& brush);
 
 	void fillRect(
 		kke::Rect const& rect,
@@ -127,16 +128,17 @@ public:
 		float deviation);
 
 	void drawTextShadow(
-        kke::Point2f const& position,
-        std::wstring const& text,
-        FontWeight weight,
-        std::wstring const& fontFamily,
-        int32_t fontSize,
-        kke::Brush const& brush,
-        float deviation
-    );
+		kke::Point2f const& position,
+		std::wstring const& text,
+		FontWeight weight,
+		std::wstring const& fontFamily,
+		int32_t fontSize,
+		kke::Brush const& brush,
+		float deviation);
 
 	uint64_t loadTexture(const void* data, size_t size);
+
+	void releaseTexture(uint64_t index);
 
 	void drawImage(
 		ID2D1Image* image,

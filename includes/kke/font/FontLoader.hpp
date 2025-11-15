@@ -4,6 +4,7 @@
 #include <dwrite_3.h>
 #include <dxgi1_2.h>
 #include <dxgi1_4.h>
+#include <wrl/client.h>
 
 #include <string>
 
@@ -11,12 +12,14 @@
 
 #pragma comment(lib, "dwrite.lib")
 
+using namespace Microsoft::WRL;
+
 namespace kke {
 class FontLoader {
-	IDWriteFactory5* writeFactory = nullptr;
-	IDWriteInMemoryFontFileLoader* fontFileLoader = nullptr;
-	IDWriteFontSetBuilder1* fontSetBuilder = nullptr;
-	IDWriteFontCollection1* fontCollection = nullptr;
+	ComPtr<IDWriteFactory5> writeFactory = nullptr;
+	ComPtr<IDWriteInMemoryFontFileLoader> fontFileLoader = nullptr;
+	ComPtr<IDWriteFontSetBuilder1> fontSetBuilder = nullptr;
+	ComPtr<IDWriteFontCollection1> fontCollection = nullptr;
 
 public:
 	void preInit();

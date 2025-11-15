@@ -2,6 +2,7 @@
 
 #include "kke/common/Point.hpp"
 #include "kke/transform/Transform.hpp"
+
 namespace kke {
 class RotateTransform : public Transform {
 	kke::Point2f center;

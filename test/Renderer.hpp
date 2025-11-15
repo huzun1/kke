@@ -10,9 +10,8 @@
 
 namespace application {
 class Renderer {
+   	std::unique_ptr<kke::Engine> engine;
 	application::D2D1& d2d1;
-
-	std::unique_ptr<kke::Engine> engine;
 	uint64_t dyconTexId;
 
 public:
@@ -22,6 +21,10 @@ public:
 	 * @brief Pre-setup
 	 */
 	void render();
+
+	void flush() {
+        d2d1.getDeviceContext()->Flush();
+    }
 
 private:
 	/**
