@@ -7,7 +7,6 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <functional>
 #include <memory>
 #include <optional>
 #include <stack>
@@ -71,6 +70,18 @@ public:
 
 	void clear();
 
+	kke::Scale2f getTextSize(
+        std::string const& text,
+        FontWeight weight,
+        std::string const& fontFamily,
+        int32_t fontSize);
+
+	kke::Scale2f getTextSize(
+        std::wstring const& text,
+        FontWeight weight,
+        std::wstring const& fontFamily,
+        int32_t fontSize);
+
 	void drawLine(
 		kke::Point2f start,
 		kke::Point2f end,
@@ -91,6 +102,14 @@ public:
 		kke::Ellipse const& ellipse,
 		kke::Brush const& brush,
 		float strokeWidth);
+
+	void drawText(
+		kke::Point2f const& position,
+		std::string const& text,
+		FontWeight weight,
+		std::string const& fontFamily,
+		int32_t fontSize,
+		kke::Brush const& brush);
 
 	void drawText(
 		kke::Point2f const& position,
@@ -126,6 +145,15 @@ public:
 		kke::Ellipse const& ellipse,
 		kke::Brush const& brush,
 		float deviation);
+
+	void drawTextShadow(
+        kke::Point2f const& position,
+        std::string const& text,
+        FontWeight weight,
+        std::string const& fontFamily,
+        int32_t fontSize,
+        kke::Brush const& brush,
+        float deviation);
 
 	void drawTextShadow(
 		kke::Point2f const& position,

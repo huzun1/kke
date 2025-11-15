@@ -68,6 +68,8 @@ void Engine::begin(ID2D1Bitmap* screen) {
 	// Reset the matrix
 	matrix = Matrix();
 	deviceContext->SetTransform(matrix.build());
+
+	deviceContext->Flush();
 }
 
 void Engine::end(ID2D1Image** output) {
@@ -84,6 +86,28 @@ void Engine::clear() {
 	deviceContext->Clear();
 }
 
+kke::Scale2f Engine::getTextSize(
+    std::string const& text,
+    FontWeight weight,
+    std::string const& fontFamily,
+    int32_t fontSize) {
+    std::wstring wtext = std::wstring(text.begin(), text.end());
+    std::wstring wfontFamily = std::wstring(fontFamily.begin(), fontFamily.end());
+    return getTextSize(wtext, weight, wfontFamily, fontSize);
+}
+
+kke::Scale2f Engine::getTextSize(
+    std::wstring const& text,
+    FontWeight weight,
+    std::wstring const& fontFamily,
+    int32_t fontSize) {
+    Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
+    Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
+    DWRITE_TEXT_METRICS metrics;
+    layout->GetMetrics(&metrics);
+    return Scale2f(metrics.width, metrics.height);
+}
+
 void Engine::drawLine(Point2f start, Point2f end, Brush const& brush, float strokeWidth) {
 	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
 }
@@ -98,6 +122,17 @@ void Engine::drawRounded(RoundedRect const& rect, Brush const& brush, float stro
 
 void Engine::drawEllipse(Ellipse const& ellipse, Brush const& brush, float strokeWidth) {
 	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
+}
+
+void Engine::drawText(
+    Point2f const& position,
+    std::string const& text,
+    FontWeight weight,
+    std::string const& fontFamily,
+    int32_t fontSize,
+    Brush const& brush) {
+    std::wstring wtext = std::wstring(text.begin(), text.end());
+    drawText(position, wtext, weight, std::wstring(fontFamily.begin(), fontFamily.end()), fontSize, brush);
 }
 
 void Engine::drawText(
@@ -173,6 +208,19 @@ void Engine::drawEllipseShadow(
 	});
 	deviceContext->SetTransform(matrix.build());
 	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+}
+
+void Engine::drawTextShadow(
+    Point2f const& position,
+    std::string const& text,
+    FontWeight weight,
+    std::string const& fontFamily,
+    int32_t fontSize,
+    Brush const& brush,
+    float deviation) {
+    std::wstring wtext = std::wstring(text.begin(), text.end());
+    std::wstring wfontFamily = std::wstring(fontFamily.begin(), fontFamily.end());
+    drawTextShadow(position, wtext, weight, wfontFamily, fontSize, brush, deviation);
 }
 
 void Engine::drawTextShadow(
