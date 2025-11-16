@@ -225,6 +225,8 @@ private:
 		kke::InterpolationMode interpolationMode = kke::InterpolationMode::LINEAR,
 		std::optional<kke::Rect> srcRect = std::nullopt);
 
+	std::wstring toWString(std::string const& str);
+
 	static D2D1_INTERPOLATION_MODE toD2D1InterpolationMode(kke::InterpolationMode mode);
 };
 };	// namespace kke

@@ -92,9 +92,7 @@ kke::Scale2f Engine::getTextSize(
 	FontWeight weight,
 	std::string const& fontFamily,
 	int32_t fontSize) {
-	std::wstring wtext = std::wstring(text.begin(), text.end());
-	std::wstring wfontFamily = std::wstring(fontFamily.begin(), fontFamily.end());
-	return getTextSize(wtext, weight, wfontFamily, fontSize);
+	return getTextSize(toWString(text), weight, toWString(fontFamily), fontSize);
 }
 
 kke::Scale2f Engine::getTextSize(
@@ -132,8 +130,7 @@ void Engine::drawText(
 	std::string const& fontFamily,
 	int32_t fontSize,
 	Brush const& brush) {
-	std::wstring wtext = std::wstring(text.begin(), text.end());
-	drawText(position, wtext, weight, std::wstring(fontFamily.begin(), fontFamily.end()), fontSize, brush);
+	drawText(position, toWString(text), weight, toWString(fontFamily), fontSize, brush);
 }
 
 void Engine::drawText(
@@ -219,9 +216,7 @@ void Engine::drawTextShadow(
 	int32_t fontSize,
 	Brush const& brush,
 	float deviation) {
-	std::wstring wtext = std::wstring(text.begin(), text.end());
-	std::wstring wfontFamily = std::wstring(fontFamily.begin(), fontFamily.end());
-	drawTextShadow(position, wtext, weight, wfontFamily, fontSize, brush, deviation);
+	drawTextShadow(position, toWString(text), weight, toWString(fontFamily), fontSize, brush, deviation);
 }
 
 void Engine::drawTextShadow(
@@ -394,6 +389,13 @@ void Engine::drawBitmap(
 		srcRectanglePtr = &srcRectangle;
 	}
 	deviceContext->DrawBitmap(bitmap, &rect, opacity, toD2D1InterpolationMode(interpolationMode), srcRectanglePtr);
+}
+
+std::wstring Engine::toWString(std::string const& str) {
+	uint32_t size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
+	std::wstring result(size - 1, 0);
+	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &result[0], size);
+	return result;
 }
 
 D2D1_INTERPOLATION_MODE Engine::toD2D1InterpolationMode(InterpolationMode mode) {
