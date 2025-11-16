@@ -1,11 +1,18 @@
+#include "kke/common/geometry/Ellipse.hpp"
+
 #include <cstdint>
-#include <kke/common/geometry/Ellipse.hpp>
 
 #include "kke/common/Geometry.hpp"
 #include "kke/internal/Hasher.hpp"
 
 kke::Ellipse::Ellipse(float x, float y, float radius)
 	: point(kke::Point2f{x, y}), radius(radius) {
+}
+
+void kke::Ellipse::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
+	ID2D1EllipseGeometry* ellipseGeometry;
+	factory->CreateEllipseGeometry(ellipse(), &ellipseGeometry);
+	*output = ellipseGeometry;
 }
 
 D2D1_ELLIPSE kke::Ellipse::ellipse() const {

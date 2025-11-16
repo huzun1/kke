@@ -15,10 +15,12 @@ struct Ellipse : public Geometry {
 
 	Ellipse(float x, float y, float radius);
 
+	void create(ID2D1Factory* factory, ID2D1Geometry** output) const override;
+
+	uint64_t hash(bool positionDependent) const override;
+
 	D2D1_ELLIPSE ellipse() const;
 
 	kke::Rect dimension() const;
-
-	uint64_t hash(bool positionDependent) const;
 };
 };	// namespace kke

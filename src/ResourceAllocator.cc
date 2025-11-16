@@ -8,74 +8,88 @@
 #include "kke/font/FontLoader.hpp"
 #include "kke/internal/Hasher.hpp"
 
-kke::ResourceAllocator::ResourceAllocator(ID2D1DeviceContext* context, FontLoader* fontLoader)
-	: deviceContext(context), fontLoader(fontLoader), brushStorage() {
+using namespace kke;
+
+ResourceAllocator::ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* context, FontLoader* fontLoader)
+	: factory(factory), deviceContext(context), fontLoader(fontLoader), brushStorage() {
 }
 
-Microsoft::WRL::ComPtr<ID2D1Brush> kke::ResourceAllocator::aquireOrCreateBrush(kke::Brush const& brush) {
+ComPtr<ID2D1Brush> ResourceAllocator::aquireOrCreateBrush(Brush const& brush) {
 	uint64_t key = brush.hash();
-	Microsoft::WRL::ComPtr<ID2D1Brush> cachedBrush = brushStorage.get(key);
+	ComPtr<ID2D1Brush> cachedBrush = brushStorage.get(key);
 	if (cachedBrush) {
 		return cachedBrush;
 	}
-	Microsoft::WRL::ComPtr<ID2D1Brush> brushInstance;
+	ComPtr<ID2D1Brush> brushInstance;
 	brush.create(deviceContext, &brushInstance);
 	brushStorage.put(brush.hash(), brushInstance);
 	return brushInstance;
 }
 
-Microsoft::WRL::ComPtr<ID2D1Image> kke::ResourceAllocator::aquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc) {
+ComPtr<ID2D1Geometry> ResourceAllocator::aquireOrCreateGeometry(Geometry const& geometry) {
+    uint64_t key = geometry.hash(true);
+    ComPtr<ID2D1Geometry> cachedGeometry = geometryStorage.get(key);
+    if (cachedGeometry) {
+        return cachedGeometry;
+    }
+    ComPtr<ID2D1Geometry> geometryInstance;
+    geometry.create(factory, &geometryInstance);
+    geometryStorage.put(geometry.hash(true), geometryInstance);
+    return geometryInstance;
+}
+
+ComPtr<ID2D1Image> ResourceAllocator::aquireOrDispatchShadow(Geometry const& geometry, Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc) {
 	Hasher hasher;
 	hasher.combine(geometry.hash(false));
 	hasher.combine(brush.hash());
 	hasher.combine(strength);
-	Microsoft::WRL::ComPtr<ID2D1Image> cachedShadow = shadowStorage.get(hasher.get());
+	ComPtr<ID2D1Image> cachedShadow = shadowStorage.get(hasher.get());
 	if (cachedShadow) {
 		return cachedShadow;
 	}
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput;
+	ComPtr<ID2D1Image> shadowOutput;
 	dispatchFunc(&shadowOutput);
 	shadowStorage.put(hasher.get(), shadowOutput);
 	return shadowOutput;
 }
 
-kke::RenderSurface* kke::ResourceAllocator::aquireOrCreateSurface(ID2D1DeviceContext* context) {
+RenderSurface* ResourceAllocator::aquireOrCreateSurface(ID2D1DeviceContext* context) {
 	// TODO: Implement resource limit?
 	for (auto& surface : surfaces) {
 		if (!surface.isLocking()) {
 			return &surface;
 		}
 	}
-	kke::RenderSurface surface = kke::RenderSurface::createSurface(context);
+	RenderSurface surface = RenderSurface::createSurface(context);
 	surfaces.push_back(surface);
 	return &surfaces.back();
 }
 
-IDWriteTextFormat* kke::ResourceAllocator::aquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, kke::FontWeight weight) {
+IDWriteTextFormat* ResourceAllocator::aquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, FontWeight weight) {
     Hasher hasher;
     hasher.combine(fontFamily);
     hasher.combine(fontSize);
     hasher.combine(static_cast<uint32_t>(weight));
     uint64_t key = hasher.get();
-    Microsoft::WRL::ComPtr<IDWriteTextFormat> cachedFormat = textFormatStorage.get(key);
+    ComPtr<IDWriteTextFormat> cachedFormat = textFormatStorage.get(key);
     if (cachedFormat) {
         return cachedFormat.Get();
     }
-    Microsoft::WRL::ComPtr<IDWriteTextFormat> textFormat = fontLoader->createTextFormat(fontFamily, fontSize, weight);
+    ComPtr<IDWriteTextFormat> textFormat = fontLoader->createTextFormat(fontFamily, fontSize, weight);
     textFormatStorage.put(key, textFormat);
     return textFormat.Get();
 }
 
-IDWriteTextLayout* kke::ResourceAllocator::aquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat) {
+IDWriteTextLayout* ResourceAllocator::aquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat) {
     Hasher hasher;
     hasher.combine(text);
     hasher.combine(reinterpret_cast<uint64_t>(textFormat));
     uint64_t key = hasher.get();
-    Microsoft::WRL::ComPtr<IDWriteTextLayout> cachedLayout = textLayoutStorage.get(key);
+    ComPtr<IDWriteTextLayout> cachedLayout = textLayoutStorage.get(key);
     if (cachedLayout) {
         return cachedLayout.Get();
     }
-    Microsoft::WRL::ComPtr<IDWriteTextLayout> textLayout = fontLoader->createTextLayout(text, textFormat);
+    ComPtr<IDWriteTextLayout> textLayout = fontLoader->createTextLayout(text, textFormat);
     textLayoutStorage.put(key, textLayout);
     return textLayout.Get();
 }

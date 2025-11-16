@@ -14,8 +14,10 @@ struct RoundedRect : public Rect {
 
 	RoundedRect(Rect const& rect, float rounding);
 
-	D2D1_ROUNDED_RECT roundedRect() const;
+	void create(ID2D1Factory* factory, ID2D1Geometry** output) const override;
 
 	uint64_t hash(bool positionDependent) const override;
+
+	D2D1_ROUNDED_RECT roundedRect() const;
 };
 };	// namespace kke

@@ -21,6 +21,7 @@
 #include "common/Point.hpp"
 #include "common/geometry/Ellipse.hpp"
 #include "common/geometry/Rect.hpp"
+#include "kke/common/Geometry.hpp"
 #include "kke/common/Scale.hpp"
 #include "kke/common/geometry/Ellipse.hpp"
 #include "kke/common/geometry/RoundedRect.hpp"
@@ -45,6 +46,7 @@ enum class InterpolationMode {
 };
 
 class Engine {
+    ID2D1Factory* factory;
 	ID2D1DeviceContext* deviceContext;
 
 	ID2D1Bitmap1* renderTarget;
@@ -58,7 +60,7 @@ class Engine {
 	std::stack<RenderSurface*> surfaceStack;
 
 public:
-	Engine(ID2D1DeviceContext* deviceContext);
+	Engine(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext);
 
 	void init(std::vector<FontData> loadFonts);
 
@@ -71,16 +73,16 @@ public:
 	void clear();
 
 	kke::Scale2f getTextSize(
-        std::string const& text,
-        FontWeight weight,
-        std::string const& fontFamily,
-        int32_t fontSize);
+		std::string const& text,
+		FontWeight weight,
+		std::string const& fontFamily,
+		int32_t fontSize);
 
 	kke::Scale2f getTextSize(
-        std::wstring const& text,
-        FontWeight weight,
-        std::wstring const& fontFamily,
-        int32_t fontSize);
+		std::wstring const& text,
+		FontWeight weight,
+		std::wstring const& fontFamily,
+		int32_t fontSize);
 
 	void drawLine(
 		kke::Point2f start,
@@ -147,13 +149,13 @@ public:
 		float deviation);
 
 	void drawTextShadow(
-        kke::Point2f const& position,
-        std::string const& text,
-        FontWeight weight,
-        std::string const& fontFamily,
-        int32_t fontSize,
-        kke::Brush const& brush,
-        float deviation);
+		kke::Point2f const& position,
+		std::string const& text,
+		FontWeight weight,
+		std::string const& fontFamily,
+		int32_t fontSize,
+		kke::Brush const& brush,
+		float deviation);
 
 	void drawTextShadow(
 		kke::Point2f const& position,
@@ -181,12 +183,14 @@ public:
 
 	void blur(
 		float deviation,
+		kke::Geometry* fillGeometry = nullptr,
 		kke::BlurBorderMode borderMode = kke::BlurBorderMode::HARD,
 		kke::BlurOptimization optimization = kke::BlurOptimization::BALANCED);
 
 	void blur(
 		ID2D1Image* input,
 		float deviation,
+		kke::Geometry* fillGeometry = nullptr,
 		kke::BlurBorderMode borderMode = kke::BlurBorderMode::HARD,
 		kke::BlurOptimization optimization = kke::BlurOptimization::BALANCED);
 
@@ -195,21 +199,25 @@ public:
 		return effectContainer.acquireOrCreateEffect<T>();
 	}
 
-	void effect(ID2D1Image* image, std::shared_ptr<Effect> effect);
-
-	void effect(std::shared_ptr<Effect> effect);
-
 	void pushScale(kke::Point2f const& center, kke::Scale2f const& scale);
 
 	void pushRotate(kke::Point2f const& center, float angle);
 
-	void popTransform();
+	void pushLayer(kke::Geometry const& geometry);
 
 	void pushSurface();
+
+	void popTransform();
+
+	void popLayer();
 
 	void popSurface(ID2D1Bitmap1** output);
 
 private:
+	void effect(ID2D1Image* image, std::shared_ptr<Effect> effect);
+
+	void effect(std::shared_ptr<Effect> effect);
+
 	void drawBitmap(
 		ID2D1Bitmap* bitmap,
 		kke::Rect const& dimension,

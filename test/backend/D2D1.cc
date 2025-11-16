@@ -16,6 +16,10 @@ void application::D2D1::init(D3D11& context) {
 	createAndSetRenderTarget(swapChain, d2d1DeviceContext, &renderTarget);
 }
 
+ID2D1Factory* application::D2D1::getFactory() {
+    return d2d1Factory;
+}
+
 ID2D1DeviceContext* application::D2D1::getDeviceContext() {
 	return d2d1DeviceContext;
 }

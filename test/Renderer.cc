@@ -20,7 +20,7 @@
 static FpsCounter counter;
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
-	this->engine = std::make_unique<kke::Engine>(d2d1.getDeviceContext());
+	this->engine = std::make_unique<kke::Engine>(d2d1.getFactory(), d2d1.getDeviceContext());
 	this->engine->init({});
 
 	auto [data, size] = loadResource(TEXTURE_DYCONTRAST);
@@ -95,8 +95,8 @@ void application::Renderer::renderFrame() {
 	static float gradientAngle = 0.0f;
 	gradientAngle += 0.5f;
 
-	auto brush = kke::LinearGradientBrush({kke::Color4f(0x205034),
-										   kke::Color4f(0x680620), kke::Color4f(0xFF06FF)},
+	auto brush = kke::LinearGradientBrush({kke::Color4f(KKE_COLOR_16(0x205034)),
+										   kke::Color4f(KKE_COLOR_16(0x680620)), kke::Color4f(KKE_COLOR_16(0xFF06FF))},
 										  {rect.x1, rect.y1},
 										  {rect.x2, rect.y2});
 	brush.setAngle(gradientAngle);
@@ -138,16 +138,6 @@ void application::Renderer::renderFrame() {
 		32,
 		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
 
-	// Surface Test
-	for (int i = 0; i < 100; i++) {
-		this->engine->pushSurface();
-		this->engine->fillRect({800, 50, 1000, 250},
-							   kke::SolidColorBrush({0.5f, 0.2f, 0.8f, 1.0f}));
-		ID2D1Bitmap1* surfaceBitmap;
-		this->engine->popSurface(&surfaceBitmap);
-		this->engine->blur(surfaceBitmap, 3.0f);
-	}
-
 	// Draw FPS
 	counter.frame();
 	this->engine->drawText(
@@ -157,6 +147,13 @@ void application::Renderer::renderFrame() {
 		L"Segoe UI",
 		16,
 		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
+
+	// Ranged-blur Test
+	float offset = 50 + std::sin(theta) * 50.0f;
+	kke::RoundedRect blurRect{{0.0f + offset, 50.0f + offset, 300.0f + offset, 300.0f + offset}, 10.0f};
+	this->engine->flush(); // Ensure all previous drawing commands are executed
+	this->engine->blur(30.0f, &blurRect);
+	this->engine->drawRounded(blurRect, kke::SolidColorBrush(KKE_COLOR_24(0x000000FF)), 2.0f);
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {

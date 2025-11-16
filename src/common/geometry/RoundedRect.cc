@@ -12,6 +12,12 @@ kke::RoundedRect::RoundedRect(Rect const& rect, float rounding)
 	  rounding(rounding) {
 }
 
+void kke::RoundedRect::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
+    ID2D1RoundedRectangleGeometry* roundedRectangleGeometry;
+    factory->CreateRoundedRectangleGeometry(roundedRect(), &roundedRectangleGeometry);
+    *output = roundedRectangleGeometry;
+}
+
 uint64_t kke::RoundedRect::hash(bool positionDependent) const {
 	Hasher hasher;
 	hasher.combine(Rect::hash(positionDependent));

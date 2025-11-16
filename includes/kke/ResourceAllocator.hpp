@@ -18,23 +18,29 @@
 #include "kke/font/FontLoader.hpp"
 #include "kke/font/FontWeight.hpp"
 
+using namespace Microsoft::WRL;
+
 namespace kke {
 class ResourceAllocator {
+    ID2D1Factory* factory;
 	ID2D1DeviceContext* deviceContext;
 	FontLoader* fontLoader;
 
 	CacheStorage<ID2D1Brush> brushStorage;
+	CacheStorage<ID2D1Geometry> geometryStorage;
 	CacheStorage<ID2D1Image> shadowStorage;
 	CacheStorage<IDWriteTextFormat> textFormatStorage;
 	CacheStorage<IDWriteTextLayout> textLayoutStorage;
 	std::vector<RenderSurface> surfaces;
 
 public:
-	ResourceAllocator(ID2D1DeviceContext* context, FontLoader* fontLoader);
+	ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* context, FontLoader* fontLoader);
 
-	Microsoft::WRL::ComPtr<ID2D1Brush> aquireOrCreateBrush(kke::Brush const& brush);
+	ComPtr<ID2D1Brush> aquireOrCreateBrush(kke::Brush const& brush);
 
-	Microsoft::WRL::ComPtr<ID2D1Image> aquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
+	ComPtr<ID2D1Geometry> aquireOrCreateGeometry(kke::Geometry const& geometry);
+
+	ComPtr<ID2D1Image> aquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
 
 	kke::RenderSurface* aquireOrCreateSurface(ID2D1DeviceContext* context);
 

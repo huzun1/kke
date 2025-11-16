@@ -13,6 +13,7 @@
 #include "kke/RenderSurface.hpp"
 #include "kke/ResourceAllocator.hpp"
 #include "kke/TextureRepository.hpp"
+#include "kke/common/Geometry.hpp"
 #include "kke/common/Point.hpp"
 #include "kke/common/Scale.hpp"
 #include "kke/common/geometry/Rect.hpp"
@@ -23,8 +24,8 @@
 
 using namespace kke;
 
-Engine::Engine(ID2D1DeviceContext* deviceContext)
-	: deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &effectContainer) {
+Engine::Engine(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext)
+	: factory(factory), deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(factory, deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &effectContainer) {
 }
 
 void Engine::init(std::vector<FontData> loadFonts) {
@@ -79,7 +80,7 @@ void Engine::end(ID2D1Image** output) {
 }
 
 void Engine::flush() {
-    deviceContext->Flush();
+	deviceContext->Flush();
 }
 
 void Engine::clear() {
@@ -87,25 +88,25 @@ void Engine::clear() {
 }
 
 kke::Scale2f Engine::getTextSize(
-    std::string const& text,
-    FontWeight weight,
-    std::string const& fontFamily,
-    int32_t fontSize) {
-    std::wstring wtext = std::wstring(text.begin(), text.end());
-    std::wstring wfontFamily = std::wstring(fontFamily.begin(), fontFamily.end());
-    return getTextSize(wtext, weight, wfontFamily, fontSize);
+	std::string const& text,
+	FontWeight weight,
+	std::string const& fontFamily,
+	int32_t fontSize) {
+	std::wstring wtext = std::wstring(text.begin(), text.end());
+	std::wstring wfontFamily = std::wstring(fontFamily.begin(), fontFamily.end());
+	return getTextSize(wtext, weight, wfontFamily, fontSize);
 }
 
 kke::Scale2f Engine::getTextSize(
-    std::wstring const& text,
-    FontWeight weight,
-    std::wstring const& fontFamily,
-    int32_t fontSize) {
-    Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
-    Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
-    DWRITE_TEXT_METRICS metrics;
-    layout->GetMetrics(&metrics);
-    return Scale2f(metrics.width, metrics.height);
+	std::wstring const& text,
+	FontWeight weight,
+	std::wstring const& fontFamily,
+	int32_t fontSize) {
+	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
+	DWRITE_TEXT_METRICS metrics;
+	layout->GetMetrics(&metrics);
+	return Scale2f(metrics.width, metrics.height);
 }
 
 void Engine::drawLine(Point2f start, Point2f end, Brush const& brush, float strokeWidth) {
@@ -125,14 +126,14 @@ void Engine::drawEllipse(Ellipse const& ellipse, Brush const& brush, float strok
 }
 
 void Engine::drawText(
-    Point2f const& position,
-    std::string const& text,
-    FontWeight weight,
-    std::string const& fontFamily,
-    int32_t fontSize,
-    Brush const& brush) {
-    std::wstring wtext = std::wstring(text.begin(), text.end());
-    drawText(position, wtext, weight, std::wstring(fontFamily.begin(), fontFamily.end()), fontSize, brush);
+	Point2f const& position,
+	std::string const& text,
+	FontWeight weight,
+	std::string const& fontFamily,
+	int32_t fontSize,
+	Brush const& brush) {
+	std::wstring wtext = std::wstring(text.begin(), text.end());
+	drawText(position, wtext, weight, std::wstring(fontFamily.begin(), fontFamily.end()), fontSize, brush);
 }
 
 void Engine::drawText(
@@ -211,16 +212,16 @@ void Engine::drawEllipseShadow(
 }
 
 void Engine::drawTextShadow(
-    Point2f const& position,
-    std::string const& text,
-    FontWeight weight,
-    std::string const& fontFamily,
-    int32_t fontSize,
-    Brush const& brush,
-    float deviation) {
-    std::wstring wtext = std::wstring(text.begin(), text.end());
-    std::wstring wfontFamily = std::wstring(fontFamily.begin(), fontFamily.end());
-    drawTextShadow(position, wtext, weight, wfontFamily, fontSize, brush, deviation);
+	Point2f const& position,
+	std::string const& text,
+	FontWeight weight,
+	std::string const& fontFamily,
+	int32_t fontSize,
+	Brush const& brush,
+	float deviation) {
+	std::wstring wtext = std::wstring(text.begin(), text.end());
+	std::wstring wfontFamily = std::wstring(fontFamily.begin(), fontFamily.end());
+	drawTextShadow(position, wtext, weight, wfontFamily, fontSize, brush, deviation);
 }
 
 void Engine::drawTextShadow(
@@ -277,40 +278,43 @@ void Engine::drawTexture(size_t index, Rect const& dimension, float opacity, Int
 
 void Engine::blur(
 	float deviation,
+	kke::Geometry* fillGeometry,
 	BlurBorderMode borderMode,
 	BlurOptimization optimization) {
+	if (fillGeometry) {
+		pushLayer(*fillGeometry);
+	}
+
 	std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
 	blurEffect->setDeviation(deviation);
 	blurEffect->setBorderMode(borderMode);
 	blurEffect->setOptimization(optimization);
 	effect(blurEffect);
+
+	if (fillGeometry) {
+        popLayer();
+    }
 }
 
 void Engine::blur(
-    ID2D1Image* input,
-    float deviation,
-    BlurBorderMode borderMode,
-    BlurOptimization optimization) {
-    std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
-    blurEffect->setDeviation(deviation);
-    blurEffect->setBorderMode(borderMode);
-    blurEffect->setOptimization(optimization);
-    effect(input, blurEffect);
-}
+	ID2D1Image* input,
+	float deviation,
+	kke::Geometry* fillGeometry,
+	BlurBorderMode borderMode,
+	BlurOptimization optimization) {
+	if (fillGeometry) {
+        pushLayer(*fillGeometry);
+    }
 
-void Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
-	effect->setInput(image);
-	effect->setProperties();
-	deviceContext->DrawImage(effect->output());
-}
+	std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
+	blurEffect->setDeviation(deviation);
+	blurEffect->setBorderMode(borderMode);
+	blurEffect->setOptimization(optimization);
+	effect(input, blurEffect);
 
-void Engine::effect(std::shared_ptr<Effect> effect) {
-	// Copy the render target to the temp buffer
-	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
-	D2D1_POINT_2U destPoint(0, 0);
-	D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
-	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
-	this->effect(effectScreenBitmap, effect);
+	if (fillGeometry) {
+        popLayer();
+    }
 }
 
 void Engine::pushScale(Point2f const& center, Scale2f const& scale) {
@@ -335,6 +339,18 @@ void Engine::pushSurface() {
 	surfaceStack.push(surface);
 }
 
+void Engine::pushLayer(Geometry const& geometry) {
+    deviceContext->PushLayer(
+        D2D1::LayerParameters(
+            D2D1::InfiniteRect(),
+            resourceAllocator.aquireOrCreateGeometry(geometry).Get()),
+        nullptr);
+}
+
+void Engine::popLayer() {
+	deviceContext->PopLayer();
+}
+
 void Engine::popSurface(ID2D1Bitmap1** output) {
 	deviceContext->Flush();	 // To apply current commands to the render target
 	RenderSurface* currentSurface = surfaceStack.top();
@@ -347,6 +363,21 @@ void Engine::popSurface(ID2D1Bitmap1** output) {
 		deviceContext->SetTarget(surfaceStack.top()->getRenderTarget());
 	}
 	*output = currentSurface->getRenderTarget();
+}
+
+void Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
+	effect->setInput(image);
+	effect->setProperties();
+	deviceContext->DrawImage(effect->output());
+}
+
+void Engine::effect(std::shared_ptr<Effect> effect) {
+	// Copy the render target to the temp buffer
+	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
+	D2D1_POINT_2U destPoint(0, 0);
+	D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
+	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
+	this->effect(effectScreenBitmap, effect);
 }
 
 void Engine::drawBitmap(
