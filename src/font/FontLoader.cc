@@ -49,6 +49,9 @@ IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, 
 		case kke::FontWeight::MEDIUM:
 			dwriteWeight = DWRITE_FONT_WEIGHT_MEDIUM;
 			break;
+		case kke::FontWeight::SEMI_BOLD:
+			dwriteWeight = DWRITE_FONT_WEIGHT_SEMI_BOLD;
+			break;
 		case kke::FontWeight::BOLD:
 			dwriteWeight = DWRITE_FONT_WEIGHT_BOLD;
 			break;
