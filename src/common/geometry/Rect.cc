@@ -1,4 +1,5 @@
 #include <d2d1.h>
+
 #include <cstdint>
 #include <kke/common/geometry/Rect.hpp>
 
@@ -13,9 +14,9 @@ kke::Rect::Rect(float x1, float y1, float x2, float y2)
 }
 
 void kke::Rect::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
-    ID2D1RectangleGeometry* rectangleGeometry;
-    factory->CreateRectangleGeometry(rectF(), &rectangleGeometry);
-    *output = rectangleGeometry;
+	ID2D1RectangleGeometry* rectangleGeometry;
+	factory->CreateRectangleGeometry(rectF(), &rectangleGeometry);
+	*output = rectangleGeometry;
 }
 
 kke::Point2f kke::Rect::center() const {

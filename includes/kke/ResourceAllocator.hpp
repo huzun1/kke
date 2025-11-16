@@ -22,7 +22,7 @@ using namespace Microsoft::WRL;
 
 namespace kke {
 class ResourceAllocator {
-    ID2D1Factory* factory;
+	ID2D1Factory* factory;
 	ID2D1DeviceContext* deviceContext;
 	FontLoader* fontLoader;
 

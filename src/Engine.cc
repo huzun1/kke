@@ -292,8 +292,8 @@ void Engine::blur(
 	effect(blurEffect);
 
 	if (fillGeometry) {
-        popLayer();
-    }
+		popLayer();
+	}
 }
 
 void Engine::blur(
@@ -303,8 +303,8 @@ void Engine::blur(
 	BlurBorderMode borderMode,
 	BlurOptimization optimization) {
 	if (fillGeometry) {
-        pushLayer(*fillGeometry);
-    }
+		pushLayer(*fillGeometry);
+	}
 
 	std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
 	blurEffect->setDeviation(deviation);
@@ -313,8 +313,8 @@ void Engine::blur(
 	effect(input, blurEffect);
 
 	if (fillGeometry) {
-        popLayer();
-    }
+		popLayer();
+	}
 }
 
 void Engine::pushScale(Point2f const& center, Scale2f const& scale) {
@@ -340,11 +340,11 @@ void Engine::pushSurface() {
 }
 
 void Engine::pushLayer(Geometry const& geometry) {
-    deviceContext->PushLayer(
-        D2D1::LayerParameters(
-            D2D1::InfiniteRect(),
-            resourceAllocator.aquireOrCreateGeometry(geometry).Get()),
-        nullptr);
+	deviceContext->PushLayer(
+		D2D1::LayerParameters(
+			D2D1::InfiniteRect(),
+			resourceAllocator.aquireOrCreateGeometry(geometry).Get()),
+		nullptr);
 }
 
 void Engine::popLayer() {

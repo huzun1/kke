@@ -27,15 +27,15 @@ ComPtr<ID2D1Brush> ResourceAllocator::aquireOrCreateBrush(Brush const& brush) {
 }
 
 ComPtr<ID2D1Geometry> ResourceAllocator::aquireOrCreateGeometry(Geometry const& geometry) {
-    uint64_t key = geometry.hash(true);
-    ComPtr<ID2D1Geometry> cachedGeometry = geometryStorage.get(key);
-    if (cachedGeometry) {
-        return cachedGeometry;
-    }
-    ComPtr<ID2D1Geometry> geometryInstance;
-    geometry.create(factory, &geometryInstance);
-    geometryStorage.put(geometry.hash(true), geometryInstance);
-    return geometryInstance;
+	uint64_t key = geometry.hash(true);
+	ComPtr<ID2D1Geometry> cachedGeometry = geometryStorage.get(key);
+	if (cachedGeometry) {
+		return cachedGeometry;
+	}
+	ComPtr<ID2D1Geometry> geometryInstance;
+	geometry.create(factory, &geometryInstance);
+	geometryStorage.put(geometry.hash(true), geometryInstance);
+	return geometryInstance;
 }
 
 ComPtr<ID2D1Image> ResourceAllocator::aquireOrDispatchShadow(Geometry const& geometry, Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc) {
@@ -66,30 +66,30 @@ RenderSurface* ResourceAllocator::aquireOrCreateSurface(ID2D1DeviceContext* cont
 }
 
 IDWriteTextFormat* ResourceAllocator::aquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, FontWeight weight) {
-    Hasher hasher;
-    hasher.combine(fontFamily);
-    hasher.combine(fontSize);
-    hasher.combine(static_cast<uint32_t>(weight));
-    uint64_t key = hasher.get();
-    ComPtr<IDWriteTextFormat> cachedFormat = textFormatStorage.get(key);
-    if (cachedFormat) {
-        return cachedFormat.Get();
-    }
-    ComPtr<IDWriteTextFormat> textFormat = fontLoader->createTextFormat(fontFamily, fontSize, weight);
-    textFormatStorage.put(key, textFormat);
-    return textFormat.Get();
+	Hasher hasher;
+	hasher.combine(fontFamily);
+	hasher.combine(fontSize);
+	hasher.combine(static_cast<uint32_t>(weight));
+	uint64_t key = hasher.get();
+	ComPtr<IDWriteTextFormat> cachedFormat = textFormatStorage.get(key);
+	if (cachedFormat) {
+		return cachedFormat.Get();
+	}
+	ComPtr<IDWriteTextFormat> textFormat = fontLoader->createTextFormat(fontFamily, fontSize, weight);
+	textFormatStorage.put(key, textFormat);
+	return textFormat.Get();
 }
 
 IDWriteTextLayout* ResourceAllocator::aquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat) {
-    Hasher hasher;
-    hasher.combine(text);
-    hasher.combine(reinterpret_cast<uint64_t>(textFormat));
-    uint64_t key = hasher.get();
-    ComPtr<IDWriteTextLayout> cachedLayout = textLayoutStorage.get(key);
-    if (cachedLayout) {
-        return cachedLayout.Get();
-    }
-    ComPtr<IDWriteTextLayout> textLayout = fontLoader->createTextLayout(text, textFormat);
-    textLayoutStorage.put(key, textLayout);
-    return textLayout.Get();
+	Hasher hasher;
+	hasher.combine(text);
+	hasher.combine(reinterpret_cast<uint64_t>(textFormat));
+	uint64_t key = hasher.get();
+	ComPtr<IDWriteTextLayout> cachedLayout = textLayoutStorage.get(key);
+	if (cachedLayout) {
+		return cachedLayout.Get();
+	}
+	ComPtr<IDWriteTextLayout> textLayout = fontLoader->createTextLayout(text, textFormat);
+	textLayoutStorage.put(key, textLayout);
+	return textLayout.Get();
 }

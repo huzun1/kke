@@ -46,7 +46,7 @@ enum class InterpolationMode {
 };
 
 class Engine {
-    ID2D1Factory* factory;
+	ID2D1Factory* factory;
 	ID2D1DeviceContext* deviceContext;
 
 	ID2D1Bitmap1* renderTarget;

@@ -2,25 +2,25 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <numbers>
 #include <kke/brush/LinearGradientBrush.hpp>
+#include <numbers>
 
 #include "kke/common/Color.hpp"
 #include "kke/common/Point.hpp"
 #include "kke/internal/Hasher.hpp"
 
 kke::LinearGradientBrush::LinearGradientBrush(kke::Color4f const& startColor,
-												kke::Color4f const& endColor,
-												kke::Point2f const& startPoint,
-												kke::Point2f const& endPoint)
+											  kke::Color4f const& endColor,
+											  kke::Point2f const& startPoint,
+											  kke::Point2f const& endPoint)
 	: colors({startColor, endColor}),
 	  startPoint(startPoint),
 	  endPoint(endPoint) {
 }
 
 kke::LinearGradientBrush::LinearGradientBrush(std::vector<kke::Color4f> const& colors,
-												kke::Point2f const& startPoint,
-												kke::Point2f const& endPoint)
+											  kke::Point2f const& startPoint,
+											  kke::Point2f const& endPoint)
 	: colors(colors),
 	  startPoint(startPoint),
 	  endPoint(endPoint) {
