@@ -22,6 +22,8 @@ class FontLoader {
 	ComPtr<IDWriteFontCollection1> fontCollection = nullptr;
 
 public:
+	~FontLoader();
+
 	void preInit();
 
 	void loadFont(const void* data, size_t size);

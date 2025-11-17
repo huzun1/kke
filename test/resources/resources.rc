@@ -1,3 +1,4 @@
 #include "resources.h"
 
 TEXTURE_DYCONTRAST WAVE "resources/contents/dycontrast_1337.png"
+FONT_SPACE_GROTESK WAVE "resources/contents/SpaceGrotesk-VariableFont_wght.ttf"

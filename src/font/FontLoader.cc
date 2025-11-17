@@ -6,6 +6,12 @@
 
 using namespace kke;
 
+FontLoader::~FontLoader() {
+	if (writeFactory && fontFileLoader) {
+		writeFactory->UnregisterFontFileLoader(fontFileLoader.Get());
+	}
+}
+
 void FontLoader::preInit() {
 	if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(writeFactory), reinterpret_cast<IUnknown**>(writeFactory.GetAddressOf())))) {
 		throw std::runtime_error("couldn't create dwrite factory");
@@ -14,7 +20,10 @@ void FontLoader::preInit() {
 		throw std::runtime_error("couldn't create a font set builder");
 	}
 	if (FAILED(writeFactory->CreateInMemoryFontFileLoader(&fontFileLoader))) {
-		throw std::runtime_error("couldn't create a font set builder");
+		throw std::runtime_error("couldn't create in memory font file loader");
+	}
+	if (FAILED(writeFactory->RegisterFontFileLoader(fontFileLoader.Get()))) {
+		throw std::runtime_error("couldn't register font file loader");
 	}
 }
 
