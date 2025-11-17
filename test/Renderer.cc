@@ -15,13 +15,24 @@
 #include "kke/common/geometry/Ellipse.hpp"
 #include "kke/common/geometry/Rect.hpp"
 #include "kke/common/geometry/RoundedRect.hpp"
+#include "kke/font/FontData.hpp"
 #include "resources/resources.h"
 
 static FpsCounter counter;
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
 	this->engine = std::make_unique<kke::Engine>(d2d1.getFactory(), d2d1.getDeviceContext());
-	this->engine->init({});
+
+	// Load font resources
+	auto [fontData, fontDataSize] = loadResource(FONT_SPACE_GROTESK);
+	std::vector<FontData> fonts;
+	if (fontData) {
+		fonts.push_back({fontData, fontDataSize});
+		printf("font loaded: %p, %lld\n", fontData, fontDataSize);
+	}
+
+	// Initialize engine with loaded fonts
+	this->engine->init(fonts);
 
 	auto [data, size] = loadResource(TEXTURE_DYCONTRAST);
 	if (data) {
@@ -118,7 +129,7 @@ void application::Renderer::renderFrame() {
 		{50, 300},
 		L"Hello, kke!",
 		kke::FontWeight::BOLD,
-		L"Segoe UI",
+		L"Space Grotesk",
 		32,
 		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
 
@@ -126,15 +137,15 @@ void application::Renderer::renderFrame() {
 		{50, 350},
 		L"Hello, kke with Shadow!",
 		kke::FontWeight::BOLD,
-		L"Segoe UI",
+		L"Space Grotesk",
 		32,
 		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}),
 		5.0f);
 	this->engine->drawText(
 		{50, 350},
-		L"Hello, kke with Shadow!",
+		L"Hello, kke with Shadow! ggggggggggggggyyyyyyyyyyyyy",
 		kke::FontWeight::BOLD,
-		L"Segoe UI",
+		L"Space Grotesk",
 		32,
 		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
 
@@ -144,7 +155,7 @@ void application::Renderer::renderFrame() {
 		{10, 10},
 		L"FPS: " + std::to_wstring(static_cast<int>(counter.fps())),
 		kke::FontWeight::NORMAL,
-		L"Segoe UI",
+		L"Space Grotesk",
 		16,
 		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
 
