@@ -18,6 +18,7 @@
 #include "kke/common/Scale.hpp"
 #include "kke/common/geometry/Rect.hpp"
 #include "kke/effect/EffectContainer.hpp"
+#include "kke/effect/EffectInstance.hpp"
 #include "kke/effect/impl/BlurEffect.hpp"
 #include "kke/font/FontData.hpp"
 #include "kke/transform/Matrix.hpp"
@@ -25,7 +26,7 @@
 using namespace kke;
 
 Engine::Engine(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext)
-	: factory(factory), deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(factory, deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &effectContainer) {
+	: factory(factory), deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(factory, deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &resourceAllocator, &effectContainer) {
 }
 
 void Engine::init(std::vector<FontData> loadFonts) {
@@ -70,6 +71,8 @@ void Engine::begin(ID2D1Bitmap* screen) {
 	matrix = Matrix();
 	deviceContext->SetTransform(matrix.build());
 
+	resourceAllocator.nextFrame();
+
 	deviceContext->Flush();
 }
 
@@ -100,27 +103,27 @@ kke::Scale2f Engine::getTextSize(
 	FontWeight weight,
 	std::wstring const& fontFamily,
 	int32_t fontSize) {
-	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
-	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
+	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.acquireOrCreateTextLayout(text, format.Get());
 	DWRITE_TEXT_METRICS metrics;
 	layout->GetMetrics(&metrics);
 	return Scale2f(metrics.width, metrics.height);
 }
 
 void Engine::drawLine(Point2f start, Point2f end, Brush const& brush, float strokeWidth) {
-	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
+	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawRect(Rect const& rect, Brush const& brush, float strokeWidth) {
-	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
+	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawRounded(RoundedRect const& rect, Brush const& brush, float strokeWidth) {
-	deviceContext->DrawRoundedRectangle(rect.roundedRect(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
+	deviceContext->DrawRoundedRectangle(rect.roundedRect(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawEllipse(Ellipse const& ellipse, Brush const& brush, float strokeWidth) {
-	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush).Get(), strokeWidth);
+	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawText(
@@ -140,26 +143,26 @@ void Engine::drawText(
 	std::wstring const& fontFamily,
 	int32_t fontSize,
 	Brush const& brush) {
-	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
-	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
+	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.acquireOrCreateTextLayout(text, format.Get());
 	D2D1_POINT_2F origin = position.point2f();
 	deviceContext->DrawTextLayout(
 		origin,
 		layout.Get(),
-		resourceAllocator.aquireOrCreateBrush(brush).Get(),
+		resourceAllocator.acquireOrCreateBrush(brush).Get(),
 		D2D1_DRAW_TEXT_OPTIONS_NONE);
 }
 
 void Engine::fillRect(Rect const& rect, Brush const& brush) {
-	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.aquireOrCreateBrush(brush).Get());
+	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.acquireOrCreateBrush(brush).Get());
 }
 
 void Engine::fillRounded(RoundedRect const& rect, Brush const& brush) {
-	deviceContext->FillRoundedRectangle(rect.roundedRect(), resourceAllocator.aquireOrCreateBrush(brush).Get());
+	deviceContext->FillRoundedRectangle(rect.roundedRect(), resourceAllocator.acquireOrCreateBrush(brush).Get());
 }
 
 void Engine::fillEllipse(Ellipse const& ellipse, Brush const& brush) {
-	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.aquireOrCreateBrush(brush).Get());
+	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.acquireOrCreateBrush(brush).Get());
 }
 
 void Engine::drawRectShadow(
@@ -167,7 +170,7 @@ void Engine::drawRectShadow(
 	Brush const& brush,
 	float deviation) {
 	Point2f offset = shadowDispatcher.computeOffset(rect);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
 		shadowDispatcher.dispatch(rect, deviation, [&](Point2f const& start) {
 			fillRect(rect, brush);
 		}, output);
@@ -181,7 +184,7 @@ void Engine::drawRoundedShadow(
 	Brush const& brush,
 	float deviation) {
 	Point2f offset = shadowDispatcher.computeOffset(rect);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
 		shadowDispatcher.dispatch(rect, deviation, [&](Point2f const& start) {
 			fillRounded(rect, brush);
 		}, output);
@@ -199,7 +202,7 @@ void Engine::drawEllipseShadow(
 					  ellipse.point.x + ellipse.radius,
 					  ellipse.point.y + ellipse.radius};
 	Point2f offset = shadowDispatcher.computeOffset(dimension);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
 		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
 			fillEllipse(ellipse, brush);
 		}, output);
@@ -227,8 +230,8 @@ void Engine::drawTextShadow(
 	int32_t fontSize,
 	Brush const& brush,
 	float deviation) {
-	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.aquireOrCreateTextFormat(fontFamily, fontSize, weight);
-	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.aquireOrCreateTextLayout(text, format.Get());
+	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.acquireOrCreateTextLayout(text, format.Get());
 	DWRITE_TEXT_METRICS metrics;
 	layout->GetMetrics(&metrics);
 	Rect dimension = {
@@ -237,7 +240,7 @@ void Engine::drawTextShadow(
 		position.x + metrics.width,
 		position.y + metrics.height};
 	Point2f offset = shadowDispatcher.computeOffset(dimension);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.aquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
 		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
 			drawText(position, text, weight, fontFamily, fontSize, brush);
 		}, output);
@@ -328,7 +331,7 @@ void Engine::popTransform() {
 }
 
 void Engine::pushSurface() {
-	RenderSurface* surface = resourceAllocator.aquireOrCreateSurface(deviceContext);
+	RenderSurface* surface = resourceAllocator.acquireOrCreateSurface();
 	surface->setLocking(true);
 	deviceContext->SetTarget(surface->getRenderTarget());
 	surfaceStack.push(surface);
@@ -338,7 +341,7 @@ void Engine::pushLayer(Geometry const& geometry) {
 	deviceContext->PushLayer(
 		D2D1::LayerParameters(
 			D2D1::InfiniteRect(),
-			resourceAllocator.aquireOrCreateGeometry(geometry).Get()),
+			resourceAllocator.acquireOrCreateGeometry(geometry).Get()),
 		nullptr);
 }
 
@@ -361,9 +364,14 @@ void Engine::popSurface(ID2D1Bitmap1** output) {
 }
 
 void Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
-	effect->setInput(image);
-	effect->setProperties();
-	deviceContext->DrawImage(effect->output());
+    EffectInstance* instance = resourceAllocator.acquireOrCreateEffect(effect);
+    instance->lock();
+
+    ComPtr<ID2D1Effect> d2d1Effect = instance->getD2D1Effect();
+    d2d1Effect->SetInput(0, image);
+	effect->setProperties(d2d1Effect);
+
+	deviceContext->DrawImage(d2d1Effect.Get());
 }
 
 void Engine::effect(std::shared_ptr<Effect> effect) {

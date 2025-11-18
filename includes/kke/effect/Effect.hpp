@@ -5,22 +5,16 @@
 #include <winnt.h>
 #include <wrl/client.h>
 
+using namespace Microsoft::WRL;
+
 namespace kke {
 class Effect {
-protected:
-	Microsoft::WRL::ComPtr<ID2D1Effect> effectInstance = nullptr;
 
 public:
 	virtual ~Effect() = default;
 
-	void setInput(ID2D1Image* input);
-
 	virtual GUID effectGuid() const = 0;
 
-	virtual void setProperties() const = 0;
-
-	void init(ID2D1DeviceContext* context);
-
-	ID2D1Effect* output();
+	virtual void setProperties(ComPtr<ID2D1Effect> effectInstance) const = 0;
 };
 };	// namespace kke
