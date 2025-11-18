@@ -9,7 +9,6 @@ using namespace Microsoft::WRL;
 
 namespace kke {
 class Effect {
-
 public:
 	virtual ~Effect() = default;
 

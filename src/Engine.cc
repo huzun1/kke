@@ -84,6 +84,7 @@ void Engine::end(ID2D1Image** output) {
 
 void Engine::flush() {
 	deviceContext->Flush();
+	copyScreenToEffectBitmap();
 }
 
 void Engine::clear() {
@@ -349,6 +350,14 @@ void Engine::popLayer() {
 	deviceContext->PopLayer();
 }
 
+void Engine::copyScreenToEffectBitmap() {
+	// Copy the render target to the temp buffer
+	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
+	D2D1_POINT_2U destPoint(0, 0);
+	D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
+	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
+}
+
 void Engine::popSurface(ID2D1Bitmap1** output) {
 	deviceContext->Flush();	 // To apply current commands to the render target
 	RenderSurface* currentSurface = surfaceStack.top();
@@ -364,22 +373,17 @@ void Engine::popSurface(ID2D1Bitmap1** output) {
 }
 
 void Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
-    EffectInstance* instance = resourceAllocator.acquireOrCreateEffect(effect);
-    instance->lock();
+	EffectInstance* instance = resourceAllocator.acquireOrCreateEffect(effect);
+	instance->lock();
 
-    ComPtr<ID2D1Effect> d2d1Effect = instance->getD2D1Effect();
-    d2d1Effect->SetInput(0, image);
+	ComPtr<ID2D1Effect> d2d1Effect = instance->getD2D1Effect();
+	d2d1Effect->SetInput(0, image);
 	effect->setProperties(d2d1Effect);
 
 	deviceContext->DrawImage(d2d1Effect.Get());
 }
 
 void Engine::effect(std::shared_ptr<Effect> effect) {
-	// Copy the render target to the temp buffer
-	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
-	D2D1_POINT_2U destPoint(0, 0);
-	D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
-	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
 	this->effect(effectScreenBitmap, effect);
 }
 

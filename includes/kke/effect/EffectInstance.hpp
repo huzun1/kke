@@ -13,15 +13,15 @@ class EffectInstance {
 	bool isLocked = false;
 
 public:
-    void lock();
+	void lock();
 
-    void unlock();
+	void unlock();
 
-    bool isLocking() const;
+	bool isLocking() const;
 
-    GUID const& getGUID() const;
+	GUID const& getGUID() const;
 
-    ComPtr<ID2D1Effect> getD2D1Effect();
+	ComPtr<ID2D1Effect> getD2D1Effect();
 
-    EffectInstance(ID2D1DeviceContext* deviceContext, GUID guid);
+	EffectInstance(ID2D1DeviceContext* deviceContext, GUID guid);
 };
