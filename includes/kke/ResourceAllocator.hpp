@@ -42,18 +42,18 @@ public:
 
 	void nextFrame();
 
-	ComPtr<ID2D1Brush> aquireOrCreateBrush(kke::Brush const& brush);
+	ComPtr<ID2D1Brush> acquireOrCreateBrush(kke::Brush const& brush);
 
-	ComPtr<ID2D1Geometry> aquireOrCreateGeometry(kke::Geometry const& geometry);
+	ComPtr<ID2D1Geometry> acquireOrCreateGeometry(kke::Geometry const& geometry);
 
-	ComPtr<ID2D1Image> aquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
+	ComPtr<ID2D1Image> acquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
 
-	IDWriteTextFormat* aquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, kke::FontWeight weight);
+	IDWriteTextFormat* acquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, kke::FontWeight weight);
 
-	IDWriteTextLayout* aquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat);
+	IDWriteTextLayout* acquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat);
 
-	EffectInstance* aquireOrCreateEffect(std::shared_ptr<Effect> effect);
+	EffectInstance* acquireOrCreateEffect(std::shared_ptr<Effect> effect);
 
-	kke::RenderSurface* aquireOrCreateSurface();
+	kke::RenderSurface* acquireOrCreateSurface();
 };
 };	// namespace kke

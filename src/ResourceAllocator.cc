@@ -21,7 +21,7 @@ void ResourceAllocator::nextFrame() {
 	}
 }
 
-ComPtr<ID2D1Brush> ResourceAllocator::aquireOrCreateBrush(Brush const& brush) {
+ComPtr<ID2D1Brush> ResourceAllocator::acquireOrCreateBrush(Brush const& brush) {
 	uint64_t key = brush.hash();
 	ComPtr<ID2D1Brush> cachedBrush = brushStorage.get(key);
 	if (cachedBrush) {
@@ -33,7 +33,7 @@ ComPtr<ID2D1Brush> ResourceAllocator::aquireOrCreateBrush(Brush const& brush) {
 	return brushInstance;
 }
 
-ComPtr<ID2D1Geometry> ResourceAllocator::aquireOrCreateGeometry(Geometry const& geometry) {
+ComPtr<ID2D1Geometry> ResourceAllocator::acquireOrCreateGeometry(Geometry const& geometry) {
 	uint64_t key = geometry.hash(true);
 	ComPtr<ID2D1Geometry> cachedGeometry = geometryStorage.get(key);
 	if (cachedGeometry) {
@@ -45,7 +45,7 @@ ComPtr<ID2D1Geometry> ResourceAllocator::aquireOrCreateGeometry(Geometry const& 
 	return geometryInstance;
 }
 
-ComPtr<ID2D1Image> ResourceAllocator::aquireOrDispatchShadow(Geometry const& geometry, Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc) {
+ComPtr<ID2D1Image> ResourceAllocator::acquireOrDispatchShadow(Geometry const& geometry, Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc) {
 	Hasher hasher;
 	hasher.combine(geometry.hash(false));
 	hasher.combine(brush.hash());
@@ -60,7 +60,7 @@ ComPtr<ID2D1Image> ResourceAllocator::aquireOrDispatchShadow(Geometry const& geo
 	return shadowOutput;
 }
 
-IDWriteTextFormat* ResourceAllocator::aquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, FontWeight weight) {
+IDWriteTextFormat* ResourceAllocator::acquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, FontWeight weight) {
 	Hasher hasher;
 	hasher.combine(fontFamily);
 	hasher.combine(fontSize);
@@ -75,7 +75,7 @@ IDWriteTextFormat* ResourceAllocator::aquireOrCreateTextFormat(std::wstring cons
 	return textFormat.Get();
 }
 
-IDWriteTextLayout* ResourceAllocator::aquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat) {
+IDWriteTextLayout* ResourceAllocator::acquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat) {
 	Hasher hasher;
 	hasher.combine(text);
 	hasher.combine(reinterpret_cast<uint64_t>(textFormat));
@@ -89,7 +89,7 @@ IDWriteTextLayout* ResourceAllocator::aquireOrCreateTextLayout(std::wstring cons
 	return textLayout.Get();
 }
 
-EffectInstance* ResourceAllocator::aquireOrCreateEffect(std::shared_ptr<Effect> effect) {
+EffectInstance* ResourceAllocator::acquireOrCreateEffect(std::shared_ptr<Effect> effect) {
 	// TODO: Implement resource limit?
 	for (auto& effectInstance : effectInstances) {
 		bool sameEffect = effectInstance.getGUID() == effect->effectGuid();
@@ -102,7 +102,7 @@ EffectInstance* ResourceAllocator::aquireOrCreateEffect(std::shared_ptr<Effect> 
 	return &effectInstances.back();
 }
 
-RenderSurface* ResourceAllocator::aquireOrCreateSurface() {
+RenderSurface* ResourceAllocator::acquireOrCreateSurface() {
 	// TODO: Implement resource limit?
 	for (auto& surface : surfaces) {
 		if (!surface.isLocking()) {

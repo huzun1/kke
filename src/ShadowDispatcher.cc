@@ -44,7 +44,7 @@ void kke::ShadowDisaptcher::dispatch(kke::Rect const& dimension, float deviation
 	std::shared_ptr<BlurEffect> blurEffect = effectContainer->acquireOrCreateEffect<BlurEffect>();
 	blurEffect->setDeviation(deviation);
 
-	EffectInstance* blurEffectInstance = resourceAllocator->aquireOrCreateEffect(blurEffect);
+	EffectInstance* blurEffectInstance = resourceAllocator->acquireOrCreateEffect(blurEffect);
 	blurEffectInstance->lock();
 	ComPtr<ID2D1Effect> d2d1Effect = blurEffectInstance->getD2D1Effect();
 	d2d1Effect->SetInput(0, shadowRenderTarget);

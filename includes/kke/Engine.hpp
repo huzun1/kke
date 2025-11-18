@@ -195,7 +195,7 @@ public:
 		kke::BlurOptimization optimization = kke::BlurOptimization::BALANCED);
 
 	template <typename T>
-	std::shared_ptr<T> aquireOrCreateEffect() {
+	std::shared_ptr<T> acquireOrCreateEffect() {
 		return effectContainer.acquireOrCreateEffect<T>();
 	}
 
