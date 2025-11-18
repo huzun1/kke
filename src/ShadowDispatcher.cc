@@ -7,10 +7,11 @@
 
 #include "kke/common/Scale.hpp"
 #include "kke/effect/EffectContainer.hpp"
+#include "kke/effect/EffectInstance.hpp"
 #include "kke/effect/impl/BlurEffect.hpp"
 
-kke::ShadowDisaptcher::ShadowDisaptcher(ID2D1DeviceContext* context, kke::EffectContainer* container)
-	: deviceContext(context), effectContainer(container) {
+kke::ShadowDisaptcher::ShadowDisaptcher(ID2D1DeviceContext* context, kke::ResourceAllocator* resourceAllocator, kke::EffectContainer* container)
+	: deviceContext(context), resourceAllocator(resourceAllocator), effectContainer(container) {
 }
 
 void kke::ShadowDisaptcher::dispatch(kke::Rect const& dimension, float deviation, std::function<void(kke::Point2f const& start)> drawFunc, ID2D1Image** output) {
@@ -41,9 +42,13 @@ void kke::ShadowDisaptcher::dispatch(kke::Rect const& dimension, float deviation
 
 	//// Draw the effect image into the bitmap
 	std::shared_ptr<BlurEffect> blurEffect = effectContainer->acquireOrCreateEffect<BlurEffect>();
-	blurEffect->setInput(shadowRenderTarget);
 	blurEffect->setDeviation(deviation);
-	blurEffect->setProperties();
+
+	EffectInstance* blurEffectInstance = resourceAllocator->aquireOrCreateEffect(blurEffect);
+	blurEffectInstance->lock();
+	ComPtr<ID2D1Effect> d2d1Effect = blurEffectInstance->getD2D1Effect();
+	d2d1Effect->SetInput(0, shadowRenderTarget);
+	blurEffect->setProperties(d2d1Effect);
 
 	ID2D1Bitmap1* finalOutputRenderTarget;
 	deviceContext->CreateBitmap(
@@ -56,8 +61,7 @@ void kke::ShadowDisaptcher::dispatch(kke::Rect const& dimension, float deviation
 	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());	// Reset the matrix
 	deviceContext->Clear();
 	// Draw the blur output
-	deviceContext->DrawImage(blurEffect->output());
-	deviceContext->Flush();	 // To apply current commands to the render target
+	deviceContext->DrawImage(d2d1Effect.Get());
 
 	deviceContext->SetTarget(previousTarget);
 	previousTarget->Release();	// prevent resource leaking

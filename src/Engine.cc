@@ -18,6 +18,7 @@
 #include "kke/common/Scale.hpp"
 #include "kke/common/geometry/Rect.hpp"
 #include "kke/effect/EffectContainer.hpp"
+#include "kke/effect/EffectInstance.hpp"
 #include "kke/effect/impl/BlurEffect.hpp"
 #include "kke/font/FontData.hpp"
 #include "kke/transform/Matrix.hpp"
@@ -25,7 +26,7 @@
 using namespace kke;
 
 Engine::Engine(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext)
-	: factory(factory), deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(factory, deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &effectContainer) {
+	: factory(factory), deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(factory, deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &resourceAllocator, &effectContainer) {
 }
 
 void Engine::init(std::vector<FontData> loadFonts) {
@@ -69,6 +70,8 @@ void Engine::begin(ID2D1Bitmap* screen) {
 	// Reset the matrix
 	matrix = Matrix();
 	deviceContext->SetTransform(matrix.build());
+
+	resourceAllocator.nextFrame();
 
 	deviceContext->Flush();
 }
@@ -328,7 +331,7 @@ void Engine::popTransform() {
 }
 
 void Engine::pushSurface() {
-	RenderSurface* surface = resourceAllocator.aquireOrCreateSurface(deviceContext);
+	RenderSurface* surface = resourceAllocator.aquireOrCreateSurface();
 	surface->setLocking(true);
 	deviceContext->SetTarget(surface->getRenderTarget());
 	surfaceStack.push(surface);
@@ -361,9 +364,14 @@ void Engine::popSurface(ID2D1Bitmap1** output) {
 }
 
 void Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
-	effect->setInput(image);
-	effect->setProperties();
-	deviceContext->DrawImage(effect->output());
+    EffectInstance* instance = resourceAllocator.aquireOrCreateEffect(effect);
+    instance->lock();
+
+    ComPtr<ID2D1Effect> d2d1Effect = instance->getD2D1Effect();
+    d2d1Effect->SetInput(0, image);
+	effect->setProperties(d2d1Effect);
+
+	deviceContext->DrawImage(d2d1Effect.Get());
 }
 
 void Engine::effect(std::shared_ptr<Effect> effect) {

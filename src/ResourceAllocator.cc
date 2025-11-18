@@ -5,6 +5,7 @@
 #include <kke/ResourceAllocator.hpp>
 
 #include "kke/RenderSurface.hpp"
+#include "kke/effect/EffectInstance.hpp"
 #include "kke/font/FontLoader.hpp"
 #include "kke/internal/Hasher.hpp"
 
@@ -12,6 +13,12 @@ using namespace kke;
 
 ResourceAllocator::ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* context, FontLoader* fontLoader)
 	: factory(factory), deviceContext(context), fontLoader(fontLoader), brushStorage() {
+}
+
+void ResourceAllocator::nextFrame() {
+	for (auto& effectInstance : effectInstances) {
+		effectInstance.unlock();
+	}
 }
 
 ComPtr<ID2D1Brush> ResourceAllocator::aquireOrCreateBrush(Brush const& brush) {
@@ -53,18 +60,6 @@ ComPtr<ID2D1Image> ResourceAllocator::aquireOrDispatchShadow(Geometry const& geo
 	return shadowOutput;
 }
 
-RenderSurface* ResourceAllocator::aquireOrCreateSurface(ID2D1DeviceContext* context) {
-	// TODO: Implement resource limit?
-	for (auto& surface : surfaces) {
-		if (!surface.isLocking()) {
-			return &surface;
-		}
-	}
-	RenderSurface surface = RenderSurface::createSurface(context);
-	surfaces.push_back(surface);
-	return &surfaces.back();
-}
-
 IDWriteTextFormat* ResourceAllocator::aquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, FontWeight weight) {
 	Hasher hasher;
 	hasher.combine(fontFamily);
@@ -92,4 +87,29 @@ IDWriteTextLayout* ResourceAllocator::aquireOrCreateTextLayout(std::wstring cons
 	ComPtr<IDWriteTextLayout> textLayout = fontLoader->createTextLayout(text, textFormat);
 	textLayoutStorage.put(key, textLayout);
 	return textLayout.Get();
+}
+
+EffectInstance* ResourceAllocator::aquireOrCreateEffect(std::shared_ptr<Effect> effect) {
+	// TODO: Implement resource limit?
+	for (auto& effectInstance : effectInstances) {
+		bool sameEffect = effectInstance.getGUID() == effect->effectGuid();
+		if (sameEffect && !effectInstance.isLocking()) {
+			return &effectInstance;
+		}
+	}
+	EffectInstance effectInstance(deviceContext, effect->effectGuid());
+	effectInstances.push_back(effectInstance);
+	return &effectInstances.back();
+}
+
+RenderSurface* ResourceAllocator::aquireOrCreateSurface() {
+	// TODO: Implement resource limit?
+	for (auto& surface : surfaces) {
+		if (!surface.isLocking()) {
+			return &surface;
+		}
+	}
+	RenderSurface surface = RenderSurface::createSurface(deviceContext);
+	surfaces.push_back(surface);
+	return &surfaces.back();
 }

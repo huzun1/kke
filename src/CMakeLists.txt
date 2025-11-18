@@ -15,6 +15,7 @@ add_library(kke STATIC
     brush/LinearGradientBrush.cc
     effect/EffectContainer.cc
     effect/Effect.cc
+    effect/EffectInstance.cc
     effect/impl/BlurEffect.cc
     transform/impl/RotateTransform.cc
     transform/impl/ScaleTransform.cc

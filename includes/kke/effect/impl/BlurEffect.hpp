@@ -30,6 +30,6 @@ public:
 	DEFINE_GETTER_SETTER(BlurOptimization, Optimization, optimization);
 	DEFINE_GETTER_SETTER(BlurBorderMode, BorderMode, borderMode);
 
-	void setProperties() const override;
+	void setProperties(ComPtr<ID2D1Effect> effectInstance) const override;
 };
 };	// namespace kke

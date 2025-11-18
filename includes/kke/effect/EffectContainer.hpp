@@ -29,7 +29,6 @@ public:
 	template <typename T>
 	std::shared_ptr<T> createEffect() {
 		std::shared_ptr<T> instance = std::make_shared<T>();
-		instance->init(deviceContext);
 		effectContainer.push_back(instance);
 		return instance;
 	}

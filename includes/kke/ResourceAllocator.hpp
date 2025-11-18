@@ -7,6 +7,7 @@
 #include <wrl/client.h>
 
 #include <functional>
+#include <future>
 #include <string>
 #include <vector>
 
@@ -15,6 +16,8 @@
 #include "kke/CacheStorage.hpp"
 #include "kke/RenderSurface.hpp"
 #include "kke/common/Geometry.hpp"
+#include "kke/effect/Effect.hpp"
+#include "kke/effect/EffectInstance.hpp"
 #include "kke/font/FontLoader.hpp"
 #include "kke/font/FontWeight.hpp"
 
@@ -31,10 +34,13 @@ class ResourceAllocator {
 	CacheStorage<ID2D1Image> shadowStorage;
 	CacheStorage<IDWriteTextFormat> textFormatStorage;
 	CacheStorage<IDWriteTextLayout> textLayoutStorage;
+	std::vector<EffectInstance> effectInstances;
 	std::vector<RenderSurface> surfaces;
 
 public:
 	ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* context, FontLoader* fontLoader);
+
+	void nextFrame();
 
 	ComPtr<ID2D1Brush> aquireOrCreateBrush(kke::Brush const& brush);
 
@@ -42,10 +48,12 @@ public:
 
 	ComPtr<ID2D1Image> aquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
 
-	kke::RenderSurface* aquireOrCreateSurface(ID2D1DeviceContext* context);
-
 	IDWriteTextFormat* aquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, kke::FontWeight weight);
 
 	IDWriteTextLayout* aquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat);
+
+	EffectInstance* aquireOrCreateEffect(std::shared_ptr<Effect> effect);
+
+	kke::RenderSurface* aquireOrCreateSurface();
 };
 };	// namespace kke
