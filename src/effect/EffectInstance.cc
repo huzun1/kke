@@ -3,23 +3,23 @@
 #include <stdexcept>
 
 void EffectInstance::lock() {
-    isLocked = true;
+	isLocked = true;
 }
 
 void EffectInstance::unlock() {
-    isLocked = false;
+	isLocked = false;
 }
 
 bool EffectInstance::isLocking() const {
-    return isLocked;
+	return isLocked;
 }
 
 GUID const& EffectInstance::getGUID() const {
-    return guid;
+	return guid;
 }
 
 ComPtr<ID2D1Effect> EffectInstance::getD2D1Effect() {
-    return d2d1Effect;
+	return d2d1Effect;
 }
 
 EffectInstance::EffectInstance(ID2D1DeviceContext* deviceContext, GUID guid)

@@ -214,6 +214,8 @@ public:
 	void popSurface(ID2D1Bitmap1** output);
 
 private:
+	void copyScreenToEffectBitmap();
+
 	void effect(ID2D1Image* image, std::shared_ptr<Effect> effect);
 
 	void effect(std::shared_ptr<Effect> effect);
