@@ -153,16 +153,18 @@ void application::Renderer::renderFrame() {
 	counter.frame();
 	this->engine->drawText(
 		{10, 10},
-		L"FPS: " + std::to_wstring(static_cast<int>(counter.fps())),
+		L"FPS (1%/Avg/99%): " + std::to_wstring(static_cast<int>(counter.p1_fps())) + L"/" +
+			std::to_wstring(static_cast<int>(counter.average_fps())) + L"/" +
+			std::to_wstring(static_cast<int>(counter.p99_fps())),
 		kke::FontWeight::NORMAL,
 		L"Space Grotesk",
 		16,
-		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
+		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
 
 	// Ranged-blur Test
 	float offset = 50 + std::sin(theta) * 50.0f;
 	kke::RoundedRect blurRect{{0.0f + offset, 50.0f + offset, 300.0f + offset, 300.0f + offset}, 10.0f};
-	this->engine->flush(); // Ensure all previous drawing commands are executed
+	this->engine->flush();	// Ensure all previous drawing commands are executed
 	this->engine->blur(30.0f, &blurRect);
 	this->engine->drawRounded(blurRect, kke::SolidColorBrush(KKE_COLOR_24(0x000000FF)), 2.0f);
 }
