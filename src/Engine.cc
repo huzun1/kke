@@ -2,6 +2,7 @@
 
 #include <d2d1.h>
 #include <d2d1_1.h>
+#include <d2d1_1helper.h>
 #include <d2d1helper.h>
 #include <dcommon.h>
 #include <wincodec.h>
@@ -380,7 +381,9 @@ void Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
 	d2d1Effect->SetInput(0, image);
 	effect->setProperties(d2d1Effect);
 
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	deviceContext->DrawImage(d2d1Effect.Get());
+	deviceContext->SetTransform(matrix.build());
 }
 
 void Engine::effect(std::shared_ptr<Effect> effect) {
