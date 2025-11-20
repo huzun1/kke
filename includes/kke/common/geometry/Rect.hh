@@ -4,8 +4,8 @@
 
 #include <cstdint>
 
-#include "kke/common/Geometry.hpp"
-#include "kke/common/Point.hpp"
+#include "kke/common/Geometry.hh"
+#include "kke/common/Point.hh"
 
 namespace kke {
 struct Rect : public Geometry {

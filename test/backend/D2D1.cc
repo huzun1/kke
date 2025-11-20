@@ -1,10 +1,10 @@
-#include "D2D1.hpp"
+#include "D2D1.hh"
 
 #include <d2d1_1.h>
 #include <d3d11_1.h>
 #include <dxgi1_2.h>
 
-#include "D3D11.hpp"
+#include "D3D11.hh"
 
 void application::D2D1::init(D3D11& context) {
 	ID3D11Device1* d11Device = context.getDevice();

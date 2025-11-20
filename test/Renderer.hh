@@ -5,8 +5,8 @@
 #include <memory>
 #include <utility>
 
-#include "backend/D2D1.hpp"
-#include "kke/Engine.hpp"
+#include "backend/D2D1.hh"
+#include "kke/Engine.hh"
 
 namespace application {
 class Renderer {

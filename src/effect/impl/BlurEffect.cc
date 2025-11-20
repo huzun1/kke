@@ -1,7 +1,7 @@
 #include <d2d1.h>
 #include <d2d1effects.h>
 
-#include <kke/effect/impl/BlurEffect.hpp>
+#include <kke/effect/impl/BlurEffect.hh>
 
 GUID kke::BlurEffect::effectGuid() const {
 	return CLSID_D2D1GaussianBlur;

@@ -1,10 +1,10 @@
 #include <d2d1.h>
 
 #include <cstdint>
-#include <kke/common/geometry/Rect.hpp>
+#include <kke/common/geometry/Rect.hh>
 
-#include "kke/common/Geometry.hpp"
-#include "kke/internal/Hasher.hpp"
+#include "kke/common/Geometry.hh"
+#include "kke/internal/Hasher.hh"
 
 kke::Rect::Rect(float x1, float y1, float x2, float y2)
 	: x1(x1),

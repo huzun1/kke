@@ -1,6 +1,6 @@
-#include <kke/common/geometry/RoundedRect.hpp>
+#include <kke/common/geometry/RoundedRect.hh>
 
-#include "kke/internal/Hasher.hpp"
+#include "kke/internal/Hasher.hh"
 
 kke::RoundedRect::RoundedRect(float x1, float y1, float x2, float y2, float rounding)
 	: Rect({x1, y1, x2, y2}),

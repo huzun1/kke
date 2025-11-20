@@ -5,10 +5,10 @@
 
 #include <functional>
 
-#include "common/Point.hpp"
-#include "common/geometry/Rect.hpp"
-#include "kke/ResourceAllocator.hpp"
-#include "kke/effect/EffectContainer.hpp"
+#include "common/Point.hh"
+#include "common/geometry/Rect.hh"
+#include "kke/ResourceAllocator.hh"
+#include "kke/effect/EffectContainer.hh"
 
 namespace kke {
 class ShadowDisaptcher {

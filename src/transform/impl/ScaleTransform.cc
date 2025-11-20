@@ -1,4 +1,4 @@
-#include <kke/transform/impl/ScaleTransform.hpp>
+#include <kke/transform/impl/ScaleTransform.hh>
 
 kke::ScaleTransform::ScaleTransform(kke::Point2f center, kke::Scale2f scale)
 	: center(center),

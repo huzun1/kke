@@ -2,12 +2,12 @@
 
 #include <cstdint>
 #include <cstdlib>
-#include <kke/brush/LinearGradientBrush.hpp>
+#include <kke/brush/LinearGradientBrush.hh>
 #include <numbers>
 
-#include "kke/common/Color.hpp"
-#include "kke/common/Point.hpp"
-#include "kke/internal/Hasher.hpp"
+#include "kke/common/Color.hh"
+#include "kke/common/Point.hh"
+#include "kke/internal/Hasher.hh"
 
 kke::LinearGradientBrush::LinearGradientBrush(kke::Color4f const& startColor,
 											  kke::Color4f const& endColor,

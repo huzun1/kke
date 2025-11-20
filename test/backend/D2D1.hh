@@ -5,7 +5,7 @@
 #include <d3d11_1.h>
 #include <dxgi1_2.h>
 
-#include "D3D11.hpp"
+#include "D3D11.hh"
 
 #pragma comment(lib, "D2d1.lib")
 #pragma comment(lib, "dxguid.lib")

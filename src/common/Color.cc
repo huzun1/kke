@@ -1,4 +1,4 @@
-#include <kke/common/Color.hpp>
+#include <kke/common/Color.hh>
 
 kke::Color4f::Color4f(float r, float g, float b)
 	: r(r),

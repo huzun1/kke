@@ -3,9 +3,9 @@
 #include <memory>
 #include <vector>
 
-#include "Transform.hpp"
-#include "kke/common/Point.hpp"
-#include "kke/common/Scale.hpp"
+#include "Transform.hh"
+#include "kke/common/Point.hh"
+#include "kke/common/Scale.hh"
 
 namespace kke {
 class Matrix {

@@ -1,7 +1,7 @@
-#include <kke/transform/Matrix.hpp>
+#include <kke/transform/Matrix.hh>
 
-#include "kke/transform/impl/RotateTransform.hpp"
-#include "kke/transform/impl/ScaleTransform.hpp"
+#include "kke/transform/impl/RotateTransform.hh"
+#include "kke/transform/impl/ScaleTransform.hh"
 
 void kke::Matrix::pushScale(kke::Point2f const& center, kke::Scale2f const& scale) {
 	transforms.push_back(std::make_shared<kke::ScaleTransform>(center, scale));

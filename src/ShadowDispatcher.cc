@@ -3,12 +3,12 @@
 #include <wincodec.h>
 #include <wrl/client.h>
 
-#include <kke/ShadowDispatcher.hpp>
+#include <kke/ShadowDispatcher.hh>
 
-#include "kke/common/Scale.hpp"
-#include "kke/effect/EffectContainer.hpp"
-#include "kke/effect/EffectInstance.hpp"
-#include "kke/effect/impl/BlurEffect.hpp"
+#include "kke/common/Scale.hh"
+#include "kke/effect/EffectContainer.hh"
+#include "kke/effect/EffectInstance.hh"
+#include "kke/effect/impl/BlurEffect.hh"
 
 kke::ShadowDisaptcher::ShadowDisaptcher(ID2D1DeviceContext* context, kke::ResourceAllocator* resourceAllocator, kke::EffectContainer* container)
 	: deviceContext(context), resourceAllocator(resourceAllocator), effectContainer(container) {

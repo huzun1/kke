@@ -3,8 +3,8 @@
 #include <d2d1_1.h>
 #include <winnt.h>
 
-#include <kke/effect/Effect.hpp>
-#include <kke/internal/Macro.hpp>
+#include <kke/effect/Effect.hh>
+#include <kke/internal/Macro.hh>
 
 namespace kke {
 enum class BlurOptimization {

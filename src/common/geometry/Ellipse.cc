@@ -1,9 +1,9 @@
-#include "kke/common/geometry/Ellipse.hpp"
+#include "kke/common/geometry/Ellipse.hh"
 
 #include <cstdint>
 
-#include "kke/common/Geometry.hpp"
-#include "kke/internal/Hasher.hpp"
+#include "kke/common/Geometry.hh"
+#include "kke/internal/Hasher.hh"
 
 kke::Ellipse::Ellipse(float x, float y, float radius)
 	: point(kke::Point2f{x, y}), radius(radius) {

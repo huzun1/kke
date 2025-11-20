@@ -2,12 +2,12 @@
 #include <wrl/client.h>
 
 #include <cstdint>
-#include <kke/ResourceAllocator.hpp>
+#include <kke/ResourceAllocator.hh>
 
-#include "kke/RenderSurface.hpp"
-#include "kke/effect/EffectInstance.hpp"
-#include "kke/font/FontLoader.hpp"
-#include "kke/internal/Hasher.hpp"
+#include "kke/RenderSurface.hh"
+#include "kke/effect/EffectInstance.hh"
+#include "kke/font/FontLoader.hh"
+#include "kke/internal/Hasher.hh"
 
 using namespace kke;
 

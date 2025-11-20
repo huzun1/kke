@@ -1,8 +1,8 @@
 #pragma once
 
-#include "kke/common/Point.hpp"
-#include "kke/common/Scale.hpp"
-#include "kke/transform/Transform.hpp"
+#include "kke/common/Point.hh"
+#include "kke/common/Scale.hh"
+#include "kke/transform/Transform.hh"
 
 namespace kke {
 class ScaleTransform : public Transform {

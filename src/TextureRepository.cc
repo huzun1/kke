@@ -3,7 +3,7 @@
 #include <wincodec.h>
 #include <wrl/client.h>
 
-#include <kke/TextureRepository.hpp>
+#include <kke/TextureRepository.hh>
 
 #pragma comment(lib, "Shlwapi.lib")
 

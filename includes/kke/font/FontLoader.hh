@@ -8,7 +8,7 @@
 
 #include <string>
 
-#include "kke/font/FontWeight.hpp"
+#include "kke/font/FontWeight.hh"
 
 #pragma comment(lib, "dwrite.lib")
 

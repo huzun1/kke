@@ -6,8 +6,8 @@
 #include <memory>
 #include <vector>
 
-#include "Effect.hpp"
-#include "kke/effect/Effect.hpp"
+#include "Effect.hh"
+#include "kke/effect/Effect.hh"
 
 namespace kke {
 class EffectContainer {

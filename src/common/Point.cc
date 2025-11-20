@@ -1,6 +1,6 @@
-#include <kke/common/Point.hpp>
+#include <kke/common/Point.hh>
 
-#include "kke/internal/Hasher.hpp"
+#include "kke/internal/Hasher.hh"
 
 D2D1_POINT_2F kke::Point2f::point2f() const {
 	return {x, y};

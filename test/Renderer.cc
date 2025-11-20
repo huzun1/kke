@@ -1,4 +1,4 @@
-#include "Renderer.hpp"
+#include "Renderer.hh"
 
 #include <D2D1.h>
 #include <d2d1_1.h>
@@ -8,14 +8,14 @@
 #include <cmath>
 #include <memory>
 
-#include "FpsCounter.hpp"
-#include "kke/brush/LinearGradientBrush.hpp"
-#include "kke/brush/SolidColorBrush.hpp"
-#include "kke/common/Color.hpp"
-#include "kke/common/geometry/Ellipse.hpp"
-#include "kke/common/geometry/Rect.hpp"
-#include "kke/common/geometry/RoundedRect.hpp"
-#include "kke/font/FontData.hpp"
+#include "FpsCounter.hh"
+#include "kke/brush/LinearGradientBrush.hh"
+#include "kke/brush/SolidColorBrush.hh"
+#include "kke/common/Color.hh"
+#include "kke/common/geometry/Ellipse.hh"
+#include "kke/common/geometry/Rect.hh"
+#include "kke/common/geometry/RoundedRect.hh"
+#include "kke/font/FontData.hh"
 #include "resources/resources.h"
 
 static FpsCounter counter;

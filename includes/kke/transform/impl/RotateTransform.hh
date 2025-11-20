@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kke/common/Point.hpp"
-#include "kke/transform/Transform.hpp"
+#include "kke/common/Point.hh"
+#include "kke/transform/Transform.hh"
 
 namespace kke {
 class RotateTransform : public Transform {

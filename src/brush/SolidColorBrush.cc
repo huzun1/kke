@@ -1,7 +1,7 @@
 #include <d2d1.h>
 
-#include <kke/brush/SolidColorBrush.hpp>
-#include <kke/internal/Hasher.hpp>
+#include <kke/brush/SolidColorBrush.hh>
+#include <kke/internal/Hasher.hh>
 
 kke::SolidColorBrush::SolidColorBrush(kke::Color4f color)
 	: color(color) {

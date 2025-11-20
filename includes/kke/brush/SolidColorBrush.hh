@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../common/Color.hpp"
-#include "Brush.hpp"
+#include "../common/Color.hh"
+#include "Brush.hh"
 
 namespace kke {
 class SolidColorBrush : public Brush {

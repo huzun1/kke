@@ -1,4 +1,4 @@
-#include "kke/Engine.hpp"
+#include "kke/Engine.hh"
 
 #include <d2d1.h>
 #include <d2d1_1.h>
@@ -10,18 +10,18 @@
 #include <cstdint>
 #include <memory>
 
-#include "kke/RenderSurface.hpp"
-#include "kke/ResourceAllocator.hpp"
-#include "kke/TextureRepository.hpp"
-#include "kke/common/Geometry.hpp"
-#include "kke/common/Point.hpp"
-#include "kke/common/Scale.hpp"
-#include "kke/common/geometry/Rect.hpp"
-#include "kke/effect/EffectContainer.hpp"
-#include "kke/effect/EffectInstance.hpp"
-#include "kke/effect/impl/BlurEffect.hpp"
-#include "kke/font/FontData.hpp"
-#include "kke/transform/Matrix.hpp"
+#include "kke/RenderSurface.hh"
+#include "kke/ResourceAllocator.hh"
+#include "kke/TextureRepository.hh"
+#include "kke/common/Geometry.hh"
+#include "kke/common/Point.hh"
+#include "kke/common/Scale.hh"
+#include "kke/common/geometry/Rect.hh"
+#include "kke/effect/EffectContainer.hh"
+#include "kke/effect/EffectInstance.hh"
+#include "kke/effect/impl/BlurEffect.hh"
+#include "kke/font/FontData.hh"
+#include "kke/transform/Matrix.hh"
 
 using namespace kke;
 

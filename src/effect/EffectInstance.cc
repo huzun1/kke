@@ -1,4 +1,4 @@
-#include "kke/effect/EffectInstance.hpp"
+#include "kke/effect/EffectInstance.hh"
 
 #include <stdexcept>
 

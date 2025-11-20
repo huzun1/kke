@@ -1,7 +1,7 @@
 #include <d2d1_1.h>
 #include <wrl/client.h>
 
-#include <kke/RenderSurface.hpp>
+#include <kke/RenderSurface.hh>
 
 kke::RenderSurface::RenderSurface(Microsoft::WRL::ComPtr<ID2D1Bitmap1> renderTarget)
 	: renderTarget(renderTarget) {

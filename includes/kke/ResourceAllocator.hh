@@ -11,15 +11,15 @@
 #include <string>
 #include <vector>
 
-#include "CacheStorage.hpp"
-#include "brush/Brush.hpp"
-#include "kke/CacheStorage.hpp"
-#include "kke/RenderSurface.hpp"
-#include "kke/common/Geometry.hpp"
-#include "kke/effect/Effect.hpp"
-#include "kke/effect/EffectInstance.hpp"
-#include "kke/font/FontLoader.hpp"
-#include "kke/font/FontWeight.hpp"
+#include "CacheStorage.hh"
+#include "brush/Brush.hh"
+#include "kke/CacheStorage.hh"
+#include "kke/RenderSurface.hh"
+#include "kke/common/Geometry.hh"
+#include "kke/effect/Effect.hh"
+#include "kke/effect/EffectInstance.hh"
+#include "kke/font/FontLoader.hh"
+#include "kke/font/FontWeight.hh"
 
 using namespace Microsoft::WRL;
 

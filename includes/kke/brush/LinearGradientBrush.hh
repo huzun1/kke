@@ -3,9 +3,9 @@
 #include <optional>
 #include <vector>
 
-#include "Brush.hpp"
-#include "kke/common/Color.hpp"
-#include "kke/common/Point.hpp"
+#include "Brush.hh"
+#include "kke/common/Color.hh"
+#include "kke/common/Point.hh"
 
 namespace kke {
 class LinearGradientBrush : public Brush {

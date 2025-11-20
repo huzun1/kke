@@ -4,7 +4,7 @@
 
 #include <cstdint>
 
-#include "kke/common/geometry/Rect.hpp"
+#include "kke/common/geometry/Rect.hh"
 
 namespace kke {
 struct RoundedRect : public Rect {

@@ -4,10 +4,10 @@
 
 #include <cstdio>
 
-#include "Renderer.hpp"
-#include "Window.hpp"
-#include "backend/D2D1.hpp"
-#include "backend/D3D11.hpp"
+#include "Renderer.hh"
+#include "Window.hh"
+#include "backend/D2D1.hh"
+#include "backend/D3D11.hh"
 
 application::D3D11 d3d11;
 application::D2D1 d2d1;

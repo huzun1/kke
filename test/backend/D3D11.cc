@@ -1,4 +1,4 @@
-#include "D3D11.hpp"
+#include "D3D11.hh"
 
 #include <assert.h>
 
@@ -92,7 +92,7 @@ void application::D3D11::createSwapChain(HWND hwnd, ID3D11Device1* device, IDXGI
 	d3d11SwapChainDesc.AlphaMode = DXGI_ALPHA_MODE_UNSPECIFIED;
 	// Enable allow-tearing so Present can present without vsync when supported
 	d3d11SwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
-	
+
 	HRESULT hResult = factory->CreateSwapChainForHwnd(device, hwnd, &d3d11SwapChainDesc, 0, 0, swapChainOut);
 	assert(SUCCEEDED(hResult));
 }

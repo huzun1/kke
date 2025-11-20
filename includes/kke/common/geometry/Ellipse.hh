@@ -4,9 +4,9 @@
 
 #include <cstdint>
 
-#include "Rect.hpp"
-#include "kke/common/Geometry.hpp"
-#include "kke/common/Point.hpp"
+#include "Rect.hh"
+#include "kke/common/Geometry.hh"
+#include "kke/common/Point.hh"
 
 namespace kke {
 struct Ellipse : public Geometry {
