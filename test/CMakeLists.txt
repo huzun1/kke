@@ -10,5 +10,5 @@ add_executable(kke_test WIN32
     resources/resources.h
     resources/resources.rc
  )
-target_link_libraries(kke_test kke)
+target_link_libraries(kke_test kke yogacore)
 target_include_directories(kke_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

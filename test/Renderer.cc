@@ -7,6 +7,7 @@
 
 #include <cmath>
 #include <memory>
+#include <format>
 
 #include "FpsCounter.hh"
 #include "kke/brush/LinearGradientBrush.hh"
@@ -16,6 +17,8 @@
 #include "kke/common/geometry/Rect.hh"
 #include "kke/common/geometry/RoundedRect.hh"
 #include "kke/font/FontData.hh"
+#include "kke/ui/DivBuilder.hh"
+#include "kke/ui/Utilities.hh"
 #include "resources/resources.h"
 
 static FpsCounter counter;
@@ -40,6 +43,9 @@ application::Renderer::Renderer(application::D2D1& d2d1)
 		printf("resource loaded: %p, %lld\n", data, size);
 		printf("texture loaded: %lld\n", dyconTexId);
 	}
+
+	// Initialize UI components
+	initializeUI();
 }
 
 void application::Renderer::render() {
@@ -79,75 +85,10 @@ void application::Renderer::preRender() {
 }
 
 void application::Renderer::renderFrame() {
-	// Generic Rendering Test
-	this->engine->drawRect(kke::Rect{20, 20, 100, 100}, kke::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}), 10.0f);
-	this->engine->fillRect(kke::Rect{60, 20, 160, 100}, kke::SolidColorBrush({0.0f, 1.0f, 1.0f, 1.0f}));
-	this->engine->fillRounded(kke::RoundedRect({20, 60, 160, 220}, 3.0f), kke::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
-	this->engine->fillEllipse(kke::Ellipse(300, 300, 30), kke::SolidColorBrush({1.0, 0.0f, 0.0f, 1.0f}));
-
-	// Scale Test
-	static int angle = 0;
-	angle++;
-	kke::Rect rotRect{300, 90, 500, 200};
-	this->engine->pushRotate(rotRect.center(), angle);
-	this->engine->fillRounded({rotRect, 3.0f}, kke::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
-	this->engine->popTransform();
-
-	// Rotate Test
-	static float theta = 0;
-	theta += 0.01f;
-	kke::Rect scaleRect{200, 400, 400, 600};
-	this->engine->pushScale(scaleRect.center(), {std::sin(theta) * 0.5f + 1.0f, std::sin(theta) * 0.5f + 1.0f});
-	this->engine->fillRounded({scaleRect, 3.0f}, kke::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
-	this->engine->popTransform();
-
-	// Shadow Test
-	kke::RoundedRect rect{{200.0f, 200.0f, 400.0f, 400.0f}, 15.0f};
-	static float gradientAngle = 0.0f;
-	gradientAngle += 0.5f;
-
-	auto brush = kke::LinearGradientBrush({kke::Color4f(KKE_COLOR_16(0x205034)),
-										   kke::Color4f(KKE_COLOR_16(0x680620)), kke::Color4f(KKE_COLOR_16(0xFF06FF))},
-										  {rect.x1, rect.y1},
-										  {rect.x2, rect.y2});
-	brush.setAngle(gradientAngle);
-	this->engine->drawRoundedShadow(rect, brush, 10.0f);
-	this->engine->fillRounded(rect, brush);
-
-	this->engine->drawRectShadow({600, 300, 800, 400}, kke::SolidColorBrush({1.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
-
-	// Texture Test
-	static int dyconAngle = 0;
-	dyconAngle += 3;
-	kke::Rect dyconRect{500, 500, 700, 700};
-	this->engine->pushRotate(dyconRect.center(), dyconAngle);
-	this->engine->drawTexture(dyconTexId, dyconRect);
-	this->engine->popTransform();
-
-	// Text Test
-	this->engine->drawText(
-		{50, 300},
-		L"Hello, kke!",
-		kke::FontWeight::BOLD,
-		L"Space Grotesk",
-		32,
-		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
-
-	this->engine->drawTextShadow(
-		{50, 350},
-		L"Hello, kke with Shadow!",
-		kke::FontWeight::BOLD,
-		L"Space Grotesk",
-		32,
-		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}),
-		5.0f);
-	this->engine->drawText(
-		{50, 350},
-		L"Hello, kke with Shadow! ggggggggggggggyyyyyyyyyyyyy",
-		kke::FontWeight::BOLD,
-		L"Space Grotesk",
-		32,
-		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
+	// === UI Builder Component Rendering ===
+	if (uiComponent) {
+		uiComponent->render(this->engine.get());
+	}
 
 	// Draw FPS
 	counter.frame();
@@ -160,13 +101,65 @@ void application::Renderer::renderFrame() {
 		L"Space Grotesk",
 		16,
 		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
+}
 
-	// Ranged-blur Test
-	float offset = 50 + std::sin(theta) * 50.0f;
-	kke::RoundedRect blurRect{{0.0f + offset, 50.0f + offset, 300.0f + offset, 300.0f + offset}, 10.0f};
-	this->engine->flush();	// Ensure all previous drawing commands are executed
-	this->engine->blur(30.0f, &blurRect);
-	this->engine->drawRounded(blurRect, kke::SolidColorBrush(KKE_COLOR_24(0x000000FF)), 2.0f);
+void application::Renderer::initializeUI() {
+	using namespace kke::ui;
+
+	// Create a UI component using the builder pattern
+	// This matches the example provided by the user
+	std::string text = "World";
+
+	uiComponent = div()
+		.flex()
+		.flex_col()
+		.gap(16.0f)
+		.bg(rgb(0x2d3748))
+		.width(600.0f)
+		.padding(32.0f)
+		.margin(100.0f, 50.0f, 0.0f, 50.0f)
+		.justify_center()
+		.items_center()
+		.shadow_lg()
+		.border(2.0f)
+		.border_color(rgb(0x4299e1))
+		.rounded_xl()
+		.child(
+			div()
+				.text_size(24.0f)
+				.text_color(rgb(0xffffff))
+				.font_family(L"Space Grotesk")
+				.font_bold()
+				.child(std::format("Hello, {}!", text))
+		)
+		.child(
+			div()
+				.flex()
+				.gap(16.0f)
+				.child(div().size(64.0f).bg(red()).rounded_lg().shadow())
+				.child(div().size(64.0f).bg(green()).rounded_lg().shadow())
+				.child(div().size(64.0f).bg(blue()).rounded_lg().shadow())
+				.child(div().size(64.0f).bg(yellow()).rounded_lg().shadow())
+				.child(div().size(64.0f).bg(magenta()).rounded_lg().shadow())
+				.child(div().size(64.0f).bg(cyan()).rounded_lg().shadow())
+		)
+		.child(
+			div()
+				.padding(16.0f, 32.0f, 16.0f, 32.0f)
+				.bg(rgb(0x48bb78))
+				.text_color(white())
+				.rounded_md()
+				.text_size(16.0f)
+				.shadow_sm()
+				.child("Click Meaaaaaaaaaaaaa\naaaaaaaaaaaaaaa!")
+		)
+		.build();
+
+	// Measure text sizes before layout calculation
+	uiComponent->measureTextIfNeeded(this->engine.get());
+
+	// Calculate layout for 1280x720 window
+	uiComponent->calculateLayout(1280.0f, 720.0f);
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {
