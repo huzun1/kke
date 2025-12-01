@@ -221,12 +221,11 @@ void Engine::drawLineShadow(
 	float strokeWidth,
 	float deviation) {
 	Rect dimension = {
-		start.x,
-		start.y,
+		start.x - 1.0f,
+		start.y - 1.0f,
 		end.x + 1.0f,
 		end.y + 1.0f,
 	};
-	Point2f offset = shadowDispatcher.computeOffset(dimension);
 
 	Hasher hasher;
 	hasher.combine(0xFFFFFF);  // Unique identifier for line shadows
@@ -238,8 +237,9 @@ void Engine::drawLineShadow(
 	hasher.combine(strokeWidth);
 	hasher.combine(deviation);
 
+	Point2f offset = shadowDispatcher.computeOffset(dimension);
 	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, hasher.get(), brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
+		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& _) {
 			drawLine(start, end, brush, strokeWidth);
 		}, output);
 	});
