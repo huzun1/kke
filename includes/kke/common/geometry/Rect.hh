@@ -17,6 +17,10 @@ struct Rect : public Geometry {
 
 	uint64_t hash(bool positionDependent) const override;
 
+	float width() const;
+
+	float height() const;
+
 	kke::Point2f center() const;
 
 	void offset(float x1, float y1, float x2, float y2);

@@ -51,7 +51,7 @@ ComPtr<ID2D1Image> ResourceAllocator::acquireOrDispatchShadow(Geometry const& ge
 	hasher.combine(geometry.hash(false));
 	hasher.combine(brush.hash());
 	hasher.combine(strength);
-	acquireOrDispatchShadow(geometry, hasher.get(), brush, strength, dispatchFunc);
+	return acquireOrDispatchShadow(geometry, hasher.get(), brush, strength, dispatchFunc);
 }
 
 ComPtr<ID2D1Image> ResourceAllocator::acquireOrDispatchShadow(Geometry const& geometry, uint64_t identifierHash, Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc) {

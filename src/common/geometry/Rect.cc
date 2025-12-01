@@ -19,6 +19,14 @@ void kke::Rect::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
 	*output = rectangleGeometry;
 }
 
+float kke::Rect::width() const {
+    return x2 - x1;
+}
+
+float kke::Rect::height() const {
+    return y2 - y1;
+}
+
 kke::Point2f kke::Rect::center() const {
 	return {x1 + (x2 - x1) * 0.5f, y1 + (y2 - y1) * 0.5f};
 }
