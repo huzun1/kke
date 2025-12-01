@@ -70,14 +70,14 @@ IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, 
 			throw std::runtime_error("unsupported font weight");
 	}
 	HRESULT result = writeFactory->CreateTextFormat(
-			fontFamily.c_str(),
-			fontCollection.Get(),
-			dwriteWeight,
-			DWRITE_FONT_STYLE_NORMAL,
-			DWRITE_FONT_STRETCH_NORMAL,
-			static_cast<FLOAT>(fontSize),
-			L"",  // locale
-			&textFormat);
+		fontFamily.c_str(),
+		fontCollection.Get(),
+		dwriteWeight,
+		DWRITE_FONT_STYLE_NORMAL,
+		DWRITE_FONT_STRETCH_NORMAL,
+		static_cast<FLOAT>(fontSize),
+		L"",  // locale
+		&textFormat);
 	if (FAILED(result)) {
 		throw std::runtime_error(std::string("couldn't create text format: {:x}", result));
 	}

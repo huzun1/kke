@@ -22,6 +22,7 @@
 #include "kke/effect/EffectInstance.hh"
 #include "kke/effect/impl/BlurEffect.hh"
 #include "kke/font/FontData.hh"
+#include "kke/internal/Hasher.hh"
 #include "kke/transform/Matrix.hh"
 
 using namespace kke;
@@ -204,9 +205,42 @@ void Engine::drawEllipseShadow(
 					  ellipse.point.x + ellipse.radius,
 					  ellipse.point.y + ellipse.radius};
 	Point2f offset = shadowDispatcher.computeOffset(dimension);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(ellipse, brush, deviation, [&](ID2D1Image** output) {
 		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
 			fillEllipse(ellipse, brush);
+		}, output);
+	});
+	deviceContext->SetTransform(matrix.build());
+	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+}
+
+void Engine::drawLineShadow(
+	kke::Point2f start,
+	kke::Point2f end,
+	kke::Brush const& brush,
+	float strokeWidth,
+	float deviation) {
+	Rect dimension = {
+		start.x,
+		start.y,
+		end.x + 1.0f,
+		end.y + 1.0f,
+	};
+	Point2f offset = shadowDispatcher.computeOffset(dimension);
+
+	Hasher hasher;
+	hasher.combine(0xFFFFFF);  // Unique identifier for line shadows
+	hasher.combine(start.x);
+	hasher.combine(start.y);
+	hasher.combine(end.x);
+	hasher.combine(end.y);
+	hasher.combine(brush.hash());
+	hasher.combine(strokeWidth);
+	hasher.combine(deviation);
+
+	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, hasher.get(), brush, deviation, [&](ID2D1Image** output) {
+		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
+			drawLine(start, end, brush, strokeWidth);
 		}, output);
 	});
 	deviceContext->SetTransform(matrix.build());

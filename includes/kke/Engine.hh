@@ -148,6 +148,13 @@ public:
 		kke::Brush const& brush,
 		float deviation);
 
+	void drawLineShadow(
+		kke::Point2f start,
+		kke::Point2f end,
+		kke::Brush const& brush,
+		float strokeWidth,
+		float deviation);
+
 	void drawTextShadow(
 		kke::Point2f const& position,
 		std::string const& text,
