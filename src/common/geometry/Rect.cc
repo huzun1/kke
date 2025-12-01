@@ -20,22 +20,33 @@ void kke::Rect::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
 }
 
 float kke::Rect::width() const {
-    return x2 - x1;
+	return x2 - x1;
 }
 
 float kke::Rect::height() const {
-    return y2 - y1;
+	return y2 - y1;
 }
 
 kke::Point2f kke::Rect::center() const {
 	return {x1 + (x2 - x1) * 0.5f, y1 + (y2 - y1) * 0.5f};
 }
 
-void kke::Rect::offset(float x1, float y1, float x2, float y2) {
-	this->x1 += x1;
-	this->y1 += y1;
-	this->x2 += x2;
-	this->y2 += y2;
+kke::Rect kke::Rect::shrink(float amount) const {
+	kke::Rect newRect = *this;
+	newRect.x1 += amount;
+	newRect.y1 += amount;
+	newRect.x2 -= amount;
+	newRect.y2 -= amount;
+	return newRect;
+}
+
+kke::Rect kke::Rect::offset(float x1, float y1, float x2, float y2) const {
+	kke::Rect newRect = *this;
+	newRect.x1 += x1;
+	newRect.y1 += y1;
+	newRect.x2 += x2;
+	newRect.y2 += y2;
+	return newRect;
 }
 
 D2D1_RECT_F kke::Rect::rectF() const {

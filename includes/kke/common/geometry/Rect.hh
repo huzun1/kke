@@ -23,7 +23,9 @@ struct Rect : public Geometry {
 
 	kke::Point2f center() const;
 
-	void offset(float x1, float y1, float x2, float y2);
+	Rect shrink(float amount) const;
+
+	Rect offset(float x1, float y1, float x2, float y2) const;
 
 	D2D1_RECT_F rectF() const;
 };
