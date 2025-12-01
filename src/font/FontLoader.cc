@@ -1,8 +1,10 @@
 #include "kke/font/FontLoader.hh"
 
 #include <dwrite.h>
+#include <winnt.h>
 
 #include <stdexcept>
+#include <string>
 
 using namespace kke;
 
@@ -67,7 +69,7 @@ IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, 
 		default:
 			throw std::runtime_error("unsupported font weight");
 	}
-	if (FAILED(writeFactory->CreateTextFormat(
+	HRESULT result = writeFactory->CreateTextFormat(
 			fontFamily.c_str(),
 			fontCollection.Get(),
 			dwriteWeight,
@@ -75,8 +77,9 @@ IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, 
 			DWRITE_FONT_STRETCH_NORMAL,
 			static_cast<FLOAT>(fontSize),
 			L"",  // locale
-			&textFormat))) {
-		throw std::runtime_error("couldn't create text format");
+			&textFormat);
+	if (FAILED(result)) {
+		throw std::runtime_error(std::string("couldn't create text format: {:x}", result));
 	}
 	return textFormat;
 }
