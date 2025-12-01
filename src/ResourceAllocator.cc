@@ -1,4 +1,5 @@
 #include <d2d1.h>
+#include <wincodec.h>
 #include <wrl/client.h>
 
 #include <cstdint>
@@ -50,14 +51,18 @@ ComPtr<ID2D1Image> ResourceAllocator::acquireOrDispatchShadow(Geometry const& ge
 	hasher.combine(geometry.hash(false));
 	hasher.combine(brush.hash());
 	hasher.combine(strength);
-	ComPtr<ID2D1Image> cachedShadow = shadowStorage.get(hasher.get());
+	acquireOrDispatchShadow(geometry, hasher.get(), brush, strength, dispatchFunc);
+}
+
+ComPtr<ID2D1Image> ResourceAllocator::acquireOrDispatchShadow(Geometry const& geometry, uint64_t identifierHash, Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc) {
+	ComPtr<ID2D1Image> cachedShadow = shadowStorage.get(identifierHash);
 	if (cachedShadow) {
 		return cachedShadow;
 	}
-	ComPtr<ID2D1Image> shadowOutput;
-	dispatchFunc(&shadowOutput);
-	shadowStorage.put(hasher.get(), shadowOutput);
-	return shadowOutput;
+	ComPtr<ID2D1Image> shadowImage;
+	dispatchFunc(&shadowImage);
+	shadowStorage.put(identifierHash, shadowImage);
+	return shadowImage;
 }
 
 IDWriteTextFormat* ResourceAllocator::acquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, FontWeight weight) {

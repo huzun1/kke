@@ -48,6 +48,8 @@ public:
 
 	ComPtr<ID2D1Image> acquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
 
+	ComPtr<ID2D1Image> acquireOrDispatchShadow(kke::Geometry const& geometry, uint64_t identifierHash, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
+
 	IDWriteTextFormat* acquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, kke::FontWeight weight);
 
 	IDWriteTextLayout* acquireOrCreateTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat);
