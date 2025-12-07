@@ -13,6 +13,8 @@ struct Ellipse : public Geometry {
 	kke::Point2f point;
 	float radius;
 
+	Ellipse();
+
 	Ellipse(float x, float y, float radius);
 
 	void create(ID2D1Factory* factory, ID2D1Geometry** output) const override;

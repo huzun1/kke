@@ -6,33 +6,42 @@
 #include "kke/common/Geometry.hh"
 #include "kke/internal/Hasher.hh"
 
-kke::Rect::Rect(float x1, float y1, float x2, float y2)
+using namespace kke;
+
+Rect::Rect()
+	: x1(0.0f),
+	  y1(0.0f),
+	  x2(0.0f),
+	  y2(0.0f) {
+}
+
+Rect::Rect(float x1, float y1, float x2, float y2)
 	: x1(x1),
 	  y1(y1),
 	  x2(x2),
 	  y2(y2) {
 }
 
-void kke::Rect::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
+void Rect::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
 	ID2D1RectangleGeometry* rectangleGeometry;
 	factory->CreateRectangleGeometry(rectF(), &rectangleGeometry);
 	*output = rectangleGeometry;
 }
 
-float kke::Rect::width() const {
+float Rect::width() const {
 	return x2 - x1;
 }
 
-float kke::Rect::height() const {
+float Rect::height() const {
 	return y2 - y1;
 }
 
-kke::Point2f kke::Rect::center() const {
+Point2f Rect::center() const {
 	return {x1 + (x2 - x1) * 0.5f, y1 + (y2 - y1) * 0.5f};
 }
 
-kke::Rect kke::Rect::shrink(float amount) const {
-	kke::Rect newRect = *this;
+Rect Rect::shrink(float amount) const {
+	Rect newRect = *this;
 	newRect.x1 += amount;
 	newRect.y1 += amount;
 	newRect.x2 -= amount;
@@ -40,8 +49,8 @@ kke::Rect kke::Rect::shrink(float amount) const {
 	return newRect;
 }
 
-kke::Rect kke::Rect::offset(float x1, float y1, float x2, float y2) const {
-	kke::Rect newRect = *this;
+Rect Rect::offset(float x1, float y1, float x2, float y2) const {
+	Rect newRect = *this;
 	newRect.x1 += x1;
 	newRect.y1 += y1;
 	newRect.x2 += x2;
@@ -49,11 +58,11 @@ kke::Rect kke::Rect::offset(float x1, float y1, float x2, float y2) const {
 	return newRect;
 }
 
-D2D1_RECT_F kke::Rect::rectF() const {
+D2D1_RECT_F Rect::rectF() const {
 	return {x1, y1, x2, y2};
 }
 
-uint64_t kke::Rect::hash(bool positionDependent) const {
+uint64_t Rect::hash(bool positionDependent) const {
 	Hasher hasher;
 	hasher.combine(static_cast<uint32_t>(GeometryType::RECT));
 	hasher.combine(positionDependent);

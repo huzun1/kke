@@ -10,6 +10,8 @@ namespace kke {
 struct RoundedRect : public Rect {
 	float rounding;
 
+	RoundedRect();
+
 	RoundedRect(float x1, float y1, float x2, float y2, float rounding);
 
 	RoundedRect(Rect const& rect, float rounding);

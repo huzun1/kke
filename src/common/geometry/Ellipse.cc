@@ -5,25 +5,31 @@
 #include "kke/common/Geometry.hh"
 #include "kke/internal/Hasher.hh"
 
-kke::Ellipse::Ellipse(float x, float y, float radius)
+using namespace kke;
+
+Ellipse::Ellipse()
+	: point(kke::Point2f{0.0f, 0.0f}), radius(0.0f) {
+}
+
+Ellipse::Ellipse(float x, float y, float radius)
 	: point(kke::Point2f{x, y}), radius(radius) {
 }
 
-void kke::Ellipse::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
+void Ellipse::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
 	ID2D1EllipseGeometry* ellipseGeometry;
 	factory->CreateEllipseGeometry(ellipse(), &ellipseGeometry);
 	*output = ellipseGeometry;
 }
 
-D2D1_ELLIPSE kke::Ellipse::ellipse() const {
+D2D1_ELLIPSE Ellipse::ellipse() const {
 	return {point.point2f(), radius, radius};
 }
 
-kke::Rect kke::Ellipse::dimension() const {
+Rect Ellipse::dimension() const {
 	return {point.x - radius, point.y - radius, point.x + radius, point.y + radius};
 }
 
-uint64_t kke::Ellipse::hash(bool positionDependent) const {
+uint64_t Ellipse::hash(bool positionDependent) const {
 	Hasher hasher;
 	hasher.combine(static_cast<uint32_t>(GeometryType::ELLIPSE));
 	hasher.combine(positionDependent);

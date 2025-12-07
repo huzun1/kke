@@ -11,6 +11,12 @@
 using namespace kke;
 using namespace Microsoft::WRL;
 
+Triangle::Triangle()
+	: a(kke::Point2f{0.0f, 0.0f}),
+	  b(kke::Point2f{0.0f, 0.0f}),
+	  c(kke::Point2f{0.0f, 0.0f}) {
+}
+
 Triangle::Triangle(kke::Point2f const& a, kke::Point2f const& b, kke::Point2f const& c)
 	: a(a), b(b), c(c) {
 }
