@@ -31,6 +31,7 @@ class ResourceAllocator {
 
 	CacheStorage<ID2D1Brush> brushStorage;
 	CacheStorage<ID2D1Geometry> geometryStorage;
+	CacheStorage<ID2D1Geometry> invertedGeometryStorage;
 	CacheStorage<ID2D1Image> shadowStorage;
 	CacheStorage<IDWriteTextFormat> textFormatStorage;
 	CacheStorage<IDWriteTextLayout> textLayoutStorage;
@@ -45,6 +46,8 @@ public:
 	ComPtr<ID2D1Brush> acquireOrCreateBrush(kke::Brush const& brush);
 
 	ComPtr<ID2D1Geometry> acquireOrCreateGeometry(kke::Geometry const& geometry);
+
+	ComPtr<ID2D1Geometry> acquireOrCreateInvertedGeometry(kke::Geometry const& geometry);
 
 	ComPtr<ID2D1Image> acquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
 

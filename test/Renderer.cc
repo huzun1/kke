@@ -169,6 +169,9 @@ void application::Renderer::renderFrame() {
 	// Triangle Test
 	kke::Triangle triangle{{600.0f, 100.0f}, {700.0f, 300.0f}, {500.0f, 300.0f}};
 	this->engine->fillTriangle(triangle, kke::SolidColorBrush(KKE_COLOR_24(0x00FF00FF)));
+
+	// Shadow inverted-geometry test
+	this->engine->drawRectShadow({800, 20, 900, 100}, kke::SolidColorBrush(KKE_COLOR_16(0x000000)), 3.0f, true);
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {

@@ -186,47 +186,80 @@ void Engine::fillEllipse(Ellipse const& ellipse, Brush const& brush) {
 void Engine::drawRectShadow(
 	Rect const& rect,
 	Brush const& brush,
-	float deviation) {
+	float deviation,
+	bool clipOriginalGeometry) {
 	Point2f offset = shadowDispatcher.computeOffset(rect);
 	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(rect, deviation, [&](Point2f const& start) {
+		shadowDispatcher.dispatch(rect, deviation, [&]() {
 			fillRect(rect, brush);
 		}, output);
 	});
 	deviceContext->SetTransform(matrix.build());
+
+	if (clipOriginalGeometry) {
+        ComPtr<ID2D1Geometry> clipGeometry = resourceAllocator.acquireOrCreateInvertedGeometry(rect);
+        deviceContext->PushLayer(
+            D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry.Get()),
+            nullptr);
+    }
 	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	if (clipOriginalGeometry) {
+        deviceContext->PopLayer();
+    }
 }
 
 void Engine::drawRoundedShadow(
 	RoundedRect const& rect,
 	Brush const& brush,
-	float deviation) {
+	float deviation,
+	bool clipOriginalGeometry) {
 	Point2f offset = shadowDispatcher.computeOffset(rect);
 	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(rect, deviation, [&](Point2f const& start) {
+		shadowDispatcher.dispatch(rect, deviation, [&]() {
 			fillRounded(rect, brush);
 		}, output);
 	});
 	deviceContext->SetTransform(matrix.build());
+
+	if (clipOriginalGeometry) {
+		ComPtr<ID2D1Geometry> clipGeometry = resourceAllocator.acquireOrCreateInvertedGeometry(rect);
+		deviceContext->PushLayer(
+			D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry.Get()),
+			nullptr);
+	}
 	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	if (clipOriginalGeometry) {
+        deviceContext->PopLayer();
+    }
 }
 
 void Engine::drawEllipseShadow(
 	Ellipse const& ellipse,
 	Brush const& brush,
-	float deviation) {
+	float deviation,
+	bool clipOriginalGeometry) {
 	Rect dimension = {ellipse.point.x - ellipse.radius,
 					  ellipse.point.y - ellipse.radius,
 					  ellipse.point.x + ellipse.radius,
 					  ellipse.point.y + ellipse.radius};
 	Point2f offset = shadowDispatcher.computeOffset(dimension);
 	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(ellipse, brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
+		shadowDispatcher.dispatch(dimension, deviation, [&]() {
 			fillEllipse(ellipse, brush);
 		}, output);
 	});
 	deviceContext->SetTransform(matrix.build());
+
+	if (clipOriginalGeometry) {
+		ComPtr<ID2D1Geometry> clipGeometry = resourceAllocator.acquireOrCreateInvertedGeometry(ellipse);
+		deviceContext->PushLayer(
+			D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry.Get()),
+			nullptr);
+	}
 	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	if (clipOriginalGeometry) {
+        deviceContext->PopLayer();
+    }
 }
 
 void Engine::drawLineShadow(
@@ -254,7 +287,7 @@ void Engine::drawLineShadow(
 
 	Point2f offset = shadowDispatcher.computeOffset(dimension);
 	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, hasher.get(), brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& _) {
+		shadowDispatcher.dispatch(dimension, deviation, [&]() {
 			drawLine(start, end, brush, strokeWidth);
 		}, output);
 	});
@@ -292,7 +325,7 @@ void Engine::drawTextShadow(
 		position.y + metrics.height};
 	Point2f offset = shadowDispatcher.computeOffset(dimension);
 	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(dimension, deviation, [&](Point2f const& start) {
+		shadowDispatcher.dispatch(dimension, deviation, [&]() {
 			drawText(position, text, weight, fontFamily, fontSize, brush);
 		}, output);
 	});

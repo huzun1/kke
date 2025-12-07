@@ -92,9 +92,9 @@ public:
 		float strokeWidth);
 
 	void drawTriangle(
-        kke::Triangle const& rect,
-        kke::Brush const& brush,
-        float strokeWidth);
+		kke::Triangle const& rect,
+		kke::Brush const& brush,
+		float strokeWidth);
 
 	void drawRect(
 		kke::Rect const& rect,
@@ -128,8 +128,8 @@ public:
 		kke::Brush const& brush);
 
 	void fillTriangle(
-        kke::Triangle const& triangle,
-        kke::Brush const& brush);
+		kke::Triangle const& triangle,
+		kke::Brush const& brush);
 
 	void fillRect(
 		kke::Rect const& rect,
@@ -146,17 +146,19 @@ public:
 	void drawRectShadow(
 		kke::Rect const& rect,
 		kke::Brush const& brush,
-		float deviation);
+		float deviation,
+		bool clipOriginalGeometry = false);
 
 	void drawRoundedShadow(
 		kke::RoundedRect const& rect,
 		kke::Brush const& brush,
-		float deviation);
+		float deviation,
+		bool clipOriginalGeometry = false);
 
 	void drawEllipseShadow(
 		kke::Ellipse const& ellipse,
 		kke::Brush const& brush,
-		float deviation);
+		float deviation, bool clipOriginalGeometry = false);
 
 	void drawLineShadow(
 		kke::Point2f start,

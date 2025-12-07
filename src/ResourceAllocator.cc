@@ -46,6 +46,39 @@ ComPtr<ID2D1Geometry> ResourceAllocator::acquireOrCreateGeometry(Geometry const&
 	return geometryInstance;
 }
 
+ComPtr<ID2D1Geometry> ResourceAllocator::acquireOrCreateInvertedGeometry(Geometry const& geometry) {
+	uint64_t key = geometry.hash(true);
+	ComPtr<ID2D1Geometry> cachedGeometry = invertedGeometryStorage.get(key);
+	if (cachedGeometry) {
+		return cachedGeometry;
+	}
+
+	// viewport rectangle
+	ComPtr<ID2D1RectangleGeometry> rectGeo = nullptr;
+	D2D1_SIZE_U viewport = deviceContext->GetPixelSize();
+	factory->CreateRectangleGeometry(
+		{0.0f, 0.0f, static_cast<FLOAT>(viewport.width), static_cast<FLOAT>(viewport.height)},
+		&rectGeo);
+
+	ComPtr<ID2D1Geometry> baseGeometry;
+	geometry.create(factory, &baseGeometry);
+
+	// Combine with the original geometry using a geometry group with the "exclude" mode
+	ID2D1PathGeometry* combinedGeometry;
+	ID2D1GeometrySink* geometrySink;
+	factory->CreatePathGeometry(&combinedGeometry);
+	combinedGeometry->Open(&geometrySink);
+	rectGeo->CombineWithGeometry(
+		baseGeometry.Get(),
+		D2D1_COMBINE_MODE_EXCLUDE,
+		nullptr,
+		geometrySink);
+	geometrySink->Close();
+
+	invertedGeometryStorage.put(geometry.hash(true), combinedGeometry);
+	return combinedGeometry;
+}
+
 ComPtr<ID2D1Image> ResourceAllocator::acquireOrDispatchShadow(Geometry const& geometry, Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc) {
 	Hasher hasher;
 	hasher.combine(geometry.hash(false));
