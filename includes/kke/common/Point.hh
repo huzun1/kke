@@ -11,5 +11,11 @@ struct Point2f {
 	D2D1_POINT_2F point2f() const;
 
 	uint64_t hash() const;
+
+	Point2f offset(float amount) const;
+
+	Point2f offset(Point2f const& amount) const;
+
+	Point2f operator *(const Point2f& param) const;
 };
 };	// namespace kke

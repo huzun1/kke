@@ -117,6 +117,14 @@ void Engine::drawLine(Point2f start, Point2f end, Brush const& brush, float stro
 	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
+void Engine::drawTriangle(
+	Triangle const& triangle,
+	Brush const& brush,
+	float strokeWidth) {
+	ComPtr<ID2D1Geometry> geometry = resourceAllocator.acquireOrCreateGeometry(triangle);
+	deviceContext->DrawGeometry(geometry.Get(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
+}
+
 void Engine::drawRect(Rect const& rect, Brush const& brush, float strokeWidth) {
 	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
@@ -154,6 +162,13 @@ void Engine::drawText(
 		layout.Get(),
 		resourceAllocator.acquireOrCreateBrush(brush).Get(),
 		D2D1_DRAW_TEXT_OPTIONS_NONE);
+}
+
+void Engine::fillTriangle(
+	Triangle const& triangle,
+	Brush const& brush) {
+	ComPtr<ID2D1Geometry> geometry = resourceAllocator.acquireOrCreateGeometry(triangle);
+	deviceContext->FillGeometry(geometry.Get(), resourceAllocator.acquireOrCreateBrush(brush).Get());
 }
 
 void Engine::fillRect(Rect const& rect, Brush const& brush) {

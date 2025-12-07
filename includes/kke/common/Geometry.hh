@@ -8,8 +8,9 @@
 namespace kke {
 enum class GeometryType : uint32_t {
 	ELLIPSE = 0,
-	RECT = 1,
-	ROUNDED_RECT = 2
+	TRIANGLE = 1,
+	RECT = 2,
+	ROUNDED_RECT = 3,
 };
 
 class Geometry {

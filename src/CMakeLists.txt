@@ -11,6 +11,7 @@ add_library(kke STATIC
     common/geometry/Ellipse.cc
     common/geometry/Rect.cc
     common/geometry/RoundedRect.cc
+    common/geometry/Triangle.cc
     brush/SolidColorBrush.cc
     brush/LinearGradientBrush.cc
     effect/EffectContainer.cc

@@ -25,6 +25,7 @@
 #include "kke/common/Scale.hh"
 #include "kke/common/geometry/Ellipse.hh"
 #include "kke/common/geometry/RoundedRect.hh"
+#include "kke/common/geometry/Triangle.hh"
 #include "kke/effect/Effect.hh"
 #include "kke/effect/EffectContainer.hh"
 #include "kke/effect/impl/BlurEffect.hh"
@@ -90,6 +91,11 @@ public:
 		kke::Brush const& brush,
 		float strokeWidth);
 
+	void drawTriangle(
+        kke::Triangle const& rect,
+        kke::Brush const& brush,
+        float strokeWidth);
+
 	void drawRect(
 		kke::Rect const& rect,
 		kke::Brush const& brush,
@@ -120,6 +126,10 @@ public:
 		std::wstring const& fontFamily,
 		int32_t fontSize,
 		kke::Brush const& brush);
+
+	void fillTriangle(
+        kke::Triangle const& triangle,
+        kke::Brush const& brush);
 
 	void fillRect(
 		kke::Rect const& rect,

@@ -165,6 +165,10 @@ void application::Renderer::renderFrame() {
 	this->engine->flush(); // Ensure all previous drawing commands are executed
 	this->engine->blur(30.0f, &blurRect);
 	this->engine->drawRounded(blurRect, kke::SolidColorBrush(KKE_COLOR_24(0x000000FF)), 2.0f);
+
+	// Triangle Test
+	kke::Triangle triangle{{600.0f, 100.0f}, {700.0f, 300.0f}, {500.0f, 300.0f}};
+	this->engine->fillTriangle(triangle, kke::SolidColorBrush(KKE_COLOR_24(0x00FF00FF)));
 }
 
 std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {
