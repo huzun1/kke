@@ -197,15 +197,15 @@ void Engine::drawRectShadow(
 	deviceContext->SetTransform(matrix.build());
 
 	if (clipOriginalGeometry) {
-        ComPtr<ID2D1Geometry> clipGeometry = resourceAllocator.acquireOrCreateInvertedGeometry(rect);
-        deviceContext->PushLayer(
-            D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry.Get()),
-            nullptr);
-    }
+		ComPtr<ID2D1Geometry> clipGeometry = resourceAllocator.acquireOrCreateInvertedGeometry(rect);
+		deviceContext->PushLayer(
+			D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry.Get()),
+			nullptr);
+	}
 	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 	if (clipOriginalGeometry) {
-        deviceContext->PopLayer();
-    }
+		deviceContext->PopLayer();
+	}
 }
 
 void Engine::drawRoundedShadow(
@@ -229,8 +229,8 @@ void Engine::drawRoundedShadow(
 	}
 	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 	if (clipOriginalGeometry) {
-        deviceContext->PopLayer();
-    }
+		deviceContext->PopLayer();
+	}
 }
 
 void Engine::drawEllipseShadow(
@@ -258,8 +258,8 @@ void Engine::drawEllipseShadow(
 	}
 	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 	if (clipOriginalGeometry) {
-        deviceContext->PopLayer();
-    }
+		deviceContext->PopLayer();
+	}
 }
 
 void Engine::drawLineShadow(

@@ -147,18 +147,18 @@ public:
 		kke::Rect const& rect,
 		kke::Brush const& brush,
 		float deviation,
-		bool clipOriginalGeometry = false);
+		bool clipOriginalGeometry = true);
 
 	void drawRoundedShadow(
 		kke::RoundedRect const& rect,
 		kke::Brush const& brush,
 		float deviation,
-		bool clipOriginalGeometry = false);
+		bool clipOriginalGeometry = true);
 
 	void drawEllipseShadow(
 		kke::Ellipse const& ellipse,
 		kke::Brush const& brush,
-		float deviation, bool clipOriginalGeometry = false);
+		float deviation, bool clipOriginalGeometry = true);
 
 	void drawLineShadow(
 		kke::Point2f start,
