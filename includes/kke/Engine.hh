@@ -218,6 +218,8 @@ public:
 		return effectContainer.acquireOrCreateEffect<T>();
 	}
 
+	void pushTranslate(kke::Point2f const& offset);
+
 	void pushScale(kke::Point2f const& center, kke::Scale2f const& scale);
 
 	void pushRotate(kke::Point2f const& center, float angle);

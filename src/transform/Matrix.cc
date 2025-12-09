@@ -2,6 +2,11 @@
 
 #include "kke/transform/impl/RotateTransform.hh"
 #include "kke/transform/impl/ScaleTransform.hh"
+#include "kke/transform/impl/TranslateTransfrom.hh"
+
+void kke::Matrix::pushTranslate(kke::Point2f const& offset) {
+	transforms.push_back(std::make_shared<kke::TranslateTransform>(offset));
+}
 
 void kke::Matrix::pushScale(kke::Point2f const& center, kke::Scale2f const& scale) {
 	transforms.push_back(std::make_shared<kke::ScaleTransform>(center, scale));

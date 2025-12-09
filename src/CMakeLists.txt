@@ -20,6 +20,7 @@ add_library(kke STATIC
     effect/impl/BlurEffect.cc
     transform/impl/RotateTransform.cc
     transform/impl/ScaleTransform.cc
+    transform/impl/TranslateTransform.cc
     transform/Matrix.cc
     font/FontLoader.cc
 )

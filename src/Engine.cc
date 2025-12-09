@@ -399,6 +399,11 @@ void Engine::blur(
 	}
 }
 
+void Engine::pushTranslate(Point2f const& offset) {
+	matrix.pushTranslate(offset);
+	deviceContext->SetTransform(matrix.build());
+}
+
 void Engine::pushScale(Point2f const& center, Scale2f const& scale) {
 	matrix.pushScale(center, scale);
 	deviceContext->SetTransform(matrix.build());
