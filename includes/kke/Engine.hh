@@ -73,6 +73,8 @@ public:
 
 	void clear();
 
+	kke::Scale2f getViewportSize() const;
+
 	kke::Scale2f getTextSize(
 		std::string const& text,
 		FontWeight weight,

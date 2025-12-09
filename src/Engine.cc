@@ -93,6 +93,11 @@ void Engine::clear() {
 	deviceContext->Clear();
 }
 
+kke::Scale2f Engine::getViewportSize() const {
+    D2D1_SIZE_F size = deviceContext->GetSize();
+    return Scale2f(size.width, size.height);
+}
+
 kke::Scale2f Engine::getTextSize(
 	std::string const& text,
 	FontWeight weight,
