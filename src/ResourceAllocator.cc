@@ -17,9 +17,6 @@ ResourceAllocator::ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* 
 }
 
 void ResourceAllocator::nextFrame() {
-    for (auto& surface : surfaces) {
-        surface.setLocking(false);
-    }
 	for (auto& effectInstance : effectInstances) {
 		effectInstance.unlock();
 	}
