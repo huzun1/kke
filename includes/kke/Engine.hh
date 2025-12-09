@@ -234,19 +234,21 @@ public:
 
 	void popSurface(ID2D1Bitmap1** output);
 
-private:
-	void copyScreenToEffectBitmap();
-
-	void effect(ID2D1Image* image, std::shared_ptr<Effect> effect);
-
-	void effect(std::shared_ptr<Effect> effect);
-
+	// FIXME: we don't want to expose this api, but currently we need it for rendering surface output with opacity...
+	// In the future, we will replace whole surface background with command list API...
 	void drawBitmap(
 		ID2D1Bitmap* bitmap,
 		kke::Rect const& dimension,
 		float opacity = 1.0f,
 		kke::InterpolationMode interpolationMode = kke::InterpolationMode::LINEAR,
 		std::optional<kke::Rect> srcRect = std::nullopt);
+
+private:
+	void copyScreenToEffectBitmap();
+
+	void effect(ID2D1Image* image, std::shared_ptr<Effect> effect);
+
+	void effect(std::shared_ptr<Effect> effect);
 
 	std::wstring toWString(std::string const& str);
 
