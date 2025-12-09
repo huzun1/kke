@@ -2,6 +2,7 @@
 
 #include <d2d1_1.h>
 #include <wrl/client.h>
+#include <memory>
 
 namespace kke {
 class RenderSurface {
@@ -17,6 +18,6 @@ public:
 
 	ID2D1Bitmap1* getRenderTarget();
 
-	static RenderSurface createSurface(ID2D1DeviceContext* context);
+	static std::shared_ptr<RenderSurface> createSurface(ID2D1DeviceContext* context);
 };
 };	// namespace kke

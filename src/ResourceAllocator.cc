@@ -18,7 +18,7 @@ ResourceAllocator::ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* 
 
 void ResourceAllocator::nextFrame() {
 	for (auto& effectInstance : effectInstances) {
-		effectInstance.unlock();
+		effectInstance->unlock();
 	}
 }
 
@@ -130,24 +130,24 @@ IDWriteTextLayout* ResourceAllocator::acquireOrCreateTextLayout(std::wstring con
 EffectInstance* ResourceAllocator::acquireOrCreateEffect(std::shared_ptr<Effect> effect) {
 	// TODO: Implement resource limit?
 	for (auto& effectInstance : effectInstances) {
-		bool sameEffect = effectInstance.getGUID() == effect->effectGuid();
-		if (sameEffect && !effectInstance.isLocking()) {
-			return &effectInstance;
+		bool sameEffect = effectInstance->getGUID() == effect->effectGuid();
+		if (sameEffect && !effectInstance->isLocking()) {
+			return effectInstance.get();
 		}
 	}
-	EffectInstance effectInstance(deviceContext, effect->effectGuid());
+	auto effectInstance = std::make_shared<EffectInstance>(deviceContext, effect->effectGuid());
 	effectInstances.push_back(effectInstance);
-	return &effectInstances.back();
+	return effectInstance.get();
 }
 
 RenderSurface* ResourceAllocator::acquireOrCreateSurface() {
 	// TODO: Implement resource limit?
 	for (auto& surface : surfaces) {
-		if (!surface.isLocking()) {
-			return &surface;
+		if (!surface->isLocking()) {
+			return surface.get();
 		}
 	}
-	RenderSurface surface = RenderSurface::createSurface(deviceContext);
+	auto surface = RenderSurface::createSurface(deviceContext);
 	surfaces.push_back(surface);
-	return &surfaces.back();
+	return surface.get();
 }

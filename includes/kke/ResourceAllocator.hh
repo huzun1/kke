@@ -35,8 +35,8 @@ class ResourceAllocator {
 	CacheStorage<ID2D1Image> shadowStorage;
 	CacheStorage<IDWriteTextFormat> textFormatStorage;
 	CacheStorage<IDWriteTextLayout> textLayoutStorage;
-	std::vector<EffectInstance> effectInstances;
-	std::vector<RenderSurface> surfaces;
+	std::vector<std::shared_ptr<EffectInstance>> effectInstances;
+	std::vector<std::shared_ptr<RenderSurface>> surfaces;
 
 public:
 	ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* context, FontLoader* fontLoader);
