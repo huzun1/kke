@@ -17,6 +17,10 @@ ResourceAllocator::ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* 
 }
 
 void ResourceAllocator::nextFrame() {
+    for (auto& surface : surfaces) {
+        // NOTE: We unlock here, because we sometimes want to re-use the bitmap immediately result as a effect input...
+        surface->setLocking(false);
+    }
 	for (auto& effectInstance : effectInstances) {
 		effectInstance->unlock();
 	}

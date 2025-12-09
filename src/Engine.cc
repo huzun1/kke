@@ -455,7 +455,6 @@ void Engine::copyScreenToEffectBitmap() {
 void Engine::popSurface(ID2D1Bitmap1** output) {
 	deviceContext->Flush();	 // To apply current commands to the render target
 	RenderSurface* currentSurface = surfaceStack.top();
-	currentSurface->setLocking(false);
 	surfaceStack.pop();
 	// Restore the render target
 	if (surfaceStack.empty()) {
