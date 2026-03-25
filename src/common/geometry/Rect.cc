@@ -6,7 +6,10 @@
 #include "kke/common/Geometry.hh"
 #include "kke/internal/Hasher.hh"
 
+#include "../../internal/HResult.hh"
+
 using namespace kke;
+using kke::internal::throwIfFailed;
 
 Rect::Rect()
 	: x1(0.0f),
@@ -23,8 +26,10 @@ Rect::Rect(float x1, float y1, float x2, float y2)
 }
 
 void Rect::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
-	ID2D1RectangleGeometry* rectangleGeometry;
-	factory->CreateRectangleGeometry(rectF(), &rectangleGeometry);
+	ID2D1RectangleGeometry* rectangleGeometry = nullptr;
+	throwIfFailed(
+		factory->CreateRectangleGeometry(rectF(), &rectangleGeometry),
+		"Failed to create rectangle geometry");
 	*output = rectangleGeometry;
 }
 

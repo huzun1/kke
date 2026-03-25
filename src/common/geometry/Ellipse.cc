@@ -5,7 +5,10 @@
 #include "kke/common/Geometry.hh"
 #include "kke/internal/Hasher.hh"
 
+#include "../../internal/HResult.hh"
+
 using namespace kke;
+using kke::internal::throwIfFailed;
 
 Ellipse::Ellipse()
 	: point(kke::Point2f{0.0f, 0.0f}), radius(0.0f) {
@@ -16,8 +19,10 @@ Ellipse::Ellipse(float x, float y, float radius)
 }
 
 void Ellipse::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
-	ID2D1EllipseGeometry* ellipseGeometry;
-	factory->CreateEllipseGeometry(ellipse(), &ellipseGeometry);
+	ID2D1EllipseGeometry* ellipseGeometry = nullptr;
+	throwIfFailed(
+		factory->CreateEllipseGeometry(ellipse(), &ellipseGeometry),
+		"Failed to create ellipse geometry");
 	*output = ellipseGeometry;
 }
 

@@ -5,11 +5,9 @@
 #include <winnt.h>
 #include <wrl/client.h>
 
-using namespace Microsoft::WRL;
-
 class EffectInstance {
 	GUID guid;
-	ComPtr<ID2D1Effect> d2d1Effect;
+	Microsoft::WRL::ComPtr<ID2D1Effect> d2d1Effect;
 	bool isLocked = false;
 
 public:
@@ -21,7 +19,7 @@ public:
 
 	GUID const& getGUID() const;
 
-	ComPtr<ID2D1Effect> getD2D1Effect();
+	Microsoft::WRL::ComPtr<ID2D1Effect> getD2D1Effect();
 
 	EffectInstance(ID2D1DeviceContext* deviceContext, GUID guid);
 };

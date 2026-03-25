@@ -2,7 +2,10 @@
 
 #include "kke/internal/Hasher.hh"
 
+#include "../../internal/HResult.hh"
+
 using namespace kke;
+using kke::internal::throwIfFailed;
 
 RoundedRect::RoundedRect()
 	: Rect({0.0f, 0.0f, 0.0f, 0.0f}),
@@ -20,8 +23,10 @@ RoundedRect::RoundedRect(Rect const& rect, float rounding)
 }
 
 void RoundedRect::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
-	ID2D1RoundedRectangleGeometry* roundedRectangleGeometry;
-	factory->CreateRoundedRectangleGeometry(roundedRect(), &roundedRectangleGeometry);
+	ID2D1RoundedRectangleGeometry* roundedRectangleGeometry = nullptr;
+	throwIfFailed(
+		factory->CreateRoundedRectangleGeometry(roundedRect(), &roundedRectangleGeometry),
+		"Failed to create rounded rectangle geometry");
 	*output = roundedRectangleGeometry;
 }
 

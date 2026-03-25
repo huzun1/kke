@@ -1,5 +1,7 @@
 #include <kke/transform/Matrix.hh>
 
+#include <stdexcept>
+
 #include "kke/transform/impl/RotateTransform.hh"
 #include "kke/transform/impl/ScaleTransform.hh"
 #include "kke/transform/impl/TranslateTransfrom.hh"
@@ -17,10 +19,13 @@ void kke::Matrix::pushRotate(kke::Point2f const& center, float angle) {
 }
 
 void kke::Matrix::pop() {
+	if (transforms.empty()) {
+		throw std::runtime_error("Cannot pop an empty transform stack.");
+	}
 	transforms.pop_back();
 }
 
-D2D1::Matrix3x2F kke::Matrix::build() {
+D2D1::Matrix3x2F kke::Matrix::build() const {
 	D2D1::Matrix3x2F multiplied = D2D1::Matrix3x2F::Identity();
 	for (const auto& transform : transforms) {
 		transform->transform(multiplied);

@@ -12,14 +12,12 @@
 
 #pragma comment(lib, "dwrite.lib")
 
-using namespace Microsoft::WRL;
-
 namespace kke {
 class FontLoader {
-	ComPtr<IDWriteFactory5> writeFactory = nullptr;
-	ComPtr<IDWriteInMemoryFontFileLoader> fontFileLoader = nullptr;
-	ComPtr<IDWriteFontSetBuilder1> fontSetBuilder = nullptr;
-	ComPtr<IDWriteFontCollection1> fontCollection = nullptr;
+	Microsoft::WRL::ComPtr<IDWriteFactory5> writeFactory = nullptr;
+	Microsoft::WRL::ComPtr<IDWriteInMemoryFontFileLoader> fontFileLoader = nullptr;
+	Microsoft::WRL::ComPtr<IDWriteFontSetBuilder1> fontSetBuilder = nullptr;
+	Microsoft::WRL::ComPtr<IDWriteFontCollection1> fontCollection = nullptr;
 
 public:
 	~FontLoader();

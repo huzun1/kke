@@ -7,7 +7,7 @@
 namespace kke {
 class RenderSurface {
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> renderTarget;
-	bool locking;
+	bool locking = false;
 
 public:
 	RenderSurface(Microsoft::WRL::ComPtr<ID2D1Bitmap1> renderTarget);
@@ -16,7 +16,7 @@ public:
 
 	bool isLocking() const;
 
-	ID2D1Bitmap1* getRenderTarget();
+	ID2D1Bitmap1* getRenderTarget() const;
 
 	static std::shared_ptr<RenderSurface> createSurface(ID2D1DeviceContext* context);
 };

@@ -8,8 +8,11 @@
 #include "kke/common/Point.hh"
 #include "kke/internal/Hasher.hh"
 
+#include "../../internal/HResult.hh"
+
 using namespace kke;
 using namespace Microsoft::WRL;
+using kke::internal::throwIfFailed;
 
 Triangle::Triangle()
 	: a(kke::Point2f{0.0f, 0.0f}),
@@ -22,16 +25,22 @@ Triangle::Triangle(kke::Point2f const& a, kke::Point2f const& b, kke::Point2f co
 }
 
 void Triangle::create(ID2D1Factory* factory, ID2D1Geometry** output) const {
-	ID2D1PathGeometry* geometry;
+	ID2D1PathGeometry* geometry = nullptr;
 
-	factory->CreatePathGeometry(&geometry);
+	throwIfFailed(
+		factory->CreatePathGeometry(&geometry),
+		"Failed to create triangle path geometry");
 	ComPtr<ID2D1GeometrySink> sink;
-	geometry->Open(&sink);
+	throwIfFailed(
+		geometry->Open(&sink),
+		"Failed to open triangle geometry sink");
 	sink->BeginFigure(a.point2f(), D2D1_FIGURE_BEGIN_FILLED);
 	sink->AddLine(b.point2f());
 	sink->AddLine(c.point2f());
 	sink->EndFigure(D2D1_FIGURE_END_CLOSED);
-	sink->Close();
+	throwIfFailed(
+		sink->Close(),
+		"Failed to close triangle geometry sink");
 
 	*output = geometry;
 }

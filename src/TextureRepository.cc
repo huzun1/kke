@@ -3,9 +3,16 @@
 #include <wincodec.h>
 #include <wrl/client.h>
 
+#include <stdexcept>
+
 #include <kke/TextureRepository.hh>
 
+#include "internal/HResult.hh"
+
 #pragma comment(lib, "Shlwapi.lib")
+
+using Microsoft::WRL::ComPtr;
+using kke::internal::throwIfFailed;
 
 kke::TextureRepository::TextureRepository(ID2D1DeviceContext* context)
 	: deviceContext(context) {
@@ -27,33 +34,55 @@ void kke::TextureRepository::release(TextureId id) {
 }
 
 kke::TextureId kke::TextureRepository::load(const void* data, size_t size) {
-	static IWICImagingFactory* factory = nullptr;
-	if (!factory) {
-		CoCreateInstance(CLSID_WICImagingFactory, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&factory));
+	if (data == nullptr || size == 0) {
+		throw std::invalid_argument("TextureRepository::load requires non-empty texture data.");
 	}
 
-	auto stream = SHCreateMemStream(reinterpret_cast<const uint8_t*>(data), size);
-	ComPtr<IWICBitmapDecoder> decoder;
-	factory->CreateDecoderFromStream(stream, NULL, WICDecodeMetadataCacheOnLoad, &decoder);
-	ComPtr<IWICBitmapFrameDecode> frame;
-	decoder->GetFrame(0, &frame);
-	ComPtr<IWICFormatConverter> converter;
-	factory->CreateFormatConverter(&converter);
+	static ComPtr<IWICImagingFactory> factory;
+	if (!factory) {
+		throwIfFailed(
+			CoCreateInstance(CLSID_WICImagingFactory, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(factory.ReleaseAndGetAddressOf())),
+			"Failed to create WIC imaging factory");
+	}
 
-	converter->Initialize(
-		frame.Get(),
-		GUID_WICPixelFormat32bppPBGRA,
-		WICBitmapDitherTypeNone,
-		NULL,
-		0.0f,
-		WICBitmapPaletteTypeCustom);
+	ComPtr<IStream> stream;
+	stream.Attach(SHCreateMemStream(reinterpret_cast<const uint8_t*>(data), static_cast<UINT>(size)));
+	if (!stream) {
+		throw std::runtime_error("Failed to create texture input stream.");
+	}
+
+	ComPtr<IWICBitmapDecoder> decoder;
+	throwIfFailed(
+		factory->CreateDecoderFromStream(stream.Get(), nullptr, WICDecodeMetadataCacheOnLoad, decoder.GetAddressOf()),
+		"Failed to create WIC bitmap decoder");
+
+	ComPtr<IWICBitmapFrameDecode> frame;
+	throwIfFailed(
+		decoder->GetFrame(0, frame.GetAddressOf()),
+		"Failed to read WIC bitmap frame");
+
+	ComPtr<IWICFormatConverter> converter;
+	throwIfFailed(
+		factory->CreateFormatConverter(converter.GetAddressOf()),
+		"Failed to create WIC format converter");
+
+	throwIfFailed(
+		converter->Initialize(
+			frame.Get(),
+			GUID_WICPixelFormat32bppPBGRA,
+			WICBitmapDitherTypeNone,
+			nullptr,
+			0.0f,
+			WICBitmapPaletteTypeCustom),
+		"Failed to initialize WIC format converter");
 
 	ComPtr<ID2D1Bitmap> bitmap;
-	deviceContext->CreateBitmapFromWicBitmap(converter.Get(), NULL, &bitmap);
+	throwIfFailed(
+		deviceContext->CreateBitmapFromWicBitmap(converter.Get(), nullptr, bitmap.GetAddressOf()),
+		"Failed to create D2D bitmap from texture data");
 
-	TextureId id = assignTexId();
+	const TextureId id = assignTexId();
 	textures.emplace(id, bitmap);
-
 	return id;
 }
 

@@ -8,20 +8,19 @@
 #include <cstddef>
 #include <unordered_map>
 
-using namespace Microsoft::WRL;
-
 namespace kke {
-typedef std::size_t TextureId;
+using TextureId = std::size_t;
+
 class TextureRepository {
 	ID2D1DeviceContext* deviceContext;
-	std::unordered_map<TextureId, ComPtr<ID2D1Bitmap>> textures;
+	std::unordered_map<TextureId, Microsoft::WRL::ComPtr<ID2D1Bitmap>> textures;
 
 	TextureId nextId = 0;
 
 public:
 	TextureRepository(ID2D1DeviceContext* context);
 
-	ComPtr<ID2D1Bitmap> getTexture(TextureId id);
+	Microsoft::WRL::ComPtr<ID2D1Bitmap> getTexture(TextureId id);
 
 	TextureId load(const void* data, size_t size);
 

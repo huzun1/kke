@@ -9,6 +9,10 @@
 #include "kke/common/Point.hh"
 #include "kke/internal/Hasher.hh"
 
+#include "../internal/HResult.hh"
+
+using kke::internal::throwIfFailed;
+
 kke::LinearGradientBrush::LinearGradientBrush(kke::Color4f const& startColor,
 											  kke::Color4f const& endColor,
 											  kke::Point2f const& startPoint,
@@ -45,19 +49,24 @@ void kke::LinearGradientBrush::create(ID2D1DeviceContext* context, ID2D1Brush** 
 		endPoint = kke::Point2f{centerX - offsetX, centerY - offsetY};
 	}
 
-	ID2D1GradientStopCollection* gradientStopCollection;
+	ID2D1GradientStopCollection* gradientStopCollection = nullptr;
 	std::vector<D2D1_GRADIENT_STOP> gradientStops;
 	for (int i = 0; i < colors.size(); i++) {
 		const D2D1_COLOR_F color = D2D1::ColorF(colors[i].r, colors[i].g, colors[i].b, colors[i].a);
 		const float position = i * 1.0f / (colors.size() - 1);
 		gradientStops.emplace_back(position, color);
 	}
-	context->CreateGradientStopCollection(gradientStops.data(), gradientStops.size(), D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &gradientStopCollection);
+	throwIfFailed(
+		context->CreateGradientStopCollection(gradientStops.data(), gradientStops.size(), D2D1_GAMMA_2_2, D2D1_EXTEND_MODE_CLAMP, &gradientStopCollection),
+		"Failed to create gradient stop collection");
 
-	ID2D1LinearGradientBrush* brush;
-	context->CreateLinearGradientBrush(
-		D2D1::LinearGradientBrushProperties(D2D1::Point2F(startPoint.x, startPoint.y), D2D1::Point2F(endPoint.x, endPoint.y)),
-		gradientStopCollection, &brush);
+	ID2D1LinearGradientBrush* brush = nullptr;
+	throwIfFailed(
+		context->CreateLinearGradientBrush(
+			D2D1::LinearGradientBrushProperties(D2D1::Point2F(startPoint.x, startPoint.y), D2D1::Point2F(endPoint.x, endPoint.y)),
+			gradientStopCollection,
+			&brush),
+		"Failed to create linear gradient brush");
 	gradientStopCollection->Release();
 
 	*output = brush;

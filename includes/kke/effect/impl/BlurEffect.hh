@@ -21,7 +21,7 @@ enum class BlurBorderMode {
 class BlurEffect : public Effect {
 	float deviation = 0.0f;
 	BlurOptimization optimization = BlurOptimization::BALANCED;
-	BlurBorderMode borderMode;
+	BlurBorderMode borderMode = BlurBorderMode::HARD;
 
 public:
 	GUID effectGuid() const override;
@@ -30,6 +30,6 @@ public:
 	DEFINE_GETTER_SETTER(BlurOptimization, Optimization, optimization);
 	DEFINE_GETTER_SETTER(BlurBorderMode, BorderMode, borderMode);
 
-	void setProperties(ComPtr<ID2D1Effect> effectInstance) const override;
+	void setProperties(Microsoft::WRL::ComPtr<ID2D1Effect> effectInstance) const override;
 };
 };	// namespace kke

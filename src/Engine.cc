@@ -1,101 +1,202 @@
 #include "kke/Engine.hh"
 
+#include <Windows.h>
 #include <d2d1.h>
 #include <d2d1_1.h>
-#include <d2d1_1helper.h>
 #include <d2d1helper.h>
-#include <dcommon.h>
+#include <dwrite.h>
 #include <wincodec.h>
 #include <wrl/client.h>
 
-#include <cstdint>
 #include <memory>
+#include <optional>
+#include <stack>
+#include <stdexcept>
+#include <string>
+#include <utility>
 
+#include "internal/HResult.hh"
 #include "kke/RenderSurface.hh"
 #include "kke/ResourceAllocator.hh"
+#include "kke/ShadowDispatcher.hh"
 #include "kke/TextureRepository.hh"
-#include "kke/common/Geometry.hh"
-#include "kke/common/Point.hh"
-#include "kke/common/Scale.hh"
-#include "kke/common/geometry/Rect.hh"
-#include "kke/effect/EffectContainer.hh"
 #include "kke/effect/EffectInstance.hh"
-#include "kke/effect/impl/BlurEffect.hh"
-#include "kke/font/FontData.hh"
+#include "kke/font/FontLoader.hh"
 #include "kke/internal/Hasher.hh"
 #include "kke/transform/Matrix.hh"
 
-using namespace kke;
+using Microsoft::WRL::ComPtr;
+using kke::internal::throwIfFailed;
 
-Engine::Engine(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext)
-	: factory(factory), deviceContext(deviceContext), textureRepository(deviceContext), resourceAllocator(factory, deviceContext, &fontLoader), effectContainer(deviceContext), shadowDispatcher(deviceContext, &resourceAllocator, &effectContainer) {
+namespace {
+std::wstring toWString(const std::string& str) {
+	const int size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
+	if (size <= 0) {
+		throw std::runtime_error("Failed to convert UTF-8 text to UTF-16.");
+	}
+
+	std::wstring result(static_cast<size_t>(size - 1), L'\0');
+	const int converted = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, result.data(), size);
+	if (converted == 0) {
+		throw std::runtime_error("Failed to convert UTF-8 text to UTF-16.");
+	}
+
+	return result;
 }
 
-void Engine::init(std::vector<FontData> loadFonts) {
-	fontLoader.preInit();
-	for (const auto& font : loadFonts) {
-		fontLoader.loadFont(font.data, font.size);
+D2D1_INTERPOLATION_MODE toD2D1InterpolationMode(kke::InterpolationMode mode) {
+	switch (mode) {
+		case kke::InterpolationMode::NEAREST:
+			return D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
+		case kke::InterpolationMode::LINEAR:
+			return D2D1_INTERPOLATION_MODE_LINEAR;
+		case kke::InterpolationMode::CUBIC:
+			return D2D1_INTERPOLATION_MODE_CUBIC;
+		case kke::InterpolationMode::MULTI_SAMPLE_LINEAR:
+			return D2D1_INTERPOLATION_MODE_MULTI_SAMPLE_LINEAR;
+		case kke::InterpolationMode::ANISOTROPIC:
+			return D2D1_INTERPOLATION_MODE_ANISOTROPIC;
+		case kke::InterpolationMode::HIGH_QUALITY_CUBIC:
+			return D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC;
+		default:
+			throw std::runtime_error("Unsupported interpolation mode.");
 	}
-	fontLoader.init();
+}
+
+void copyScreenToEffectBitmap(ID2D1Bitmap1* renderTarget, ID2D1Bitmap1* effectScreenBitmap) {
+	const D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
+	const D2D1_POINT_2U destPoint(0, 0);
+	const D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
+	throwIfFailed(
+		effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle),
+		"Failed to copy render target into effect bitmap");
+}
+
+void applyEffect(
+	ID2D1DeviceContext* deviceContext,
+	kke::ResourceAllocator* resourceAllocator,
+	kke::Matrix const& matrix,
+	ID2D1Image* image,
+	std::shared_ptr<kke::Effect> const& effect) {
+	EffectInstance* instance = resourceAllocator->acquireOrCreateEffect(effect);
+	instance->lock();
+
+	ComPtr<ID2D1Effect> d2d1Effect = instance->getD2D1Effect();
+	d2d1Effect->SetInput(0, image);
+	effect->setProperties(d2d1Effect);
+
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	deviceContext->DrawImage(d2d1Effect.Get());
+	deviceContext->SetTransform(matrix.build());
+}
+}  // namespace
+
+namespace kke {
+struct Engine::Impl {
+	ID2D1Factory* factory;
+	ID2D1DeviceContext* deviceContext;
+	ComPtr<ID2D1Bitmap1> renderTarget;
+	ComPtr<ID2D1Bitmap1> effectScreenBitmap;
+	kke::FontLoader fontLoader;
+	kke::Matrix matrix;
+	kke::ResourceAllocator resourceAllocator;
+	kke::TextureRepository textureRepository;
+	kke::ShadowDisaptcher shadowDispatcher;
+	std::stack<RenderSurface*> surfaceStack;
+
+	Impl(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext)
+		: factory(factory),
+		  deviceContext(deviceContext),
+		  resourceAllocator(factory, deviceContext, &fontLoader),
+		  textureRepository(deviceContext),
+		  shadowDispatcher(deviceContext, &resourceAllocator) {
+	}
+};
+
+Engine::Engine(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext)
+	: impl(std::make_unique<Impl>(factory, deviceContext)) {
+}
+
+Engine::~Engine() = default;
+
+Engine::Engine(Engine&&) noexcept = default;
+
+Engine& Engine::operator=(Engine&&) noexcept = default;
+
+void Engine::init(std::vector<FontData> loadFonts) {
+	impl->fontLoader.preInit();
+	for (const auto& font : loadFonts) {
+		impl->fontLoader.loadFont(font.data, font.size);
+	}
+	impl->fontLoader.init();
 }
 
 void Engine::begin(ID2D1Bitmap* screen) {
-	// Create a bitmap of the same size as the current screen
-	// and use it as the target
-	D2D1_SIZE_U screenSize = screen->GetPixelSize();
-	float dpiX, dpiY;
+	const D2D1_SIZE_U screenSize = screen->GetPixelSize();
+	float dpiX = 0.0f;
+	float dpiY = 0.0f;
 	screen->GetDpi(&dpiX, &dpiY);
 
-	D2D1_BITMAP_PROPERTIES1 properties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET, screen->GetPixelFormat(), dpiX, dpiY);
-	deviceContext->CreateBitmap(
-		screenSize,
-		nullptr,
-		0,
-		properties,
-		&renderTarget);
+	const D2D1_BITMAP_PROPERTIES1 properties = D2D1::BitmapProperties1(
+		D2D1_BITMAP_OPTIONS_TARGET,
+		screen->GetPixelFormat(),
+		dpiX,
+		dpiY);
+	throwIfFailed(
+		impl->deviceContext->CreateBitmap(
+			screenSize,
+			nullptr,
+			0,
+			properties,
+			impl->renderTarget.ReleaseAndGetAddressOf()),
+		"Failed to create engine render target");
 
-	deviceContext->BeginDraw();
-	deviceContext->SetTarget(renderTarget);
-	deviceContext->Clear();
+	impl->deviceContext->BeginDraw();
+	impl->deviceContext->SetTarget(impl->renderTarget.Get());
+	impl->deviceContext->Clear();
 
-	D2D1_RECT_F destRectangle(0, 0, (float)screenSize.width, (float)screenSize.height);
-	deviceContext->DrawBitmap(screen, destRectangle);
+	const D2D1_RECT_F destRectangle(0.0f, 0.0f, static_cast<float>(screenSize.width), static_cast<float>(screenSize.height));
+	impl->deviceContext->DrawBitmap(screen, destRectangle);
 
-	// Create a temp bitmap
-	deviceContext->CreateBitmap(
-		screenSize,
-		nullptr,
-		0,
-		properties,
-		&effectScreenBitmap);
+	throwIfFailed(
+		impl->deviceContext->CreateBitmap(
+			screenSize,
+			nullptr,
+			0,
+			properties,
+			impl->effectScreenBitmap.ReleaseAndGetAddressOf()),
+		"Failed to create effect staging bitmap");
 
-	// Reset the matrix
-	matrix = Matrix();
-	deviceContext->SetTransform(matrix.build());
+	impl->matrix = Matrix();
+	impl->deviceContext->SetTransform(impl->matrix.build());
+	impl->resourceAllocator.nextFrame();
 
-	resourceAllocator.nextFrame();
-
-	deviceContext->Flush();
+	throwIfFailed(impl->deviceContext->Flush(), "Failed to flush engine begin state");
 }
 
 void Engine::end(ID2D1Image** output) {
-	deviceContext->EndDraw();
-	*output = renderTarget;
-	effectScreenBitmap->Release();
+	if (output == nullptr) {
+		throw std::invalid_argument("Engine::end requires a non-null output pointer.");
+	}
+
+	throwIfFailed(impl->deviceContext->EndDraw(), "Failed to end engine draw pass");
+	impl->renderTarget.CopyTo(output);
+	impl->renderTarget.Reset();
+	impl->effectScreenBitmap.Reset();
 }
 
 void Engine::flush() {
-	deviceContext->Flush();
-	copyScreenToEffectBitmap();
+	throwIfFailed(impl->deviceContext->Flush(), "Failed to flush draw commands");
+	copyScreenToEffectBitmap(impl->renderTarget.Get(), impl->effectScreenBitmap.Get());
 }
 
 void Engine::clear() {
-	deviceContext->Clear();
+	impl->deviceContext->Clear();
 }
 
 kke::Scale2f Engine::getViewportSize() const {
-    D2D1_SIZE_F size = deviceContext->GetSize();
-    return Scale2f(size.width, size.height);
+	const D2D1_SIZE_F size = impl->deviceContext->GetSize();
+	return Scale2f(size.width, size.height);
 }
 
 kke::Scale2f Engine::getTextSize(
@@ -111,35 +212,35 @@ kke::Scale2f Engine::getTextSize(
 	FontWeight weight,
 	std::wstring const& fontFamily,
 	int32_t fontSize) {
-	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
-	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.acquireOrCreateTextLayout(text, format.Get());
-	DWRITE_TEXT_METRICS metrics;
-	layout->GetMetrics(&metrics);
+	IDWriteTextFormat* format = impl->resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	IDWriteTextLayout* layout = impl->resourceAllocator.acquireOrCreateTextLayout(text, format);
+	DWRITE_TEXT_METRICS metrics{};
+	throwIfFailed(layout->GetMetrics(&metrics), "Failed to query text metrics");
 	return Scale2f(metrics.width, metrics.height);
 }
 
 void Engine::drawLine(Point2f start, Point2f end, Brush const& brush, float strokeWidth) {
-	deviceContext->DrawLine(start.point2f(), end.point2f(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
+	impl->deviceContext->DrawLine(start.point2f(), end.point2f(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawTriangle(
 	Triangle const& triangle,
 	Brush const& brush,
 	float strokeWidth) {
-	ComPtr<ID2D1Geometry> geometry = resourceAllocator.acquireOrCreateGeometry(triangle);
-	deviceContext->DrawGeometry(geometry.Get(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
+	ComPtr<ID2D1Geometry> geometry = impl->resourceAllocator.acquireOrCreateGeometry(triangle);
+	impl->deviceContext->DrawGeometry(geometry.Get(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawRect(Rect const& rect, Brush const& brush, float strokeWidth) {
-	deviceContext->DrawRectangle(rect.rectF(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
+	impl->deviceContext->DrawRectangle(rect.rectF(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawRounded(RoundedRect const& rect, Brush const& brush, float strokeWidth) {
-	deviceContext->DrawRoundedRectangle(rect.roundedRect(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
+	impl->deviceContext->DrawRoundedRectangle(rect.roundedRect(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawEllipse(Ellipse const& ellipse, Brush const& brush, float strokeWidth) {
-	deviceContext->DrawEllipse(ellipse.ellipse(), resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
+	impl->deviceContext->DrawEllipse(ellipse.ellipse(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get(), strokeWidth);
 }
 
 void Engine::drawText(
@@ -159,33 +260,32 @@ void Engine::drawText(
 	std::wstring const& fontFamily,
 	int32_t fontSize,
 	Brush const& brush) {
-	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
-	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.acquireOrCreateTextLayout(text, format.Get());
-	D2D1_POINT_2F origin = position.point2f();
-	deviceContext->DrawTextLayout(
-		origin,
-		layout.Get(),
-		resourceAllocator.acquireOrCreateBrush(brush).Get(),
+	IDWriteTextFormat* format = impl->resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	IDWriteTextLayout* layout = impl->resourceAllocator.acquireOrCreateTextLayout(text, format);
+	impl->deviceContext->DrawTextLayout(
+		position.point2f(),
+		layout,
+		impl->resourceAllocator.acquireOrCreateBrush(brush).Get(),
 		D2D1_DRAW_TEXT_OPTIONS_NONE);
 }
 
 void Engine::fillTriangle(
 	Triangle const& triangle,
 	Brush const& brush) {
-	ComPtr<ID2D1Geometry> geometry = resourceAllocator.acquireOrCreateGeometry(triangle);
-	deviceContext->FillGeometry(geometry.Get(), resourceAllocator.acquireOrCreateBrush(brush).Get());
+	ComPtr<ID2D1Geometry> geometry = impl->resourceAllocator.acquireOrCreateGeometry(triangle);
+	impl->deviceContext->FillGeometry(geometry.Get(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get());
 }
 
 void Engine::fillRect(Rect const& rect, Brush const& brush) {
-	deviceContext->FillRectangle(rect.rectF(), resourceAllocator.acquireOrCreateBrush(brush).Get());
+	impl->deviceContext->FillRectangle(rect.rectF(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get());
 }
 
 void Engine::fillRounded(RoundedRect const& rect, Brush const& brush) {
-	deviceContext->FillRoundedRectangle(rect.roundedRect(), resourceAllocator.acquireOrCreateBrush(brush).Get());
+	impl->deviceContext->FillRoundedRectangle(rect.roundedRect(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get());
 }
 
 void Engine::fillEllipse(Ellipse const& ellipse, Brush const& brush) {
-	deviceContext->FillEllipse(ellipse.ellipse(), resourceAllocator.acquireOrCreateBrush(brush).Get());
+	impl->deviceContext->FillEllipse(ellipse.ellipse(), impl->resourceAllocator.acquireOrCreateBrush(brush).Get());
 }
 
 void Engine::drawRectShadow(
@@ -193,23 +293,23 @@ void Engine::drawRectShadow(
 	Brush const& brush,
 	float deviation,
 	bool clipOriginalGeometry) {
-	Point2f offset = shadowDispatcher.computeOffset(rect);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(rect, deviation, [&]() {
+	const Point2f offset = impl->shadowDispatcher.computeOffset(rect);
+	const ComPtr<ID2D1Image> shadowOutput = impl->resourceAllocator.acquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
+		impl->shadowDispatcher.dispatch(rect, deviation, [&]() {
 			fillRect(rect, brush);
 		}, output);
 	});
-	deviceContext->SetTransform(matrix.build());
+	impl->deviceContext->SetTransform(impl->matrix.build());
 
 	if (clipOriginalGeometry) {
-		ComPtr<ID2D1Geometry> clipGeometry = resourceAllocator.acquireOrCreateInvertedGeometry(rect);
-		deviceContext->PushLayer(
+		ComPtr<ID2D1Geometry> clipGeometry = impl->resourceAllocator.acquireOrCreateInvertedGeometry(rect);
+		impl->deviceContext->PushLayer(
 			D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry.Get()),
 			nullptr);
 	}
-	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	impl->deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 	if (clipOriginalGeometry) {
-		deviceContext->PopLayer();
+		impl->deviceContext->PopLayer();
 	}
 }
 
@@ -218,23 +318,23 @@ void Engine::drawRoundedShadow(
 	Brush const& brush,
 	float deviation,
 	bool clipOriginalGeometry) {
-	Point2f offset = shadowDispatcher.computeOffset(rect);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(rect, deviation, [&]() {
+	const Point2f offset = impl->shadowDispatcher.computeOffset(rect);
+	const ComPtr<ID2D1Image> shadowOutput = impl->resourceAllocator.acquireOrDispatchShadow(rect, brush, deviation, [&](ID2D1Image** output) {
+		impl->shadowDispatcher.dispatch(rect, deviation, [&]() {
 			fillRounded(rect, brush);
 		}, output);
 	});
-	deviceContext->SetTransform(matrix.build());
+	impl->deviceContext->SetTransform(impl->matrix.build());
 
 	if (clipOriginalGeometry) {
-		ComPtr<ID2D1Geometry> clipGeometry = resourceAllocator.acquireOrCreateInvertedGeometry(rect);
-		deviceContext->PushLayer(
+		ComPtr<ID2D1Geometry> clipGeometry = impl->resourceAllocator.acquireOrCreateInvertedGeometry(rect);
+		impl->deviceContext->PushLayer(
 			D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry.Get()),
 			nullptr);
 	}
-	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	impl->deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 	if (clipOriginalGeometry) {
-		deviceContext->PopLayer();
+		impl->deviceContext->PopLayer();
 	}
 }
 
@@ -243,27 +343,29 @@ void Engine::drawEllipseShadow(
 	Brush const& brush,
 	float deviation,
 	bool clipOriginalGeometry) {
-	Rect dimension = {ellipse.point.x - ellipse.radius,
-					  ellipse.point.y - ellipse.radius,
-					  ellipse.point.x + ellipse.radius,
-					  ellipse.point.y + ellipse.radius};
-	Point2f offset = shadowDispatcher.computeOffset(dimension);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(ellipse, brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(dimension, deviation, [&]() {
+	const Rect dimension = {
+		ellipse.point.x - ellipse.radius,
+		ellipse.point.y - ellipse.radius,
+		ellipse.point.x + ellipse.radius,
+		ellipse.point.y + ellipse.radius,
+	};
+	const Point2f offset = impl->shadowDispatcher.computeOffset(dimension);
+	const ComPtr<ID2D1Image> shadowOutput = impl->resourceAllocator.acquireOrDispatchShadow(ellipse, brush, deviation, [&](ID2D1Image** output) {
+		impl->shadowDispatcher.dispatch(dimension, deviation, [&]() {
 			fillEllipse(ellipse, brush);
 		}, output);
 	});
-	deviceContext->SetTransform(matrix.build());
+	impl->deviceContext->SetTransform(impl->matrix.build());
 
 	if (clipOriginalGeometry) {
-		ComPtr<ID2D1Geometry> clipGeometry = resourceAllocator.acquireOrCreateInvertedGeometry(ellipse);
-		deviceContext->PushLayer(
+		ComPtr<ID2D1Geometry> clipGeometry = impl->resourceAllocator.acquireOrCreateInvertedGeometry(ellipse);
+		impl->deviceContext->PushLayer(
 			D2D1::LayerParameters(D2D1::InfiniteRect(), clipGeometry.Get()),
 			nullptr);
 	}
-	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	impl->deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 	if (clipOriginalGeometry) {
-		deviceContext->PopLayer();
+		impl->deviceContext->PopLayer();
 	}
 }
 
@@ -273,7 +375,7 @@ void Engine::drawLineShadow(
 	kke::Brush const& brush,
 	float strokeWidth,
 	float deviation) {
-	Rect dimension = {
+	const Rect dimension = {
 		start.x - 1.0f,
 		start.y - 1.0f,
 		end.x + 1.0f,
@@ -281,7 +383,7 @@ void Engine::drawLineShadow(
 	};
 
 	Hasher hasher;
-	hasher.combine(0xFFFFFF);  // Unique identifier for line shadows
+	hasher.combine(0xFFFFFF);
 	hasher.combine(start.x);
 	hasher.combine(start.y);
 	hasher.combine(end.x);
@@ -290,14 +392,14 @@ void Engine::drawLineShadow(
 	hasher.combine(strokeWidth);
 	hasher.combine(deviation);
 
-	Point2f offset = shadowDispatcher.computeOffset(dimension);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, hasher.get(), brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(dimension, deviation, [&]() {
+	const Point2f offset = impl->shadowDispatcher.computeOffset(dimension);
+	const ComPtr<ID2D1Image> shadowOutput = impl->resourceAllocator.acquireOrDispatchShadow(dimension, hasher.get(), brush, deviation, [&](ID2D1Image** output) {
+		impl->shadowDispatcher.dispatch(dimension, deviation, [&]() {
 			drawLine(start, end, brush, strokeWidth);
 		}, output);
 	});
-	deviceContext->SetTransform(matrix.build());
-	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	impl->deviceContext->SetTransform(impl->matrix.build());
+	impl->deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 }
 
 void Engine::drawTextShadow(
@@ -319,35 +421,36 @@ void Engine::drawTextShadow(
 	int32_t fontSize,
 	Brush const& brush,
 	float deviation) {
-	Microsoft::WRL::ComPtr<IDWriteTextFormat> format = resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
-	Microsoft::WRL::ComPtr<IDWriteTextLayout> layout = resourceAllocator.acquireOrCreateTextLayout(text, format.Get());
-	DWRITE_TEXT_METRICS metrics;
-	layout->GetMetrics(&metrics);
-	Rect dimension = {
+	IDWriteTextFormat* format = impl->resourceAllocator.acquireOrCreateTextFormat(fontFamily, fontSize, weight);
+	IDWriteTextLayout* layout = impl->resourceAllocator.acquireOrCreateTextLayout(text, format);
+	DWRITE_TEXT_METRICS metrics{};
+	throwIfFailed(layout->GetMetrics(&metrics), "Failed to query text shadow metrics");
+	const Rect dimension = {
 		position.x,
 		position.y,
 		position.x + metrics.width,
-		position.y + metrics.height};
-	Point2f offset = shadowDispatcher.computeOffset(dimension);
-	Microsoft::WRL::ComPtr<ID2D1Image> shadowOutput = resourceAllocator.acquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
-		shadowDispatcher.dispatch(dimension, deviation, [&]() {
+		position.y + metrics.height,
+	};
+	const Point2f offset = impl->shadowDispatcher.computeOffset(dimension);
+	const ComPtr<ID2D1Image> shadowOutput = impl->resourceAllocator.acquireOrDispatchShadow(dimension, brush, deviation, [&](ID2D1Image** output) {
+		impl->shadowDispatcher.dispatch(dimension, deviation, [&]() {
 			drawText(position, text, weight, fontFamily, fontSize, brush);
 		}, output);
 	});
-	deviceContext->SetTransform(matrix.build());
-	deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
+	impl->deviceContext->SetTransform(impl->matrix.build());
+	impl->deviceContext->DrawImage(shadowOutput.Get(), offset.point2f());
 }
 
 uint64_t Engine::loadTexture(const void* data, size_t size) {
-	return textureRepository.load(data, size);
+	return impl->textureRepository.load(data, size);
 }
 
 void Engine::releaseTexture(uint64_t index) {
-	textureRepository.release(index);
+	impl->textureRepository.release(index);
 }
 
 void Engine::drawImage(ID2D1Image* image, InterpolationMode interpolationMode) {
-	deviceContext->DrawImage(
+	impl->deviceContext->DrawImage(
 		image,
 		nullptr,
 		nullptr,
@@ -356,7 +459,7 @@ void Engine::drawImage(ID2D1Image* image, InterpolationMode interpolationMode) {
 }
 
 void Engine::drawTexture(size_t index, Rect const& dimension, float opacity, InterpolationMode interpolationMode, std::optional<Rect> srcRect) {
-	ComPtr<ID2D1Bitmap> texture = textureRepository.getTexture(index);
+	const ComPtr<ID2D1Bitmap> texture = impl->textureRepository.getTexture(index);
 	if (!texture) {
 		return;
 	}
@@ -368,17 +471,17 @@ void Engine::blur(
 	kke::Geometry* fillGeometry,
 	BlurBorderMode borderMode,
 	BlurOptimization optimization) {
-	if (fillGeometry) {
+	if (fillGeometry != nullptr) {
 		pushLayer(*fillGeometry);
 	}
 
-	std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
+	std::shared_ptr<BlurEffect> blurEffect = acquireOrCreateEffect<BlurEffect>();
 	blurEffect->setDeviation(deviation);
 	blurEffect->setBorderMode(borderMode);
 	blurEffect->setOptimization(optimization);
-	effect(blurEffect);
+	applyEffect(impl->deviceContext, &impl->resourceAllocator, impl->matrix, impl->effectScreenBitmap.Get(), blurEffect);
 
-	if (fillGeometry) {
+	if (fillGeometry != nullptr) {
 		popLayer();
 	}
 }
@@ -389,97 +492,82 @@ void Engine::blur(
 	kke::Geometry* fillGeometry,
 	BlurBorderMode borderMode,
 	BlurOptimization optimization) {
-	if (fillGeometry) {
+	if (fillGeometry != nullptr) {
 		pushLayer(*fillGeometry);
 	}
 
-	std::shared_ptr<BlurEffect> blurEffect = effectContainer.acquireOrCreateEffect<BlurEffect>();
+	std::shared_ptr<BlurEffect> blurEffect = acquireOrCreateEffect<BlurEffect>();
 	blurEffect->setDeviation(deviation);
 	blurEffect->setBorderMode(borderMode);
 	blurEffect->setOptimization(optimization);
-	effect(input, blurEffect);
+	applyEffect(impl->deviceContext, &impl->resourceAllocator, impl->matrix, input, blurEffect);
 
-	if (fillGeometry) {
+	if (fillGeometry != nullptr) {
 		popLayer();
 	}
 }
 
 void Engine::pushTranslate(Point2f const& offset) {
-	matrix.pushTranslate(offset);
-	deviceContext->SetTransform(matrix.build());
+	impl->matrix.pushTranslate(offset);
+	impl->deviceContext->SetTransform(impl->matrix.build());
 }
 
 void Engine::pushScale(Point2f const& center, Scale2f const& scale) {
-	matrix.pushScale(center, scale);
-	deviceContext->SetTransform(matrix.build());
+	impl->matrix.pushScale(center, scale);
+	impl->deviceContext->SetTransform(impl->matrix.build());
 }
 
 void Engine::pushRotate(Point2f const& center, float angle) {
-	matrix.pushRotate(center, angle);
-	deviceContext->SetTransform(matrix.build());
+	impl->matrix.pushRotate(center, angle);
+	impl->deviceContext->SetTransform(impl->matrix.build());
 }
 
 void Engine::popTransform() {
-	matrix.pop();
-	deviceContext->SetTransform(matrix.build());
+	impl->matrix.pop();
+	impl->deviceContext->SetTransform(impl->matrix.build());
 }
 
 void Engine::pushSurface() {
-	RenderSurface* surface = resourceAllocator.acquireOrCreateSurface();
+	RenderSurface* surface = impl->resourceAllocator.acquireOrCreateSurface();
 	surface->setLocking(true);
-	deviceContext->SetTarget(surface->getRenderTarget());
-	deviceContext->Clear();
-	surfaceStack.push(surface);
+	impl->deviceContext->SetTarget(surface->getRenderTarget());
+	impl->deviceContext->Clear();
+	impl->surfaceStack.push(surface);
 }
 
 void Engine::pushLayer(Geometry const& geometry) {
-	deviceContext->PushLayer(
+	impl->deviceContext->PushLayer(
 		D2D1::LayerParameters(
 			D2D1::InfiniteRect(),
-			resourceAllocator.acquireOrCreateGeometry(geometry).Get()),
+			impl->resourceAllocator.acquireOrCreateGeometry(geometry).Get()),
 		nullptr);
 }
 
 void Engine::popLayer() {
-	deviceContext->PopLayer();
-}
-
-void Engine::copyScreenToEffectBitmap() {
-	// Copy the render target to the temp buffer
-	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
-	D2D1_POINT_2U destPoint(0, 0);
-	D2D1_RECT_U srcRectangle(0, 0, pixelSize.width, pixelSize.height);
-	effectScreenBitmap->CopyFromBitmap(&destPoint, renderTarget, &srcRectangle);
+	impl->deviceContext->PopLayer();
 }
 
 void Engine::popSurface(ID2D1Bitmap1** output) {
-	deviceContext->Flush();	 // To apply current commands to the render target
-	RenderSurface* currentSurface = surfaceStack.top();
-	surfaceStack.pop();
-	// Restore the render target
-	if (surfaceStack.empty()) {
-		deviceContext->SetTarget(renderTarget);
-	} else {
-		deviceContext->SetTarget(surfaceStack.top()->getRenderTarget());
+	if (output == nullptr) {
+		throw std::invalid_argument("Engine::popSurface requires a non-null output pointer.");
 	}
-	*output = currentSurface->getRenderTarget();
-}
+	if (impl->surfaceStack.empty()) {
+		throw std::runtime_error("Engine::popSurface called with an empty surface stack.");
+	}
 
-void Engine::effect(ID2D1Image* image, std::shared_ptr<Effect> effect) {
-	EffectInstance* instance = resourceAllocator.acquireOrCreateEffect(effect);
-	instance->lock();
+	throwIfFailed(impl->deviceContext->Flush(), "Failed to flush off-screen surface");
+	RenderSurface* currentSurface = impl->surfaceStack.top();
+	impl->surfaceStack.pop();
 
-	ComPtr<ID2D1Effect> d2d1Effect = instance->getD2D1Effect();
-	d2d1Effect->SetInput(0, image);
-	effect->setProperties(d2d1Effect);
+	if (impl->surfaceStack.empty()) {
+		impl->deviceContext->SetTarget(impl->renderTarget.Get());
+	} else {
+		impl->deviceContext->SetTarget(impl->surfaceStack.top()->getRenderTarget());
+	}
 
-	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	deviceContext->DrawImage(d2d1Effect.Get());
-	deviceContext->SetTransform(matrix.build());
-}
-
-void Engine::effect(std::shared_ptr<Effect> effect) {
-	this->effect(effectScreenBitmap, effect);
+	ID2D1Bitmap1* surfaceTarget = currentSurface->getRenderTarget();
+	surfaceTarget->AddRef();
+	*output = surfaceTarget;
 }
 
 void Engine::drawBitmap(
@@ -488,38 +576,13 @@ void Engine::drawBitmap(
 	float opacity,
 	InterpolationMode interpolationMode,
 	std::optional<Rect> srcRect) {
-	D2D1_RECT_F rect = dimension.rectF();
-	D2D1_RECT_F srcRectangle;
+	const D2D1_RECT_F rect = dimension.rectF();
+	D2D1_RECT_F srcRectangle{};
 	D2D1_RECT_F* srcRectanglePtr = nullptr;
 	if (srcRect) {
 		srcRectangle = srcRect->rectF();
 		srcRectanglePtr = &srcRectangle;
 	}
-	deviceContext->DrawBitmap(bitmap, &rect, opacity, toD2D1InterpolationMode(interpolationMode), srcRectanglePtr);
+	impl->deviceContext->DrawBitmap(bitmap, &rect, opacity, toD2D1InterpolationMode(interpolationMode), srcRectanglePtr);
 }
-
-std::wstring Engine::toWString(std::string const& str) {
-	uint32_t size = MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, nullptr, 0);
-	std::wstring result(size - 1, 0);
-	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, &result[0], size);
-	return result;
-}
-
-D2D1_INTERPOLATION_MODE Engine::toD2D1InterpolationMode(InterpolationMode mode) {
-	switch (mode) {
-		case InterpolationMode::NEAREST:
-			return D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
-		case InterpolationMode::LINEAR:
-			return D2D1_INTERPOLATION_MODE_LINEAR;
-		case InterpolationMode::CUBIC:
-			return D2D1_INTERPOLATION_MODE_CUBIC;
-		case InterpolationMode::MULTI_SAMPLE_LINEAR:
-			return D2D1_INTERPOLATION_MODE_MULTI_SAMPLE_LINEAR;
-		case InterpolationMode::ANISOTROPIC:
-			return D2D1_INTERPOLATION_MODE_ANISOTROPIC;
-		case InterpolationMode::HIGH_QUALITY_CUBIC:
-			return D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC;
-		default:
-			return D2D1_INTERPOLATION_MODE_FORCE_DWORD;
-	}
-}
+}  // namespace kke

@@ -12,7 +12,7 @@ class Matrix {
 	std::vector<std::shared_ptr<Transform>> transforms;
 
 public:
-    void pushTranslate(kke::Point2f const& offset);
+	void pushTranslate(kke::Point2f const& offset);
 
 	void pushScale(kke::Point2f const& center, kke::Scale2f const& scale);
 
@@ -20,6 +20,6 @@ public:
 
 	void pop();
 
-	D2D1::Matrix3x2F build();
+	D2D1::Matrix3x2F build() const;
 };
 };	// namespace kke

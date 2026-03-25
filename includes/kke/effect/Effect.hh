@@ -5,8 +5,6 @@
 #include <winnt.h>
 #include <wrl/client.h>
 
-using namespace Microsoft::WRL;
-
 namespace kke {
 class Effect {
 public:
@@ -14,6 +12,6 @@ public:
 
 	virtual GUID effectGuid() const = 0;
 
-	virtual void setProperties(ComPtr<ID2D1Effect> effectInstance) const = 0;
+	virtual void setProperties(Microsoft::WRL::ComPtr<ID2D1Effect> effectInstance) const = 0;
 };
 };	// namespace kke

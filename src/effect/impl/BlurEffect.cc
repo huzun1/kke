@@ -7,7 +7,7 @@ GUID kke::BlurEffect::effectGuid() const {
 	return CLSID_D2D1GaussianBlur;
 }
 
-void kke::BlurEffect::setProperties(ComPtr<ID2D1Effect> effectInstance) const {
+void kke::BlurEffect::setProperties(Microsoft::WRL::ComPtr<ID2D1Effect> effectInstance) const {
 	effectInstance->SetValue(D2D1_GAUSSIANBLUR_PROP_STANDARD_DEVIATION, deviation);
 	switch (optimization) {
 		case kke::BlurOptimization::SPEED:

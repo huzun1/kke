@@ -3,8 +3,13 @@
 #include <dwrite.h>
 #include <winnt.h>
 
+#include <cfloat>
 #include <stdexcept>
-#include <string>
+
+#include "../internal/HResult.hh"
+
+using Microsoft::WRL::ComPtr;
+using kke::internal::throwIfFailed;
 
 using namespace kke;
 
@@ -15,40 +20,49 @@ FontLoader::~FontLoader() {
 }
 
 void FontLoader::preInit() {
-	if (FAILED(DWriteCreateFactory(DWRITE_FACTORY_TYPE_SHARED, __uuidof(writeFactory), reinterpret_cast<IUnknown**>(writeFactory.GetAddressOf())))) {
-		throw std::runtime_error("couldn't create dwrite factory");
-	}
-	if (FAILED(writeFactory->CreateFontSetBuilder(&fontSetBuilder))) {
-		throw std::runtime_error("couldn't create a font set builder");
-	}
-	if (FAILED(writeFactory->CreateInMemoryFontFileLoader(&fontFileLoader))) {
-		throw std::runtime_error("couldn't create in memory font file loader");
-	}
-	if (FAILED(writeFactory->RegisterFontFileLoader(fontFileLoader.Get()))) {
-		throw std::runtime_error("couldn't register font file loader");
-	}
+	throwIfFailed(
+		DWriteCreateFactory(
+			DWRITE_FACTORY_TYPE_SHARED,
+			__uuidof(IDWriteFactory5),
+			reinterpret_cast<IUnknown**>(writeFactory.ReleaseAndGetAddressOf())),
+		"Failed to create DirectWrite factory");
+	throwIfFailed(
+		writeFactory->CreateFontSetBuilder(fontSetBuilder.ReleaseAndGetAddressOf()),
+		"Failed to create DirectWrite font set builder");
+	throwIfFailed(
+		writeFactory->CreateInMemoryFontFileLoader(fontFileLoader.ReleaseAndGetAddressOf()),
+		"Failed to create in-memory font file loader");
+	throwIfFailed(
+		writeFactory->RegisterFontFileLoader(fontFileLoader.Get()),
+		"Failed to register in-memory font file loader");
 }
 
 void FontLoader::loadFont(const void* data, size_t size) {
-	IDWriteFontFile* fontFile;
-	if (FAILED(fontFileLoader->CreateInMemoryFontFileReference(writeFactory.Get(), data, size, nullptr, &fontFile))) {
-		return;
-	}
-	fontSetBuilder->AddFontFile(fontFile);
+	ComPtr<IDWriteFontFile> fontFile;
+	throwIfFailed(
+		fontFileLoader->CreateInMemoryFontFileReference(
+			writeFactory.Get(),
+			data,
+			size,
+			nullptr,
+			fontFile.ReleaseAndGetAddressOf()),
+		"Failed to create in-memory font reference");
+	throwIfFailed(
+		fontSetBuilder->AddFontFile(fontFile.Get()),
+		"Failed to add font to font set builder");
 }
 
 void FontLoader::init() {
-	IDWriteFontSet* fontSet;
-	if (FAILED(fontSetBuilder->CreateFontSet(&fontSet))) {
-		throw std::runtime_error("couldn't create a font set from the builder");
-	}
-	if (FAILED(writeFactory->CreateFontCollectionFromFontSet(fontSet, &fontCollection))) {
-		throw std::runtime_error("couldn't create a font collection from the font set");
-	}
+	ComPtr<IDWriteFontSet> fontSet;
+	throwIfFailed(
+		fontSetBuilder->CreateFontSet(fontSet.ReleaseAndGetAddressOf()),
+		"Failed to create DirectWrite font set");
+	throwIfFailed(
+		writeFactory->CreateFontCollectionFromFontSet(fontSet.Get(), fontCollection.ReleaseAndGetAddressOf()),
+		"Failed to create DirectWrite font collection");
 }
 
 IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, int32_t fontSize, kke::FontWeight weight) {
-	IDWriteTextFormat* textFormat;
 	DWRITE_FONT_WEIGHT dwriteWeight = DWRITE_FONT_WEIGHT_NORMAL;
 	switch (weight) {
 		case kke::FontWeight::LIGHT:
@@ -67,33 +81,34 @@ IDWriteTextFormat* FontLoader::createTextFormat(std::wstring const& fontFamily, 
 			dwriteWeight = DWRITE_FONT_WEIGHT_BOLD;
 			break;
 		default:
-			throw std::runtime_error("unsupported font weight");
+			throw std::runtime_error("Unsupported font weight.");
 	}
-	HRESULT result = writeFactory->CreateTextFormat(
-		fontFamily.c_str(),
-		fontCollection.Get(),
-		dwriteWeight,
-		DWRITE_FONT_STYLE_NORMAL,
-		DWRITE_FONT_STRETCH_NORMAL,
-		static_cast<FLOAT>(fontSize),
-		L"",  // locale
-		&textFormat);
-	if (FAILED(result)) {
-		throw std::runtime_error(std::string("couldn't create text format: {:x}", result));
-	}
-	return textFormat;
+
+	ComPtr<IDWriteTextFormat> textFormat;
+	throwIfFailed(
+		writeFactory->CreateTextFormat(
+			fontFamily.c_str(),
+			fontCollection.Get(),
+			dwriteWeight,
+			DWRITE_FONT_STYLE_NORMAL,
+			DWRITE_FONT_STRETCH_NORMAL,
+			static_cast<FLOAT>(fontSize),
+			L"",
+			textFormat.ReleaseAndGetAddressOf()),
+		"Failed to create DirectWrite text format");
+	return textFormat.Detach();
 }
 
 IDWriteTextLayout* FontLoader::createTextLayout(std::wstring const& text, IDWriteTextFormat* textFormat) {
-	IDWriteTextLayout* textLayout;
-	if (FAILED(writeFactory->CreateTextLayout(
+	ComPtr<IDWriteTextLayout> textLayout;
+	throwIfFailed(
+		writeFactory->CreateTextLayout(
 			text.c_str(),
-			text.length(),
+			static_cast<UINT32>(text.length()),
 			textFormat,
 			FLT_MAX,
 			FLT_MAX,
-			&textLayout))) {
-		throw std::runtime_error("couldn't create text layout");
-	}
-	return textLayout;
+			textLayout.ReleaseAndGetAddressOf()),
+		"Failed to create DirectWrite text layout");
+	return textLayout.Detach();
 }

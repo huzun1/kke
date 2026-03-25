@@ -25,14 +25,23 @@ add_library(kke STATIC
     font/FontLoader.cc
 )
 
+add_library(kke::kke ALIAS kke)
+
 target_include_directories(kke PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../includes>
     $<INSTALL_INTERFACE:include>
 )
+target_link_libraries(kke PUBLIC
+    d2d1
+    dwrite
+    ole32
+    shlwapi
+    windowscodecs
+)
 install(TARGETS kke
     EXPORT kkeTargets
-    ARCHIVE DESTINATION lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../includes/
-    DESTINATION include
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )

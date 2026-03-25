@@ -6,8 +6,9 @@
 #include <wincodec.h>
 #include <wrl/client.h>
 
+#include <cstddef>
 #include <functional>
-#include <future>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -20,8 +21,6 @@
 #include "kke/effect/EffectInstance.hh"
 #include "kke/font/FontLoader.hh"
 #include "kke/font/FontWeight.hh"
-
-using namespace Microsoft::WRL;
 
 namespace kke {
 class ResourceAllocator {
@@ -38,20 +37,23 @@ class ResourceAllocator {
 	std::vector<std::shared_ptr<EffectInstance>> effectInstances;
 	std::vector<std::shared_ptr<RenderSurface>> surfaces;
 
+	static constexpr size_t kEffectInstanceLimit = 16;
+	static constexpr size_t kSurfaceLimit = 8;
+
 public:
 	ResourceAllocator(ID2D1Factory* factory, ID2D1DeviceContext* context, FontLoader* fontLoader);
 
 	void nextFrame();
 
-	ComPtr<ID2D1Brush> acquireOrCreateBrush(kke::Brush const& brush);
+	Microsoft::WRL::ComPtr<ID2D1Brush> acquireOrCreateBrush(kke::Brush const& brush);
 
-	ComPtr<ID2D1Geometry> acquireOrCreateGeometry(kke::Geometry const& geometry);
+	Microsoft::WRL::ComPtr<ID2D1Geometry> acquireOrCreateGeometry(kke::Geometry const& geometry);
 
-	ComPtr<ID2D1Geometry> acquireOrCreateInvertedGeometry(kke::Geometry const& geometry);
+	Microsoft::WRL::ComPtr<ID2D1Geometry> acquireOrCreateInvertedGeometry(kke::Geometry const& geometry);
 
-	ComPtr<ID2D1Image> acquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
+	Microsoft::WRL::ComPtr<ID2D1Image> acquireOrDispatchShadow(kke::Geometry const& geometry, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
 
-	ComPtr<ID2D1Image> acquireOrDispatchShadow(kke::Geometry const& geometry, uint64_t identifierHash, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
+	Microsoft::WRL::ComPtr<ID2D1Image> acquireOrDispatchShadow(kke::Geometry const& geometry, uint64_t identifierHash, kke::Brush const& brush, float strength, std::function<void(ID2D1Image**)> dispatchFunc);
 
 	IDWriteTextFormat* acquireOrCreateTextFormat(std::wstring const& fontFamily, int32_t fontSize, kke::FontWeight weight);
 
@@ -60,5 +62,10 @@ public:
 	EffectInstance* acquireOrCreateEffect(std::shared_ptr<Effect> effect);
 
 	kke::RenderSurface* acquireOrCreateSurface();
+
+private:
+	void trimEffectInstances();
+
+	void trimSurfaces();
 };
 };	// namespace kke

@@ -1,40 +1,30 @@
 #pragma once
 
-#include <d2d1.h>
-#include <d2d1_1.h>
-#include <wincodec.h>
-#include <wrl/client.h>
-
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <optional>
-#include <stack>
 #include <string>
 #include <vector>
 
-#include "RenderSurface.hh"
-#include "ResourceAllocator.hh"
-#include "ShadowDispatcher.hh"
-#include "TextureRepository.hh"
-#include "brush/Brush.hh"
-#include "common/Point.hh"
-#include "common/geometry/Ellipse.hh"
-#include "common/geometry/Rect.hh"
+#include "kke/brush/Brush.hh"
 #include "kke/common/Geometry.hh"
+#include "kke/common/Point.hh"
 #include "kke/common/Scale.hh"
 #include "kke/common/geometry/Ellipse.hh"
+#include "kke/common/geometry/Rect.hh"
 #include "kke/common/geometry/RoundedRect.hh"
 #include "kke/common/geometry/Triangle.hh"
 #include "kke/effect/Effect.hh"
-#include "kke/effect/EffectContainer.hh"
 #include "kke/effect/impl/BlurEffect.hh"
 #include "kke/font/FontData.hh"
-#include "kke/font/FontLoader.hh"
 #include "kke/font/FontWeight.hh"
-#include "kke/transform/Matrix.hh"
 
-using namespace Microsoft::WRL;
+struct ID2D1Factory;
+struct ID2D1DeviceContext;
+struct ID2D1Bitmap;
+struct ID2D1Bitmap1;
+struct ID2D1Image;
 
 namespace kke {
 enum class InterpolationMode {
@@ -47,21 +37,19 @@ enum class InterpolationMode {
 };
 
 class Engine {
-	ID2D1Factory* factory;
-	ID2D1DeviceContext* deviceContext;
-
-	ID2D1Bitmap1* renderTarget;
-	ID2D1Bitmap1* effectScreenBitmap;  // Temporary bitmap for holding screen copies
-	kke::FontLoader fontLoader;
-	kke::Matrix matrix;
-	kke::ResourceAllocator resourceAllocator;
-	kke::TextureRepository textureRepository;
-	kke::EffectContainer effectContainer;
-	kke::ShadowDisaptcher shadowDispatcher;
-	std::stack<RenderSurface*> surfaceStack;
+	struct Impl;
+	std::unique_ptr<Impl> impl;
+	std::vector<std::shared_ptr<Effect>> effects;
 
 public:
 	Engine(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext);
+	~Engine();
+
+	Engine(Engine&&) noexcept;
+	Engine& operator=(Engine&&) noexcept;
+
+	Engine(Engine const&) = delete;
+	Engine& operator=(Engine const&) = delete;
 
 	void init(std::vector<FontData> loadFonts);
 
@@ -160,7 +148,8 @@ public:
 	void drawEllipseShadow(
 		kke::Ellipse const& ellipse,
 		kke::Brush const& brush,
-		float deviation, bool clipOriginalGeometry = true);
+		float deviation,
+		bool clipOriginalGeometry = true);
 
 	void drawLineShadow(
 		kke::Point2f start,
@@ -217,7 +206,14 @@ public:
 
 	template <typename T>
 	std::shared_ptr<T> acquireOrCreateEffect() {
-		return effectContainer.acquireOrCreateEffect<T>();
+		for (const auto& effect : effects) {
+			if (auto casted = std::dynamic_pointer_cast<T>(effect)) {
+				return casted;
+			}
+		}
+		auto effect = std::make_shared<T>();
+		effects.push_back(effect);
+		return effect;
 	}
 
 	void pushTranslate(kke::Point2f const& offset);
@@ -244,16 +240,5 @@ public:
 		float opacity = 1.0f,
 		kke::InterpolationMode interpolationMode = kke::InterpolationMode::LINEAR,
 		std::optional<kke::Rect> srcRect = std::nullopt);
-
-private:
-	void copyScreenToEffectBitmap();
-
-	void effect(ID2D1Image* image, std::shared_ptr<Effect> effect);
-
-	void effect(std::shared_ptr<Effect> effect);
-
-	std::wstring toWString(std::string const& str);
-
-	static D2D1_INTERPOLATION_MODE toD2D1InterpolationMode(kke::InterpolationMode mode);
 };
 };	// namespace kke
