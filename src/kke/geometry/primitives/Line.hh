@@ -1,10 +1,10 @@
 #pragma once
 
 #include "kke/geometry/primitives/Point.hh"
-#include "kke/geometry/Geometry.hh"
+#include "kke/geometry/Boundable.hh"
 
 namespace kke {
-class Line : public Geometry {
+class Line : public Boundable {
 public:
     kke::Point2f start, end;
 
@@ -12,6 +12,6 @@ public:
 
     Line(kke::Point2f const& start, kke::Point2f const& end);
 
-    Boundary getBounding() const override;
+    [[nodiscard]] Boundary getBounding() const override;
 };
 };	// namespace kke

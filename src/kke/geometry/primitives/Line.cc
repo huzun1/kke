@@ -10,7 +10,7 @@ Line::Line() : start(0, 0), end(0, 0) {
 Line::Line(kke::Point2f const& start, kke::Point2f const& end) : start(start), end(end) {
 }
 
-Boundary Line::getBounding() {
+Boundary Line::getBounding() const {
     Boundary boundary;
     boundary.left = std::min(start.x, end.x);
     boundary.right = std::max(start.x, end.x);
