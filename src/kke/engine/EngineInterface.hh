@@ -7,13 +7,11 @@
 #include "kke/geometry/primitives/Point.hh"
 #include "kke/geometry/shapes/Rect.hh"
 #include "kke/geometry/shapes/Triangle.hh"
-#include "kke/renderer/effect/shadow/ShadowAppearance.hh"
-#include "kke/renderer/painting/stroke/StrokeStyle.hh"
-#include "kke/resources/brush/Brush.hh"
-#include "kke/resources/font/FontAppearance.hh"
+#include "kke/appearance/font/FontAppearance.hh"
+#include "kke/appearance/brush/Brush.hh"
+#include "kke/appearance/effect/shadow/ShadowAppearance.hh"
 
 namespace kke {
-
 class EngineInterface {
 public:
 	/* =============== Render Statement ================ */
@@ -22,11 +20,11 @@ public:
 	virtual void endDraw() = 0;
 
 	/* ================= State Control ================== */
-	virtual void pushTranslate(kke::Point2f const& offset) = 0;
+	virtual void pushTranslate(Point2f const& offset) = 0;
 
-	virtual void pushScale(kke::Point2f const& center, kke::Scale2f const& scale) = 0;
+	virtual void pushScale(Point2f const& center, Scale2f const& scale) = 0;
 
-	virtual void pushRotate(kke::Point2f const& center, float angle) = 0;
+	virtual void pushRotate(Point2f const& center, float angle) = 0;
 
 	virtual void popTranslate() = 0;
 
@@ -35,95 +33,95 @@ public:
 	virtual void popRotate() = 0;
 
 	/* ================= Measurement =================== */
-	virtual kke::Scale2f getViewportSize() = 0;
+	virtual Scale2f getViewportSize() = 0;
 
-	virtual kke::Scale2f measureTextSize(
+	virtual Scale2f measureTextSize(
 		std::string_view text,
-		kke::FontAppearance const& appearance) = 0;
+		FontAppearance const& fontAppearance) = 0;
 
-	virtual kke::Scale2f measureTextSize(
+	virtual Scale2f measureTextSize(
 		std::wstring_view text,
-		kke::FontAppearance const& appearance) = 0;
+		FontAppearance const& fontAppearance) = 0;
 
 	/* ================= Stroke Rendering ================= */
 	virtual void drawLine(
-		kke::Line const& line,
-		kke::Brush const& brush,
-		StrokeStyle const& style) = 0;
+		Line const& line,
+		Brush const& brush,
+		FontAppearance const& style) = 0;
 
 	virtual void drawTriangle(
-		kke::Triangle const& triangle,
-		kke::Brush const& brush,
-		StrokeStyle const& style) = 0;
+		Triangle const& triangle,
+		Brush const& brush,
+		FontAppearance const& style) = 0;
 
 	virtual void drawRect(
-		kke::Rect const& rect,
-		kke::Brush const& brush,
-		StrokeStyle const& style) = 0;
+		Rect const& rect,
+		Brush const& brush,
+		FontAppearance const& style) = 0;
 
 	virtual void drawRounded(
-		kke::RoundedRect const& roundedRect,
-		kke::Brush const& brush,
-		StrokeStyle const& style) = 0;
+		RoundedRect const& roundedRect,
+		Brush const& brush,
+		FontAppearance const& style) = 0;
 
 	/* ================= Fill Rendering ================= */
 	virtual void fillTriangle(
-		kke::Triangle const& triangle,
-		kke::Brush const& brush) = 0;
+		Triangle const& triangle,
+		Brush const& brush) = 0;
 
 	virtual void fillRect(
-		kke::Rect const& rect,
-		kke::Brush const& brush) = 0;
+		Rect const& rect,
+		Brush const& brush) = 0;
 
 	virtual void fillRounded(
-		kke::RoundedRect const& roundedRect,
-		kke::Brush const& brush) = 0;
+		RoundedRect const& roundedRect,
+		Brush const& brush) = 0;
 
 	virtual void fillText(
 		std::string_view text,
-		kke::Point2f const& position,
-		kke::Brush const& brush,
-		kke::FontAppearance const& appearance) = 0;
+		Point2f const& position,
+		Brush const& brush,
+		FontAppearance const& appearance) = 0;
 
 	virtual void fillText(
 		std::wstring_view text,
-		kke::Point2f const& position,
-		kke::Brush const& brush,
-		kke::FontAppearance const& appearance) = 0;
+		Point2f const& position,
+		Brush const& brush,
+		FontAppearance const& appearance) = 0;
 
 	/* ================= Shadow Rendering ================= */
 	virtual void renderLineShadow(
-		kke::Line const& line,
-		kke::Brush const& brush,
-		kke::ShadowAppearance const& appearance) = 0;
+		Line const& line,
+		Brush const& brush,
+		ShadowAppearance const& appearance) = 0;
 
 	virtual void renderTriangleShadow(
-		kke::Triangle const& triangle,
-		kke::Brush const& brush,
-		kke::ShadowAppearance const& appearance) = 0;
+		Triangle const& triangle,
+		Brush const& brush,
+		ShadowAppearance const& appearance) = 0;
 
 	virtual void renderRectShadow(
-		kke::Rect const& rect,
-		kke::Brush const& brush,
-		kke::ShadowAppearance const& appearance) = 0;
+		Rect const& rect,
+		Brush const& brush,
+		ShadowAppearance const& appearance) = 0;
 
 	virtual void renderRoundedShadow(
-		kke::RoundedRect const& roundedRect,
-		kke::Brush const& brush,
-		kke::ShadowAppearance const& appearance) = 0;
+		RoundedRect const& roundedRect,
+		Brush const& brush,
+		ShadowAppearance const& appearance) = 0;
 
 	virtual void renderTextShadow(
 		std::string_view text,
-		kke::Point2f const& position,
-		kke::Brush const& brush,
-		kke::FontAppearance const& fontAppearance,
-		kke::ShadowAppearance const& shadowAppearance) = 0;
+		Point2f const& position,
+		Brush const& brush,
+		FontAppearance const& fontAppearance,
+		ShadowAppearance const& shadowAppearance) = 0;
 
 	virtual void renderTextShadow(
 		std::wstring_view text,
-		kke::Point2f const& position,
-		kke::Brush const& brush,
-		kke::FontAppearance const& fontAppearance,
-		kke::ShadowAppearance const& shadowAppearance) = 0;
+		Point2f const& position,
+		Brush const& brush,
+		FontAppearance const& fontAppearance,
+		ShadowAppearance const& shadowAppearance) = 0;
 };
 };	// namespace kke

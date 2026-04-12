@@ -2,15 +2,14 @@
 
 #include <string_view>
 
-#include "ShadowAppearance.hh"
-
+#include "kke/appearance/brush/Brush.hh"
+#include "kke/appearance/effect/shadow/ShadowAppearance.hh"
+#include "kke/appearance/font/FontStyle.hh"
 #include "kke/geometry/curved/RoundedRect.hh"
 #include "kke/geometry/primitives/Line.hh"
 #include "kke/geometry/primitives/Point.hh"
 #include "kke/geometry/shapes/Rect.hh"
 #include "kke/geometry/shapes/Triangle.hh"
-#include "kke/resources/brush/Brush.hh"
-#include "kke/resources/font/FontAppearance.hh"
 
 namespace kke {
 class ShadowRenderer {
@@ -40,14 +39,14 @@ public:
 		std::string_view text,
 		Point2f const& position,
 		Brush const& brush,
-		FontAppearance const& fontAppearance,
+		FontStyle const& fontStyle,
 		ShadowAppearance const& shadowAppearance);
 
 	void renderTextShadow(
 		std::wstring_view text,
 		Point2f const& position,
 		Brush const& brush,
-		FontAppearance const& fontAppearance,
+		FontStyle const& fontStyle,
 		ShadowAppearance const& shadowAppearance);
 };
 };	// namespace kke

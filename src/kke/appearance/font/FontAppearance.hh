@@ -5,7 +5,7 @@
 #include "FontWeight.hh"
 
 namespace kke {
-struct FontStyle {
+struct FontAppearance {
 	std::string fontFamily;
 	float fontSize;
 	kke::FontWeight weight;

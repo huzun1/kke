@@ -1,7 +1,5 @@
 #pragma once
 
-#include <dwrite.h>
-
 namespace kke {
 enum class FontWeight {
 	LIGHT,
@@ -10,7 +8,4 @@ enum class FontWeight {
 	SEMI_BOLD,
 	BOLD
 };
-
-DWRITE_FONT_WEIGHT toDWriteWeight(FontWeight weight);
-
 }  // namespace kke

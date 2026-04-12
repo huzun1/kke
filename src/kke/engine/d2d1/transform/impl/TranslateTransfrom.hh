@@ -1,7 +1,6 @@
 #pragma once
 
-#include "kke/common/Point.hh"
-#include "kke/transform/Transform.hh"
+#include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
 class TranslateTransform : public Transform {
