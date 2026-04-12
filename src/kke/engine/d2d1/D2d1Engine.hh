@@ -1,27 +1,42 @@
 #pragma once
 
-#define WIN32_LEAN_AND_MEAN
-#define NOMINMAX
-#include <d2d1.h>
-#include <d2d1_1.h>
-#include <wincodec.h>
-#include <wrl/client.h>
+#include "kke/appearance/effect/Effect.hh"
+#include "kke/appearance/text/Text.hh"
 
+#include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/engine/EngineInterface.hh"
-#include "kke/renderer/filler/FaceRenderer.hh"
-#include "kke/renderer/shadow/ShadowRenderer.hh"
-#include "kke/renderer/stroke/StrokeRenderer.hh"
+#include "kke/engine/d2d1/renderer/painting/FaceRenderer.hh"
+#include "kke/engine/d2d1/renderer/painting/StrokeRenderer.hh"
 
 namespace kke {
-class Engine : public EngineInterface {
-	kke::FaceRenderer faceRenderer;
-	kke::ShadowRenderer shadowRenderer;
-	kke::StrokeRenderer strokeRenderer;
+class D2d1Engine : public EngineInterface {
+	FaceRenderer faceRenderer;
+	StrokeRenderer strokeRenderer;
 
 public:
 	void beginDraw() override;
 
 	void endDraw() override;
+
+	void pushTranslate(Translate const& translate) override;
+
+	void pushScale(Scale const& scale) override;
+
+	void pushRotate(Rotate const& rotate) override;
+
+	void popTranslate() override;
+
+	void popScale() override;
+
+	void popRotate() override;
+
+	std::shared_ptr<Canvas> createCanvas(std::optional<Scale2f> scale = std::nullopt) override;
+
+	void pushCanvas(std::shared_ptr<Canvas> canvas) override;
+
+	void popCanvas() override;
+
+	void draw(std::shared_ptr<Canvas> canvas) override;
 
 	kke::Scale2f getViewportSize() override;
 
@@ -33,82 +48,64 @@ public:
 		std::wstring_view text,
 		kke::FontAppearance const& appearance) override;
 
-	void drawLine(
+	void draw(
 		Line const& line,
 		Brush const& brush,
-		StrokeStyle const& style) override;
+		StrokeAppearance const& appearance) override;
 
-	void drawTriangle(
+	void draw(
 		Triangle const& triangle,
 		Brush const& brush,
-		StrokeStyle const& style) override;
+		StrokeAppearance const& appearance) override;
 
-	void drawRect(
+	void draw(
 		Rect const& rect,
 		Brush const& brush,
-		StrokeStyle const& style) override;
+		StrokeAppearance const& appearance) override;
 
-	void drawRounded(
+	void draw(
 		RoundedRect const& roundedRect,
 		Brush const& brush,
-		StrokeStyle const& style) override;
+		StrokeAppearance const& appearance) override;
 
-	void fillTriangle(
+	void fill(
 		Triangle const& triangle,
 		Brush const& brush) override;
 
-	void fillRect(
+	void fill(
 		Rect const& rect,
 		Brush const& brush) override;
 
-	void fillRounded(
+	void fill(
 		RoundedRect const& roundedRect,
 		Brush const& brush) override;
 
-	void fillText(
-		std::string_view text,
-		Point2f const& position,
-		Brush const& brush,
-		FontAppearance const& fontAppearance) override;
+	void fill(
+		Text const& text,
+		Brush const& brush) override;
 
-	void fillText(
-		std::wstring_view text,
-		Point2f const& position,
-		Brush const& brush,
-		FontAppearance const& fontAppearance) override;
-
-	void renderLineShadow(
+	void renderEffect(
 		Line const& line,
-		Brush const& brush,
-		ShadowAppearance const& shadowAppearance) override;
+		Effect const& effect) override;
 
-	void renderTriangleShadow(
+	void renderEffect(
 		Triangle const& triangle,
-		Brush const& brush,
-		ShadowAppearance const& shadowAppearance) override;
+		Effect const& effect) override;
 
-	void renderRectShadow(
+	void renderEffect(
 		Rect const& rect,
-		Brush const& brush,
-		ShadowAppearance const& shadowAppearance) override;
+		Effect const& effect) override;
 
-	void renderRoundedShadow(
+	void renderEffect(
 		RoundedRect const& roundedRect,
-		Brush const& brush,
-		ShadowAppearance const& shadowAppearance) override;
+		Effect const& effect) override;
 
-	void renderTextShadow(
-		std::string_view text,
-		Point2f const& position,
-		Brush const& brush,
-		FontAppearance const& fontAppearance,
-		ShadowAppearance const& shadowAppearance) override;
+	void renderEffect(
+		Text const& text,
+		Effect const& effect) override;
 
-	void renderTextShadow(
-		std::wstring_view text,
-		Point2f const& position,
-		Brush const& brush,
-		FontAppearance const& fontAppearance,
-		ShadowAppearance const& shadowAppearance) override;
+	void renderEffect(
+		std::shared_ptr<Canvas> canvas,
+		Effect const& effect) override;
 };
 };	// namespace kke

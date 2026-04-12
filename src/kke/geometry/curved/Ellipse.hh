@@ -1,8 +1,6 @@
 #pragma once
 
-#include <d2d1.h>
-
-#include "kke/geometry/impl/primitives/Point.hh"
+#include "kke/geometry/primitives/Point.hh"
 #include "kke/geometry/Polygon.hh"
 
 namespace kke {

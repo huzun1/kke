@@ -3,7 +3,7 @@
 #include "kke/geometry/curved/RoundedRect.hh"
 #include "kke/geometry/shapes/Rect.hh"
 #include "kke/geometry/shapes/Triangle.hh"
-#include "kke/resources/brush/Brush.hh"
+#include "kke/appearance/brush/Brush.hh"
 
 namespace kke {
 class FaceRenderer {

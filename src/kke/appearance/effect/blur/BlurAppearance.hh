@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kke/resources/effect/blur/BlurBorderMode.hh"
-#include "kke/resources/effect/blur/BlurOptimization.hh"
+#include "BlurBorderMode.hh"
+#include "BlurOptimization.hh"
 
 namespace kke {
 struct BlurAppearance {

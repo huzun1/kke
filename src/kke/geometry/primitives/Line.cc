@@ -4,17 +4,17 @@
 
 using namespace kke;
 
-Line::Line() : start(0, 0), end(0, 0) {
+Line::Line() : start(0, 0), end(0, 0), thickness(0.0f) {
 }
 
-Line::Line(kke::Point2f const& start, kke::Point2f const& end) : start(start), end(end) {
+Line::Line(kke::Point2f const& start, kke::Point2f const& end, float thickness) : start(start), end(end), thickness(thickness) {
 }
 
 Boundary Line::getBounding() const {
     Boundary boundary;
-    boundary.left = std::min(start.x, end.x);
-    boundary.right = std::max(start.x, end.x);
-    boundary.top = std::min(start.y, end.y);
-    boundary.bottom = std::max(start.y, end.y);
+    boundary.left = std::min(start.x, end.x) - thickness / 2.0f;
+    boundary.right = std::max(start.x, end.x) + thickness / 2.0f;
+    boundary.top = std::min(start.y, end.y) - thickness / 2.0f;
+    boundary.bottom = std::max(start.y, end.y) + thickness / 2.0f;
     return boundary;
 }

@@ -1,12 +1,11 @@
 #pragma once
 
-#include "StrokeAppearance.hh"
-
+#include "kke/appearance/brush/Brush.hh"
+#include "kke/appearance/painting/StrokeAppearance.hh"
+#include "kke/geometry/curved/RoundedRect.hh"
 #include "kke/geometry/primitives/Line.hh"
 #include "kke/geometry/shapes/Rect.hh"
-#include "kke/geometry/curved/RoundedRect.hh"
 #include "kke/geometry/shapes/Triangle.hh"
-#include "kke/resources/brush/Brush.hh"
 
 namespace kke {
 class StrokeRenderer {
