@@ -2,26 +2,24 @@
 
 #include <vector>
 
-#include "kke/engine/d2d1/d2d1_headers.hh"
+#include "kke/engine/d2d/d2d1_headers.hh"
 
 namespace kke {
 template <typename T>
 class PoolCache {
-	using Ptr = Microsoft::WRL::ComPtr<T>;
-
 	struct CachedPtr {
 		bool isUsing;
-		Ptr ptr;
+		T ptr;
 	};
 
 	std::vector<CachedPtr> storage;
 
 public:
-	void putAndUse(Ptr val) {
+	void putAndUse(T val) {
 		storage.push_back({true, val});
 	}
 
-	Ptr tryUseCached() {
+	T& tryUse() {
 		for (auto& entry : storage) {
 			if (entry.isUsing) {
 				continue;
@@ -32,7 +30,7 @@ public:
 		return nullptr;
 	}
 
-	void release(Ptr val) {
+	void release(T val) {
 		for (auto& entry : storage) {
 			if (entry.ptr.Get() != val.Get()) {
 				continue;

@@ -1,6 +1,6 @@
 #pragma once
 
-class RenderStateController {
+class RenderPass {
 public:
     void beginDraw();
 

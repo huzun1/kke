@@ -1,35 +1,49 @@
 #pragma once
 
-#include "kke/appearance/effect/Effect.hh"
-#include "kke/appearance/text/Text.hh"
+#include <memory>
 
+#include "kke/appearance/effect/Effect.hh"
 #include "kke/appearance/painting/StrokeAppearance.hh"
+#include "kke/appearance/text/Text.hh"
 #include "kke/engine/EngineInterface.hh"
-#include "kke/engine/d2d1/renderer/painting/FaceRenderer.hh"
-#include "kke/engine/d2d1/renderer/painting/StrokeRenderer.hh"
+#include "kke/engine/d2d/D2dContext.hh"
+#include "kke/engine/d2d/renderer/RenderPass.hh"
+#include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
+#include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
+#include "kke/engine/d2d/renderer/view/MatrixManipulator.hh"
 
 namespace kke {
-class D2d1Engine : public EngineInterface {
+class D2dEngine : public EngineInterface {
+	std::unique_ptr<D2dContext> context;
+
+	RenderPass renderPass;
+	MatrixManipulator matrixManipulator;
 	FaceRenderer faceRenderer;
 	StrokeRenderer strokeRenderer;
 
 public:
-	void beginDraw() override;
+	/* =============== Render Statement ================ */
+	void beginDraw();
 
-	void endDraw() override;
+	void endDraw();
 
-	void pushTranslate(Translate const& translate) override;
+	void clear() override;
 
-	void pushScale(Scale const& scale) override;
+	/*================ Transform Control ================ */
+	void pushTransform(Translate const& translate) override;
 
-	void pushRotate(Rotate const& rotate) override;
+	void pushTransform(Scale const& scale) override;
 
-	void popTranslate() override;
+	void pushTransform(Rotate const& rotate) override;
 
-	void popScale() override;
+	void popTransform() override;
 
-	void popRotate() override;
+	/* ================= Layer Control ================== */
+	void pushLayer(Polygon const& mask, LayerMode mode = LayerMode::NORMAL) override;
 
+	void popLayer() override;
+
+	/* ================= Canvas Control ================= */
 	std::shared_ptr<Canvas> createCanvas(std::optional<Scale2f> scale = std::nullopt) override;
 
 	void pushCanvas(std::shared_ptr<Canvas> canvas) override;
@@ -38,16 +52,13 @@ public:
 
 	void draw(std::shared_ptr<Canvas> canvas) override;
 
+	/* ================= Measurement =================== */
 	kke::Scale2f getViewportSize() override;
 
 	kke::Scale2f measureTextSize(
-		std::string_view text,
-		kke::FontAppearance const& appearance) override;
+		Text const& text) override;
 
-	kke::Scale2f measureTextSize(
-		std::wstring_view text,
-		kke::FontAppearance const& appearance) override;
-
+	/* ================= Stroke Rendering ================= */
 	void draw(
 		Line const& line,
 		Brush const& brush,
@@ -68,6 +79,7 @@ public:
 		Brush const& brush,
 		StrokeAppearance const& appearance) override;
 
+	/* ================= Face Rendering ================== */
 	void fill(
 		Triangle const& triangle,
 		Brush const& brush) override;
@@ -84,6 +96,7 @@ public:
 		Text const& text,
 		Brush const& brush) override;
 
+	/* ================= Effect Rendering ================== */
 	void renderEffect(
 		Line const& line,
 		Effect const& effect) override;

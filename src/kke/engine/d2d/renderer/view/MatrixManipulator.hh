@@ -2,7 +2,7 @@
 
 #include "kke/geometry/primitives/Point.hh"
 
-class MatrixTransformController {
+class MatrixManipulator {
 public:
 	void pushTranslate(kke::Point2f const& offset);
 

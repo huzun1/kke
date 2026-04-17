@@ -2,16 +2,17 @@
 
 #include <memory>
 #include <optional>
-#include <string_view>
 
 #include "kke/appearance/brush/Brush.hh"
-#include "kke/appearance/canvas/Canvas.hh"
+#include "kke/appearance/Canvas.hh"
 #include "kke/appearance/effect/Effect.hh"
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/text/Text.hh"
 #include "kke/appearance/transform/Rotate.hh"
 #include "kke/appearance/transform/Scale.hh"
 #include "kke/appearance/transform/Translate.hh"
+#include "kke/appearance/view/LayerMode.hh"
+#include "kke/geometry/Polygon.hh"
 #include "kke/geometry/curved/Ellipse.hh"
 #include "kke/geometry/curved/RoundedRect.hh"
 #include "kke/geometry/primitives/Line.hh"
@@ -23,22 +24,21 @@ namespace kke {
 class EngineInterface {
 public:
 	/* =============== Render Statement ================ */
-	virtual void beginDraw() = 0;
+	virtual void clear() = 0;
 
-	virtual void endDraw() = 0;
+	/*================ Transform Control ================ */
+	virtual void pushTransform(Translate const& translate) = 0;
 
-	/* ================= State Control ================== */
-	virtual void pushTranslate(Translate const& translate) = 0;
+	virtual void pushTransform(Scale const& scale) = 0;
 
-	virtual void pushScale(Scale const& scale) = 0;
+	virtual void pushTransform(Rotate const& rotate) = 0;
 
-	virtual void pushRotate(Rotate const& rotate) = 0;
+	virtual void popTransform() = 0;
 
-	virtual void popTranslate() = 0;
+	/* ================= Layer Control ================== */
+	virtual void pushLayer(Polygon const& mask, LayerMode mode = LayerMode::NORMAL) = 0;
 
-	virtual void popScale() = 0;
-
-	virtual void popRotate() = 0;
+	virtual void popLayer() = 0;
 
 	/* ================= Canvas Control ================= */
 	virtual std::shared_ptr<Canvas> createCanvas(std::optional<Scale2f> scale = std::nullopt) = 0;
@@ -52,13 +52,7 @@ public:
 	/* ================= Measurement =================== */
 	virtual Scale2f getViewportSize() = 0;
 
-	virtual Scale2f measureTextSize(
-		std::string_view text,
-		FontAppearance const& fontAppearance) = 0;
-
-	virtual Scale2f measureTextSize(
-		std::wstring_view text,
-		FontAppearance const& fontAppearance) = 0;
+	virtual Scale2f measureTextSize(Text const& text) = 0;
 
 	/* ================= Stroke Rendering ================= */
 	virtual void draw(
@@ -134,6 +128,6 @@ public:
 
 	virtual void renderEffect(
 		std::shared_ptr<Canvas> canvas,
-		Effect const& effect);
+		Effect const& effect) = 0;
 };
 };	// namespace kke

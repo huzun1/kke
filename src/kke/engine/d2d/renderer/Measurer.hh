@@ -3,8 +3,8 @@
 #include <string_view>
 
 #include "kke/geometry/primitives/Point.hh"
-#include "kke/resources/font/FontAppearance.hh"
-#include "kke/renderer/shadow/ShadowAppearance.hh"
+#include "kke/appearance/text/font/FontAppearance.hh"
+#include "kke/appearance/effect/shadow/ShadowAppearance.hh"
 
 class Measurer {
 public:
