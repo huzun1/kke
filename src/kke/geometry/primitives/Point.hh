@@ -1,14 +1,14 @@
 #pragma once
 
 namespace kke {
-struct Point2f {
+struct Point {
 	float x, y;
 
-	Point2f(float x, float y);
+	Point(float x, float y);
 };
 
 #include "PointOperators.hh"
 
-using Scale2f = Point2f;
+using Scale = Point;
 
 };	// namespace kke

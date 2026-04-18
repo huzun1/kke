@@ -4,15 +4,15 @@
 #include "kke/transform/impl/ScaleTransform.hh"
 #include "kke/transform/impl/TranslateTransfrom.hh"
 
-void kke::Matrix::pushTranslate(kke::Point2f const& offset) {
+void kke::Matrix::pushTranslate(kke::Point const& offset) {
 	transforms.push_back(std::make_shared<kke::TranslateTransform>(offset));
 }
 
-void kke::Matrix::pushScale(kke::Point2f const& center, kke::Scale2f const& scale) {
+void kke::Matrix::pushScale(kke::Point const& center, kke::Scale const& scale) {
 	transforms.push_back(std::make_shared<kke::ScaleTransform>(center, scale));
 }
 
-void kke::Matrix::pushRotate(kke::Point2f const& center, float angle) {
+void kke::Matrix::pushRotate(kke::Point const& center, float angle) {
 	transforms.push_back(std::make_shared<kke::RotateTransform>(center, angle));
 }
 

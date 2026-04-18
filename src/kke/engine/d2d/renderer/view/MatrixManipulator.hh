@@ -4,11 +4,11 @@
 
 class MatrixManipulator {
 public:
-	void pushTranslate(kke::Point2f const& offset);
+	void pushTranslate(kke::Point const& offset);
 
-	void pushScale(kke::Point2f const& center, kke::Scale2f const& scale);
+	void pushScale(kke::Point const& center, kke::Scale const& scale);
 
-	void pushRotate(kke::Point2f const& center, float angle);
+	void pushRotate(kke::Point const& center, float angle);
 
 	void popTranslate();
 

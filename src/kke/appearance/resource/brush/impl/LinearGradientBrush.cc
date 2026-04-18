@@ -11,16 +11,16 @@
 
 kke::LinearGradientBrush::LinearGradientBrush(kke::Color4f const& startColor,
 											  kke::Color4f const& endColor,
-											  kke::Point2f const& startPoint,
-											  kke::Point2f const& endPoint)
+											  kke::Point const& startPoint,
+											  kke::Point const& endPoint)
 	: colors({startColor, endColor}),
 	  startPoint(startPoint),
 	  endPoint(endPoint) {
 }
 
 kke::LinearGradientBrush::LinearGradientBrush(std::vector<kke::Color4f> const& colors,
-											  kke::Point2f const& startPoint,
-											  kke::Point2f const& endPoint)
+											  kke::Point const& startPoint,
+											  kke::Point const& endPoint)
 	: colors(colors),
 	  startPoint(startPoint),
 	  endPoint(endPoint) {
@@ -31,8 +31,8 @@ void kke::LinearGradientBrush::setAngle(float angle) {
 }
 
 void kke::LinearGradientBrush::create(ID2D1DeviceContext* context, ID2D1Brush** output) const {
-	kke::Point2f startPoint = this->startPoint;
-	kke::Point2f endPoint = this->endPoint;
+	kke::Point startPoint = this->startPoint;
+	kke::Point endPoint = this->endPoint;
 	if (this->angle) {
 		float width = endPoint.x - startPoint.x;
 		float height = endPoint.y - startPoint.y;
@@ -41,8 +41,8 @@ void kke::LinearGradientBrush::create(ID2D1DeviceContext* context, ID2D1Brush** 
 		float centerY = height / 2 + startPoint.y;
 		float offsetX = dist * cosf(*angle / 180.0f * static_cast<float>(std::numbers::pi));
 		float offsetY = dist * sinf(*angle / 180.0f * static_cast<float>(std::numbers::pi));
-		startPoint = kke::Point2f{centerX + offsetX, centerY + offsetY};
-		endPoint = kke::Point2f{centerX - offsetX, centerY - offsetY};
+		startPoint = kke::Point{centerX + offsetX, centerY + offsetY};
+		endPoint = kke::Point{centerX - offsetX, centerY - offsetY};
 	}
 
 	ID2D1GradientStopCollection* gradientStopCollection;
@@ -56,7 +56,7 @@ void kke::LinearGradientBrush::create(ID2D1DeviceContext* context, ID2D1Brush** 
 
 	ID2D1LinearGradientBrush* brush;
 	context->CreateLinearGradientBrush(
-		D2D1::LinearGradientBrushProperties(D2D1::Point2F(startPoint.x, startPoint.y), D2D1::Point2F(endPoint.x, endPoint.y)),
+		D2D1::LinearGradientBrushProperties(D2D1::Point(startPoint.x, startPoint.y), D2D1::Point(endPoint.x, endPoint.y)),
 		gradientStopCollection, &brush);
 	gradientStopCollection->Release();
 

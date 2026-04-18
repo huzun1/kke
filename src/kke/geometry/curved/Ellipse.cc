@@ -3,10 +3,10 @@
 using namespace kke;
 
 Ellipse::Ellipse()
-	: point(kke::Point2f{0.0f, 0.0f}), radius(0.0f) {
+	: point(kke::Point{0.0f, 0.0f}), radius(0.0f) {
 }
 
-Ellipse::Ellipse(kke::Point2f const& point, float radius)
+Ellipse::Ellipse(kke::Point const& point, float radius)
 	: point(point), radius(radius) {
 }
 

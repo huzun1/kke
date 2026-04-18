@@ -3,20 +3,21 @@
 #include <memory>
 #include <optional>
 
-#include "kke/appearance/brush/Brush.hh"
-#include "kke/appearance/Canvas.hh"
-#include "kke/appearance/effect/Effect.hh"
+#include "kke/appearance/Text.hh"
 #include "kke/appearance/painting/StrokeAppearance.hh"
-#include "kke/appearance/text/Text.hh"
+#include "kke/appearance/resource/Canvas.hh"
+#include "kke/appearance/resource/brush/Brush.hh"
+#include "kke/appearance/resource/effect/Effect.hh"
+#include "kke/appearance/resource/effect/EffectCompose.hh"
+#include "kke/appearance/resource/texture/Texture.hh"
 #include "kke/appearance/transform/Rotate.hh"
 #include "kke/appearance/transform/Scale.hh"
 #include "kke/appearance/transform/Translate.hh"
 #include "kke/appearance/view/LayerMode.hh"
-#include "kke/geometry/Polygon.hh"
+#include "kke/geometry/Maskable.hh"
 #include "kke/geometry/curved/Ellipse.hh"
 #include "kke/geometry/curved/RoundedRect.hh"
 #include "kke/geometry/primitives/Line.hh"
-#include "kke/geometry/primitives/Point.hh"
 #include "kke/geometry/shapes/Rect.hh"
 #include "kke/geometry/shapes/Triangle.hh"
 
@@ -27,32 +28,34 @@ public:
 	virtual void clear() = 0;
 
 	/*================ Transform Control ================ */
-	virtual void pushTransform(Translate const& translate) = 0;
+	virtual void pushTransform(TranslateTransform const& translate) = 0;
 
-	virtual void pushTransform(Scale const& scale) = 0;
+	virtual void pushTransform(ScaleTransform const& scale) = 0;
 
-	virtual void pushTransform(Rotate const& rotate) = 0;
+	virtual void pushTransform(RotateTransform const& rotate) = 0;
 
 	virtual void popTransform() = 0;
 
 	/* ================= Layer Control ================== */
-	virtual void pushLayer(Polygon const& mask, LayerMode mode = LayerMode::NORMAL) = 0;
+	virtual void pushLayer(Maskable const& mask, LayerMode mode = LayerMode::NORMAL) = 0;
 
 	virtual void popLayer() = 0;
 
 	/* ================= Canvas Control ================= */
-	virtual std::shared_ptr<Canvas> createCanvas(std::optional<Scale2f> scale = std::nullopt) = 0;
+	virtual std::shared_ptr<Canvas> createCanvas(std::optional<Scale> scale = std::nullopt) = 0;
 
 	virtual void pushCanvas(std::shared_ptr<Canvas> canvas) = 0;
 
 	virtual void popCanvas() = 0;
 
-	virtual void draw(std::shared_ptr<Canvas> canvas) = 0;
+	virtual void draw(
+		std::shared_ptr<Canvas> canvas,
+		float opacity = 1.0f) = 0;
 
 	/* ================= Measurement =================== */
-	virtual Scale2f getViewportSize() = 0;
+	virtual Scale getViewportSize() = 0;
 
-	virtual Scale2f measureTextSize(Text const& text) = 0;
+	virtual Scale measureTextSize(Text const& text) = 0;
 
 	/* ================= Stroke Rendering ================= */
 	virtual void draw(
@@ -101,6 +104,19 @@ public:
 		Text const& text,
 		Brush const& brush) = 0;
 
+	/* ================ Texture Rendering ================ */
+	virtual std::shared_ptr<Texture> uploadTexture(
+		void const* data, size_t size) = 0;
+
+	virtual void discardTexture(
+		std::shared_ptr<Texture> texture) = 0;
+
+	virtual void draw(
+		std::shared_ptr<Texture> texture,
+		Rect const& destRect,
+		float opacity = 1.0f,
+		std::optional<Rect> srcRect = std::nullopt) = 0;
+
 	/* ================= Effect Rendering ================= */
 	virtual void renderEffect(
 		Line const& line,
@@ -129,5 +145,30 @@ public:
 	virtual void renderEffect(
 		std::shared_ptr<Canvas> canvas,
 		Effect const& effect) = 0;
+
+	/* ================ Effect Compose Rendering ================ */
+	virtual void renderEffect(
+		Line const& line,
+		EffectCompose const& effect) = 0;
+
+	virtual void renderEffect(
+		Triangle const& triangle,
+		EffectCompose const& effect) = 0;
+
+	virtual void renderEffect(
+		Rect const& rect,
+		EffectCompose const& effect) = 0;
+
+	virtual void renderEffect(
+		RoundedRect const& roundedRect,
+		EffectCompose const& effect) = 0;
+
+	virtual void renderEffect(
+		Text const& text,
+		EffectCompose const& effect) = 0;
+
+	virtual void renderEffect(
+		std::shared_ptr<Canvas> canvas,
+		EffectCompose const& effect) = 0;
 };
 };	// namespace kke

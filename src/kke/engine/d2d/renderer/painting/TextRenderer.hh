@@ -11,13 +11,13 @@ class TextRenderer {
 public:
 	void fillText(
 		std::string_view text,
-		kke::Point2f const& position,
+		kke::Point const& position,
 		kke::Brush const& brush,
 		kke::FontStyle const& style);
 
 	void fillText(
 		std::wstring_view text,
-		kke::Point2f const& position,
+		kke::Point const& position,
 		kke::Brush const& brush,
 		kke::FontStyle const& style);		
 };

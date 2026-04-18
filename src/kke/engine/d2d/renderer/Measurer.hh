@@ -8,14 +8,14 @@
 
 class Measurer {
 public:
-    kke::Scale2f getViewportSize();
+    kke::Scale getViewportSize();
 
-    kke::Scale2f measureTextSize(
+    kke::Scale measureTextSize(
         std::string_view text,
         kke::FontAppearance const& fontAppearance,
         kke::ShadowAppearance const& shadowAppearance);
 
-    kke::Scale2f measureTextSize(
+    kke::Scale measureTextSize(
         std::wstring_view text,
         kke::FontAppearance const& fontAppearance,
         kke::ShadowAppearance const& shadowAppearance);

@@ -1,6 +1,6 @@
 #include <kke/transform/impl/RotateTransform.hh>
 
-kke::RotateTransform::RotateTransform(kke::Point2f const& center, float angle)
+kke::RotateTransform::RotateTransform(kke::Point const& center, float angle)
 	: center(center),
 	  angle(angle) {
 }

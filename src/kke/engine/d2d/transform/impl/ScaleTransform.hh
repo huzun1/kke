@@ -6,11 +6,11 @@
 
 namespace kke {
 class ScaleTransform : public Transform {
-	kke::Point2f center;
-	kke::Scale2f scale;
+	kke::Point center;
+	kke::Scale scale;
 
 public:
-	ScaleTransform(kke::Point2f center, kke::Scale2f scale);
+	ScaleTransform(kke::Point center, kke::Scale scale);
 
 	void transform(D2D1::Matrix3x2F& matrix) override;
 };

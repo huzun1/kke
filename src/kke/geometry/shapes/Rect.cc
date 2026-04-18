@@ -5,7 +5,7 @@ using namespace kke;
 Rect::Rect() : min(0, 0), max(0, 0) {
 }
 
-Rect::Rect(kke::Point2f const& min, kke::Point2f const& max) : min(min), max(max) {
+Rect::Rect(kke::Point const& min, kke::Point const& max) : min(min), max(max) {
 }
 
 Boundary Rect::getBounding() const {
@@ -20,15 +20,15 @@ float Rect::height() const {
 	return max.y - min.y;
 }
 
-kke::Point2f Rect::center() const {
+kke::Point Rect::center() const {
 	return (min + max) / 2;
 }
 
 Rect Rect::shrink(float amount) const {
-	return Rect(min + Point2f(amount, amount), max - Point2f(amount, amount));
+	return Rect(min + Point(amount, amount), max - Point(amount, amount));
 }
 
 Rect Rect::expand(float amount) const {
-	return Rect(min - Point2f(amount, amount), max + Point2f(amount, amount));
+	return Rect(min - Point(amount, amount), max + Point(amount, amount));
 }
 

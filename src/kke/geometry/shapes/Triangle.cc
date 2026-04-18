@@ -7,17 +7,17 @@
 using namespace kke;
 
 Triangle::Triangle()
-	: a(kke::Point2f{0.0f, 0.0f}),
-	  b(kke::Point2f{0.0f, 0.0f}),
-	  c(kke::Point2f{0.0f, 0.0f}) {
+	: a(kke::Point{0.0f, 0.0f}),
+	  b(kke::Point{0.0f, 0.0f}),
+	  c(kke::Point{0.0f, 0.0f}) {
 }
 
-Triangle::Triangle(kke::Point2f const& a, kke::Point2f const& b, kke::Point2f const& c)
+Triangle::Triangle(kke::Point const& a, kke::Point const& b, kke::Point const& c)
 	: a(a), b(b), c(c) {
 }
 
-kke::Point2f moveToward(kke::Point2f const& from, kke::Point2f const& to, float amount) {
-	kke::Point2f delta = to - from;
+kke::Point moveToward(kke::Point const& from, kke::Point const& to, float amount) {
+	kke::Point delta = to - from;
 	float length = std::sqrt(delta.x * delta.x + delta.y * delta.y);
 	if (length == 0.0f) {
 		return from;
@@ -26,7 +26,7 @@ kke::Point2f moveToward(kke::Point2f const& from, kke::Point2f const& to, float 
 }
 
 Triangle Triangle::shrink(float amount) const {
-	Point2f center = (a + b + c) / 3.0f;
+	Point center = (a + b + c) / 3.0f;
 
 	return Triangle(
 		moveToward(a, center, amount),
@@ -35,7 +35,7 @@ Triangle Triangle::shrink(float amount) const {
 }
 
 Triangle Triangle::expand(float amount) const {
-	Point2f center = (a + b + c) / 3.0f;
+	Point center = (a + b + c) / 3.0f;
 
 	return Triangle(
 		moveToward(a, center, -amount),

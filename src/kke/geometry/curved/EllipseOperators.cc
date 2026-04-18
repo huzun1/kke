@@ -1,6 +1,6 @@
 #include "Ellipse.hh"
 
-kke::Ellipse kke::operator+(kke::Ellipse lhs, kke::Point2f const& rhs) {
+kke::Ellipse kke::operator+(kke::Ellipse lhs, kke::Point const& rhs) {
 	lhs.point += rhs;
 	return lhs;
 }
@@ -11,7 +11,7 @@ kke::Ellipse kke::operator+(kke::Ellipse lhs, kke::Ellipse const& rhs) {
 	return lhs;
 }
 
-kke::Ellipse kke::operator-(kke::Ellipse lhs, kke::Point2f const& rhs) {
+kke::Ellipse kke::operator-(kke::Ellipse lhs, kke::Point const& rhs) {
 	lhs.point -= rhs;
 	return lhs;
 }
@@ -22,7 +22,7 @@ kke::Ellipse kke::operator-(kke::Ellipse lhs, kke::Ellipse const& rhs) {
 	return lhs;
 }
 
-kke::Ellipse& kke::operator+=(kke::Ellipse& lhs, kke::Point2f const& rhs) {
+kke::Ellipse& kke::operator+=(kke::Ellipse& lhs, kke::Point const& rhs) {
 	lhs.point += rhs;
 	return lhs;
 }
@@ -33,7 +33,7 @@ kke::Ellipse& kke::operator+=(kke::Ellipse& lhs, kke::Ellipse const& rhs) {
 	return lhs;
 }
 
-kke::Ellipse& kke::operator-=(kke::Ellipse& lhs, kke::Point2f const& rhs) {
+kke::Ellipse& kke::operator-=(kke::Ellipse& lhs, kke::Point const& rhs) {
 	lhs.point -= rhs;
 	return lhs;
 }

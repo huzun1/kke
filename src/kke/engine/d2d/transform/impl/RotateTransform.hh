@@ -5,11 +5,11 @@
 
 namespace kke {
 class RotateTransform : public Transform {
-	kke::Point2f center;
+	kke::Point center;
 	float angle;
 
 public:
-	RotateTransform(kke::Point2f const& center, float angle);
+	RotateTransform(kke::Point const& center, float angle);
 
 	void transform(D2D1::Matrix3x2F& matrix) override;
 };

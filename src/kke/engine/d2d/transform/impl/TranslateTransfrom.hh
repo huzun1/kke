@@ -4,10 +4,10 @@
 
 namespace kke {
 class TranslateTransform : public Transform {
-	kke::Point2f offset;
+	kke::Point offset;
 
 public:
-	TranslateTransform(kke::Point2f offset);
+	TranslateTransform(kke::Point offset);
 
 	void transform(D2D1::Matrix3x2F& matrix) override;
 };

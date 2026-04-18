@@ -3,8 +3,8 @@
 #include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
-struct Rotate {
-    kke::Point2f center;
+struct RotateTransform {
+    kke::Point center;
     float angle;
 };
 };	// namespace kke

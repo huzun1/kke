@@ -1,6 +1,6 @@
 #include <kke/transform/impl/ScaleTransform.hh>
 
-kke::ScaleTransform::ScaleTransform(kke::Point2f center, kke::Scale2f scale)
+kke::ScaleTransform::ScaleTransform(kke::Point center, kke::Scale scale)
 	: center(center),
 	  scale(scale) {
 }

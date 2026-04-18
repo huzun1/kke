@@ -6,12 +6,12 @@
 namespace kke {
 class Line : public Boundable {
 public:
-    kke::Point2f start, end;
+    kke::Point start, end;
     float thickness;
 
     Line();
 
-    Line(kke::Point2f const& start, kke::Point2f const& end, float thickness);
+    Line(kke::Point const& start, kke::Point const& end, float thickness);
 
     [[nodiscard]] Boundary getBounding() const override;
 };

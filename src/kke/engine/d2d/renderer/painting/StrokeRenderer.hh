@@ -1,7 +1,7 @@
 #pragma once
 
-#include "kke/appearance/brush/Brush.hh"
 #include "kke/appearance/painting/StrokeAppearance.hh"
+#include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/geometry/curved/RoundedRect.hh"
 #include "kke/geometry/primitives/Line.hh"
 #include "kke/geometry/shapes/Rect.hh"

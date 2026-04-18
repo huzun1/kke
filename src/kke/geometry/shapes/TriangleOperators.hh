@@ -1,20 +1,20 @@
 ﻿#pragma once
 
 struct Triangle;
-struct Point2f;
+struct Point;
 
-Triangle operator+(Triangle lhs, Point2f const& rhs);
+Triangle operator+(Triangle lhs, Point const& rhs);
 
 Triangle operator+(Triangle lhs, Triangle const& rhs);
 
-Triangle operator-(Triangle lhs, Point2f const& rhs);
+Triangle operator-(Triangle lhs, Point const& rhs);
 
 Triangle operator-(Triangle lhs, Triangle const& rhs);
 
-Triangle& operator+=(Triangle& lhs, Point2f const& rhs);
+Triangle& operator+=(Triangle& lhs, Point const& rhs);
 
 Triangle& operator+=(Triangle& lhs, Triangle const& rhs);
 
-Triangle& operator-=(Triangle& lhs, Point2f const& rhs);
+Triangle& operator-=(Triangle& lhs, Point const& rhs);
 
 Triangle& operator-=(Triangle& lhs, Triangle const& rhs);

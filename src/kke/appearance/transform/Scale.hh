@@ -3,8 +3,8 @@
 #include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
-struct Scale {
-	kke::Point2f center;
-	kke::Scale2f scale;
+struct ScaleTransform {
+	kke::Point center;
+	kke::Scale scale;
 };
 };	// namespace kke

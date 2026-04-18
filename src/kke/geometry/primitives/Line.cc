@@ -7,7 +7,7 @@ using namespace kke;
 Line::Line() : start(0, 0), end(0, 0), thickness(0.0f) {
 }
 
-Line::Line(kke::Point2f const& start, kke::Point2f const& end, float thickness) : start(start), end(end), thickness(thickness) {
+Line::Line(kke::Point const& start, kke::Point const& end, float thickness) : start(start), end(end), thickness(thickness) {
 }
 
 Boundary Line::getBounding() const {

@@ -1,6 +1,6 @@
 ﻿#include <kke/geometry/shapes/Rect.hh>
 
-kke::Rect kke::operator+(kke::Rect lhs, kke::Point2f const& rhs) {
+kke::Rect kke::operator+(kke::Rect lhs, kke::Point const& rhs) {
 	lhs.min += rhs;
 	lhs.max += rhs;
 	return lhs;
@@ -12,7 +12,7 @@ kke::Rect kke::operator+(kke::Rect lhs, kke::Rect const& rhs) {
 	return lhs;
 }
 
-kke::Rect kke::operator-(kke::Rect lhs, kke::Point2f const& rhs) {
+kke::Rect kke::operator-(kke::Rect lhs, kke::Point const& rhs) {
 	lhs.min -= rhs;
 	lhs.max -= rhs;
 	return lhs;
@@ -24,7 +24,7 @@ kke::Rect kke::operator-(kke::Rect lhs, kke::Rect const& rhs) {
 	return lhs;
 }
 
-kke::Rect& kke::operator+=(kke::Rect& lhs, kke::Point2f const& rhs) {
+kke::Rect& kke::operator+=(kke::Rect& lhs, kke::Point const& rhs) {
 	lhs.min += rhs;
 	lhs.max += rhs;
 	return lhs;
@@ -36,7 +36,7 @@ kke::Rect& kke::operator+=(kke::Rect& lhs, kke::Rect const& rhs) {
 	return lhs;
 }
 
-kke::Rect& kke::operator-=(kke::Rect& lhs, kke::Point2f const& rhs) {
+kke::Rect& kke::operator-=(kke::Rect& lhs, kke::Point const& rhs) {
 	lhs.min -= rhs;
 	lhs.max -= rhs;
 	return lhs;

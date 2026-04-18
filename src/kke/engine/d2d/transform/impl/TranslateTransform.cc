@@ -1,6 +1,6 @@
 #include <kke/transform/impl/TranslateTransfrom.hh>
 
-kke::TranslateTransform::TranslateTransform(kke::Point2f offset)
+kke::TranslateTransform::TranslateTransform(kke::Point offset)
 	: offset(offset) {
 }
 
