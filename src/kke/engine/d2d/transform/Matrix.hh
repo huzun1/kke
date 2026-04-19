@@ -12,9 +12,9 @@ class Matrix {
 	std::vector<std::shared_ptr<Transform>> transforms;
 
 public:
-    void pushTranslate(kke::Point const& offset);
+    void pushTransform(Transform const& transform);
 
-	void pushScale(kke::Point const& center, kke::Scale const& scale);
+	void pushScale();
 
 	void pushRotate(kke::Point const& center, float angle);
 

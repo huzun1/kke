@@ -3,7 +3,7 @@
 #include <d2d1_1.h>
 #include <wrl/client.h>
 
-#include "kke/appearance/Canvas.hh"
+#include "kke/appearance/resource/Canvas.hh"
 
 using namespace Microsoft::WRL;
 

@@ -10,9 +10,9 @@
 #include "kke/appearance/resource/effect/Effect.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/appearance/resource/texture/Texture.hh"
-#include "kke/appearance/transform/Rotate.hh"
-#include "kke/appearance/transform/Scale.hh"
-#include "kke/appearance/transform/Translate.hh"
+#include "kke/appearance/transform/Rotation.hh"
+#include "kke/appearance/transform/Scaling.hh"
+#include "kke/appearance/transform/Translation.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/geometry/Maskable.hh"
 #include "kke/geometry/curved/Ellipse.hh"
@@ -28,11 +28,11 @@ public:
 	virtual void clear() = 0;
 
 	/*================ Transform Control ================ */
-	virtual void pushTransform(TranslateTransform const& translate) = 0;
+	virtual void pushTransform(Translation const& translate) = 0;
 
-	virtual void pushTransform(ScaleTransform const& scale) = 0;
+	virtual void pushTransform(Scaling const& scale) = 0;
 
-	virtual void pushTransform(RotateTransform const& rotate) = 0;
+	virtual void pushTransform(Rotation const& rotate) = 0;
 
 	virtual void popTransform() = 0;
 

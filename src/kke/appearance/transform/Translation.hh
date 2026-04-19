@@ -3,7 +3,7 @@
 #include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
-struct TranslateTransform {
+struct Translation {
     kke::Point offset;
 };
 };

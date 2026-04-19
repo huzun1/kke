@@ -8,7 +8,4 @@ struct Point {
 };
 
 #include "PointOperators.hh"
-
-using Scale = Point;
-
 };	// namespace kke
