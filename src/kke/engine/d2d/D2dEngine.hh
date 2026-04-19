@@ -2,25 +2,24 @@
 
 #include <memory>
 
+#include "kke/appearance/Text.hh"
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/effect/Effect.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
-#include "kke/appearance/Text.hh"
 #include "kke/engine/EngineInterface.hh"
 #include "kke/engine/d2d/D2dContext.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
 #include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
-#include "kke/engine/d2d/renderer/view/MatrixManipulator.hh"
+#include "kke/engine/d2d/renderer/view/MatrixState.hh"
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
-#include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
 class D2dEngine : public EngineInterface {
 	std::unique_ptr<D2dContext> context;
 
 	RenderPass renderPass;
-	MatrixManipulator matrixManipulator;
+	MatrixState matrixState;
 	ViewLayerController viewLayerController;
 	FaceRenderer faceRenderer;
 	StrokeRenderer strokeRenderer;
@@ -34,11 +33,11 @@ public:
 	void clear() override;
 
 	/*================ Transform Control ================ */
-	void pushTransform(TranslateTransform const& translate) override;
+	void pushTransform(Translation const& translate) override;
 
-	void pushTransform(ScaleTransform const& scale) override;
+	void pushTransform(Scaling const& scale) override;
 
-	void pushTransform(RotateTransform const& rotate) override;
+	void pushTransform(Rotation const& rotate) override;
 
 	void popTransform() override;
 
@@ -48,7 +47,7 @@ public:
 	void popLayer() override;
 
 	/* ================= Canvas Control ================= */
-	std::shared_ptr<Canvas> createCanvas(std::optional<Scale> scale = std::nullopt) override;
+	std::shared_ptr<Canvas> createCanvas() override;
 
 	void pushCanvas(std::shared_ptr<Canvas> canvas) override;
 
@@ -125,6 +124,7 @@ public:
 		std::shared_ptr<Canvas> canvas,
 		Effect const& effect) override;
 
+	/* ================ Effect Compose Rendering ================ */
 	void renderEffect(
 		Line const& line,
 		EffectCompose const& effect) override;

@@ -1,29 +1,28 @@
-#include <kke/transform/Matrix.hh>
+#include "Matrix.hh"
 
-#include "kke/transform/impl/RotateTransform.hh"
-#include "kke/transform/impl/ScaleTransform.hh"
-#include "kke/transform/impl/TranslateTransfrom.hh"
+#include "kke/appearance/transform/Translation.hh"
+#include "kke/engine/d2d/transform/impl/RotateManipulator.hh"
+#include "kke/engine/d2d/transform/impl/ScaleManipulator.hh"
+#include "kke/engine/d2d/transform/impl/TranslateManipulator.hh"
 
-void kke::Matrix::pushTranslate(kke::Point const& offset) {
-	transforms.push_back(std::make_shared<kke::TranslateTransform>(offset));
+using namespace kke;
+
+void Matrix::pushTransform(Translation const& translation) {
+	manipulators.push_back(std::make_shared<kke::TranslateManipulator>(translation));
 }
 
-void kke::Matrix::pushScale(kke::Point const& center, kke::Scale const& scale) {
-	transforms.push_back(std::make_shared<kke::ScaleTransform>(center, scale));
+void Matrix::pushTransform(Scaling const& scale) {
+	manipulators.push_back(std::make_shared<kke::ScaleManipulator>(scale));
 }
 
-void kke::Matrix::pushRotate(kke::Point const& center, float angle) {
-	transforms.push_back(std::make_shared<kke::RotateTransform>(center, angle));
-}
-
-void kke::Matrix::pop() {
-	transforms.pop_back();
+void Matrix::pushTransform(Rotation const& rotate) {
+	manipulators.push_back(std::make_shared<kke::RotateManipulator>(rotate));
 }
 
 D2D1::Matrix3x2F kke::Matrix::build() {
 	D2D1::Matrix3x2F multiplied = D2D1::Matrix3x2F::Identity();
-	for (const auto& transform : transforms) {
-		transform->transform(multiplied);
+	for (auto& manipulator : manipulators) {
+		manipulator->transform(multiplied);
 	}
 	return multiplied;
 }

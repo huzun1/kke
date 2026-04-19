@@ -3,22 +3,23 @@
 #include <memory>
 #include <vector>
 
-#include "Transform.hh"
-#include "kke/common/Point.hh"
-#include "kke/common/Scale.hh"
+#include "Manipulator.hh"
+#include "kke/appearance/transform/Scaling.hh"
+#include "kke/appearance/transform/Translation.hh"
+#include "kke/appearance/transform/Rotation.hh"
 
 namespace kke {
 class Matrix {
-	std::vector<std::shared_ptr<Transform>> transforms;
+	std::vector<std::shared_ptr<Manipulator>> manipulators;
 
 public:
-    void pushTransform(Transform const& transform);
+    void pushTransform(Translation const& transform);
 
-	void pushScale();
+	void pushTransform(Scaling const& scale);
 
-	void pushRotate(kke::Point const& center, float angle);
+	void pushTransform(Rotation const& rotate);
 
-	void pop();
+	void popTransform();
 
 	D2D1::Matrix3x2F build();
 };

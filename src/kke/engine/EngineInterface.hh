@@ -42,7 +42,7 @@ public:
 	virtual void popLayer() = 0;
 
 	/* ================= Canvas Control ================= */
-	virtual std::shared_ptr<Canvas> createCanvas(std::optional<Scale> scale = std::nullopt) = 0;
+	virtual std::shared_ptr<Canvas> createCanvas() = 0;
 
 	virtual void pushCanvas(std::shared_ptr<Canvas> canvas) = 0;
 

@@ -1,11 +1,11 @@
 #pragma once
 
-#include <d2d1.h>
+#include "kke/engine/d2d/d2d1_headers.hh"
 
 namespace kke {
-class Transform {
+class Manipulator {
 public:
-	virtual ~Transform() = default;
+	virtual ~Manipulator() = default;
 
 	virtual void transform(D2D1::Matrix3x2F& matrix) = 0;
 };
