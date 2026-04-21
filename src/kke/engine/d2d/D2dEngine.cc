@@ -30,3 +30,14 @@ void D2dEngine::popTransform() {
     matrixState.popTransform(*context);
 }
 
+std::shared_ptr<Canvas> D2dEngine::createCanvas() {
+    return canvasService.createCanvas(*context);
+}
+
+void D2dEngine::pushCanvas(std::shared_ptr<Canvas> canvas) {
+    canvasService.pushCanvas(*context, canvas);
+}
+
+void D2dEngine::popCanvas() {
+    canvasService.popCanvas(*context);
+}

@@ -13,6 +13,7 @@
 #include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
 #include "kke/engine/d2d/renderer/view/MatrixState.hh"
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
+#include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
 
 namespace kke {
 class D2dEngine : public EngineInterface {
@@ -21,6 +22,7 @@ class D2dEngine : public EngineInterface {
 	RenderPass renderPass;
 	MatrixState matrixState;
 	ViewLayerController viewLayerController;
+	CanvasService canvasService;
 	FaceRenderer faceRenderer;
 	StrokeRenderer strokeRenderer;
 

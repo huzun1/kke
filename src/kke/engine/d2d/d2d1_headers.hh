@@ -7,4 +7,3 @@
 #include <wincodec.h>
 #include <wrl/client.h>
 #include <unknwnbase.h>
-
