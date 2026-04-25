@@ -4,11 +4,10 @@
 
 #include "kke/geometry/Boundable.hh"
 #include "kke/geometry/Boundary.hh"
-#include "kke/geometry/Maskable.hh"
 #include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
-class Polygon : public Maskable, public Boundable {
+class Polygon : public Boundable {
 	std::vector<Point> points;
 
 public:

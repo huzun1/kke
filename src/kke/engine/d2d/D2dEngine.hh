@@ -28,23 +28,19 @@ class D2dEngine : public EngineInterface {
 
 public:
 	/* =============== Render Statement ================ */
-	void beginDraw();
+	void beginDraw(D2dContext const& context, ID2D1Image* renderTarget);
 
 	void endDraw();
 
 	void clear() override;
 
 	/*================ Transform Control ================ */
-	void pushTransform(Translation const& translate) override;
-
-	void pushTransform(Scaling const& scale) override;
-
-	void pushTransform(Rotation const& rotate) override;
+	void pushTransform(TransformSource const& translate) override;
 
 	void popTransform() override;
 
 	/* ================= Layer Control ================== */
-	void pushLayer(Maskable const& mask, LayerMode mode = LayerMode::NORMAL) override;
+	void pushLayer(MaskSource const& mask, LayerMode mode = LayerMode::NORMAL) override;
 
 	void popLayer() override;
 
@@ -65,90 +61,22 @@ public:
 
 	/* ================= Stroke Rendering ================= */
 	void draw(
-		Line const& line,
-		Brush const& brush,
-		StrokeAppearance const& appearance) override;
-
-	void draw(
-		Triangle const& triangle,
-		Brush const& brush,
-		StrokeAppearance const& appearance) override;
-
-	void draw(
-		Rect const& rect,
-		Brush const& brush,
-		StrokeAppearance const& appearance) override;
-
-	void draw(
-		RoundedRect const& roundedRect,
+		StrokeSource const& line,
 		Brush const& brush,
 		StrokeAppearance const& appearance) override;
 
 	/* ================= Face Rendering ================== */
 	void fill(
-		Triangle const& triangle,
-		Brush const& brush) override;
-
-	void fill(
-		Rect const& rect,
-		Brush const& brush) override;
-
-	void fill(
-		RoundedRect const& roundedRect,
-		Brush const& brush) override;
-
-	void fill(
-		Text const& text,
+		FillSource const& source,
 		Brush const& brush) override;
 
 	/* ================= Effect Rendering ================== */
 	void renderEffect(
-		Line const& line,
+		EffectSource const& source,
 		Effect const& effect) override;
 
 	void renderEffect(
-		Triangle const& triangle,
-		Effect const& effect) override;
-
-	void renderEffect(
-		Rect const& rect,
-		Effect const& effect) override;
-
-	void renderEffect(
-		RoundedRect const& roundedRect,
-		Effect const& effect) override;
-
-	void renderEffect(
-		Text const& text,
-		Effect const& effect) override;
-
-	void renderEffect(
-		std::shared_ptr<Canvas> canvas,
-		Effect const& effect) override;
-
-	/* ================ Effect Compose Rendering ================ */
-	void renderEffect(
-		Line const& line,
-		EffectCompose const& effect) override;
-
-	void renderEffect(
-		Triangle const& triangle,
-		EffectCompose const& effect) override;
-
-	void renderEffect(
-		Rect const& rect,
-		EffectCompose const& effect) override;
-
-	void renderEffect(
-		RoundedRect const& roundedRect,
-		EffectCompose const& effect) override;
-
-	void renderEffect(
-		Text const& text,
-		EffectCompose const& effect) override;
-
-	void renderEffect(
-		std::shared_ptr<Canvas> canvas,
+		EffectSource const& source,
 		EffectCompose const& effect) override;
 };
 };	// namespace kke

@@ -1,11 +1,10 @@
 #pragma once
 
-#include "kke/geometry/Boundary.hh"
-#include "kke/geometry/Maskable.hh"
+#include "kke/geometry/Boundable.hh"
 #include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
-struct Triangle : public Maskable, public Boundable {
+struct Triangle : public Boundable {
     Point a;
     Point b;
     Point c;

@@ -1,8 +1,9 @@
 #include "D2dEngine.hh"
+#include "kke/engine/Sources.hh"
 
 using namespace kke;
 
-void D2dEngine::beginDraw() {
+void D2dEngine::beginDraw(D2dContext const& context, ID2D1Image* renderTarget) {
     renderPass.beginDraw();
 }
 
@@ -14,16 +15,8 @@ void D2dEngine::clear() {
     renderPass.clear();
 }
 
-void D2dEngine::pushTransform(Translation const& translate) {
-    matrixState.pushTransform(*context, translate);
-}
-
-void D2dEngine::pushTransform(Scaling const& scale) {
-    matrixState.pushTransform(*context, scale);
-}
-
-void D2dEngine::pushTransform(Rotation const& rotate) {
-    matrixState.pushTransform(*context, rotate);
+void D2dEngine::pushTransform(TransformSource const& transform) {
+    matrixState.pushTransform(*context, transform);
 }
 
 void D2dEngine::popTransform() {

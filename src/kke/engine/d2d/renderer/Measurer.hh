@@ -1,22 +1,14 @@
 #pragma once
 
-#include <string_view>
+#include "kke/appearance/Scale.hh"
+#include "kke/appearance/Text.hh"
 
-#include "kke/geometry/primitives/Point.hh"
-#include "kke/appearance/text/font/FontAppearance.hh"
-#include "kke/appearance/effect/shadow/ShadowAppearance.hh"
-
+namespace kke {
 class Measurer {
 public:
-    kke::Scale getViewportSize();
+	Scale getViewportSize();
 
-    kke::Scale measureTextSize(
-        std::string_view text,
-        kke::FontAppearance const& fontAppearance,
-        kke::ShadowAppearance const& shadowAppearance);
-
-    kke::Scale measureTextSize(
-        std::wstring_view text,
-        kke::FontAppearance const& fontAppearance,
-        kke::ShadowAppearance const& shadowAppearance);
+	Scale measureTextSize(
+		Text const& text);
 };
+};	// namespace kke

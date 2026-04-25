@@ -2,10 +2,9 @@
 
 #include "kke/geometry/Boundable.hh"
 #include "kke/geometry/primitives/Point.hh"
-#include "kke/geometry/Maskable.hh"
 
 namespace kke {
-struct Ellipse : public Maskable, public Boundable {
+struct Ellipse : public Boundable {
 	kke::Point point;
 	float radius;
 

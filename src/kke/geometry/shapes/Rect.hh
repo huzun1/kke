@@ -1,11 +1,10 @@
 #pragma once
 
 #include "kke/geometry/Boundable.hh"
-#include "kke/geometry/Maskable.hh"
 #include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
-struct Rect : public Maskable, public Boundable {
+struct Rect : public Boundable {
 	kke::Point min;
 	kke::Point max;
 
