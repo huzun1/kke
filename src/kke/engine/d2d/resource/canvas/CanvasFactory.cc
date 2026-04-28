@@ -1,14 +1,17 @@
 #include "CanvasFactory.hh"
 
 #include <memory>
-#include "D2dCanvas.hh"
+
+#include "kke/engine/d2d/context/D2dEngineContext.hh"
 
 using namespace kke;
 using namespace Microsoft::WRL;
 
-std::shared_ptr<D2dCanvas> CanvasFactory::createCanvas(D2dContext const& context) {
+std::shared_ptr<D2dCanvas> CanvasFactory::createCanvas(D2dEngineContext const& context) {
+    D2dContext* d2dContext = context.getD2dContext();
+
     ComPtr<ID2D1CommandList> commandList;
-    HRESULT commandListResult = context.getDeviceContext()->CreateCommandList(&commandList);
+    HRESULT commandListResult = d2dContext->getDeviceContext()->CreateCommandList(&commandList);
     if (FAILED(commandListResult)) {
         // TODO: Log error
         return nullptr;

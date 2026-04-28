@@ -2,6 +2,8 @@
 
 #include "kke/appearance/resource/GeometryCompose.hh"
 #include "kke/appearance/view/LayerMode.hh"
+#include "kke/engine/Sources.hh"
+#include "kke/engine/d2d/context/D2dEngineContext.hh"
 #include "kke/geometry/curved/Ellipse.hh"
 #include "kke/geometry/curved/RoundedRect.hh"
 #include "kke/geometry/shapes/Polygon.hh"
@@ -10,17 +12,20 @@
 
 class ViewLayerController {
 public:
-	void pushLayer(kke::Triangle const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
+	void pushLayer(kke::D2dEngineContext const& context, kke::MaskSource const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
 
-	void pushLayer(kke::Rect const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
+	void popLayer(kke::D2dEngineContext const& context);
 
-	void pushLayer(kke::RoundedRect const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
+private:
+	void pushLayer(kke::D2dEngineContext const& context, kke::Triangle const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
 
-	void pushLayer(kke::Ellipse const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
+	void pushLayer(kke::D2dEngineContext const& context, kke::Rect const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
 
-	void pushLayer(kke::Polygon const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
+	void pushLayer(kke::D2dEngineContext const& context, kke::RoundedRect const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
 
-	void pushLayer(kke::GeometryCompose const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
+	void pushLayer(kke::D2dEngineContext const& context, kke::Ellipse const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
 
-	void popLayer();
+	void pushLayer(kke::D2dEngineContext const& context, kke::Polygon const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
+
+	void pushLayer(kke::D2dEngineContext const& context, kke::GeometryCompose const& mask, kke::LayerMode mode = kke::LayerMode::NORMAL);
 };

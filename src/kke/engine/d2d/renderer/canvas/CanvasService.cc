@@ -5,11 +5,11 @@
 
 using namespace kke;
 
-std::shared_ptr<D2dCanvas> CanvasService::createCanvas(D2dContext const& context) {
+std::shared_ptr<D2dCanvas> CanvasService::createCanvas(D2dEngineContext const& context) {
     return CanvasFactory::createCanvas(context);
 }
 
-void CanvasService::pushCanvas(D2dContext const& context, std::shared_ptr<Canvas> canvas) {
+void CanvasService::pushCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas) {
     std::shared_ptr<D2dCanvas> d2dCanvas = std::dynamic_pointer_cast<D2dCanvas>(canvas);
     if (!d2dCanvas) {
         // TODO: Log error - invalid canvas type
@@ -18,6 +18,6 @@ void CanvasService::pushCanvas(D2dContext const& context, std::shared_ptr<Canvas
     renderTargetStack.pushCanvas(context, d2dCanvas);
 }
 
-void CanvasService::popCanvas(D2dContext const& context) {
+void CanvasService::popCanvas(D2dEngineContext const& context) {
     renderTargetStack.popCanvas(context);
 }
