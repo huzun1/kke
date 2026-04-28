@@ -59,9 +59,6 @@ public:
 	virtual std::shared_ptr<Texture> uploadTexture(
 		void const* data, size_t size) = 0;
 
-	virtual void discardTexture(
-		std::shared_ptr<Texture> texture) = 0;
-
 	virtual void draw(
 		std::shared_ptr<Texture> texture,
 		Rect const& destRect,

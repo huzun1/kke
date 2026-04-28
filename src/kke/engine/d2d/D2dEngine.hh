@@ -9,11 +9,12 @@
 #include "kke/engine/EngineInterface.hh"
 #include "kke/engine/d2d/D2dContext.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
+#include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
 #include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
 #include "kke/engine/d2d/renderer/view/MatrixState.hh"
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
-#include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
+
 
 namespace kke {
 class D2dEngine : public EngineInterface {
@@ -28,7 +29,7 @@ class D2dEngine : public EngineInterface {
 
 public:
 	/* =============== Render Statement ================ */
-	void beginDraw(D2dContext const& context, ID2D1Image* renderTarget);
+	void beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget);
 
 	void endDraw();
 
@@ -78,5 +79,8 @@ public:
 	void renderEffect(
 		EffectSource const& source,
 		EffectCompose const& effect) override;
+
+private:
+	void assertContext() const;
 };
 };	// namespace kke
