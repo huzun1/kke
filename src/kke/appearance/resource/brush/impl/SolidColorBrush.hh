@@ -1,17 +1,14 @@
 #pragma once
 
-#include "../common/Color.hh"
-#include "Brush.hh"
+#include "kke/appearance/Color.hh"
 
 namespace kke {
-class SolidColorBrush : public Brush {
-	kke::Color4f color;
+class SolidColorBrush {
+	Color color;
 
 public:
-	SolidColorBrush(kke::Color4f color);
+	SolidColorBrush(Color color);
 
-	void create(ID2D1DeviceContext* context, ID2D1Brush** output) const override;
-
-	uint64_t hash() const override;
+	Color const& getColor() const;
 };
 };	// namespace kke

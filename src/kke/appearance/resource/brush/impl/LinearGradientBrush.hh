@@ -3,20 +3,26 @@
 #include <optional>
 #include <vector>
 
-#include "Brush.hh"
-#include "kke/common/Color.hh"
-#include "kke/common/Point.hh"
+#include "kke/appearance/Color.hh"
+#include "kke/geometry/primitives/Point.hh"
 
 namespace kke {
-class LinearGradientBrush : public Brush {
-	std::vector<kke::Color4f> colors;
+class LinearGradientBrush {
+	std::vector<Color> colors;
 	kke::Point startPoint;
 	kke::Point endPoint;
-	std::optional<float> angle;
+	float angle;
 
 public:
-	LinearGradientBrush(kke::Color4f const& startColor, kke::Color4f const& endColor, kke::Point const& startPoint, kke::Point const& endPoint);
+	LinearGradientBrush(std::vector<kke::Color> const& colors,
+						kke::Point const& startPoint, kke::Point const& endPoint, float angle = 0.0f);
 
-	LinearGradientBrush(std::vector<kke::Color4f> const& colors, kke::Point const& startPoint, kke::Point const& endPoint);
+	std::vector<kke::Color> const& getColors() const;
+
+	kke::Point const& getStartPoint() const;
+
+	kke::Point const& getEndPoint() const;
+
+	float getAngle() const;
 };
 };	// namespace kke
