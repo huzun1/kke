@@ -5,6 +5,8 @@
 namespace kke {
 struct RoundedRect : public Rect {
 	float rounding;
+
+	~RoundedRect() = default;
 	
 	RoundedRect();
 

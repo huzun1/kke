@@ -8,6 +8,8 @@ struct Ellipse : public Boundable {
 	kke::Point point;
 	float radius;
 
+	~Ellipse() = default;
+
 	Ellipse();
 
 	Ellipse(kke::Point const& point, float radius);

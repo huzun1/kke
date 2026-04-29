@@ -11,6 +11,8 @@ class Polygon : public Boundable {
 	std::vector<Point> points;
 
 public:
+    ~Polygon() = default;
+
 	Polygon(std::vector<Point> points);
 
     void addPoint(Point point);

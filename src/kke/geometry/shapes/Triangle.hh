@@ -9,6 +9,8 @@ struct Triangle : public Boundable {
     Point b;
     Point c;
 
+    ~Triangle() = default;
+
     Triangle();
 
 	Triangle(Point const& a, Point const& b, Point const& c);

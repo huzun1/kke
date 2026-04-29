@@ -8,6 +8,8 @@ struct Rect : public Boundable {
 	kke::Point min;
 	kke::Point max;
 
+	~Rect() = default;
+
 	Rect();
 
 	Rect(kke::Point const& min, kke::Point const& max);
