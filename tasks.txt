@@ -1,7 +1,0 @@
-- [x] geometryリファクタリング
-- [x] Engine再設計 (抽象化)
-- [ ] resources再実装 (リファクタリング)
-- [ ] renderer実装
-	- [ ] filler
-	- [ ] shadow
-	- [ ] stroke

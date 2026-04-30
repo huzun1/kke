@@ -6,7 +6,7 @@
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/effect/Effect.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
-#include "kke/engine/EngineInterface.hh"
+#include "kke/engine/Engine.hh"
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
 #include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
@@ -16,7 +16,7 @@
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
 
 namespace kke {
-class D2dEngine : public EngineInterface {
+class D2dEngine : public Engine {
 	std::unique_ptr<D2dEngineContext> engineContext;
 
 	RenderPass renderPass;
