@@ -40,7 +40,7 @@ public:
 	void popTransform() override;
 
 	/* ================= Layer Control ================== */
-	void pushLayer(MaskSource const& mask, LayerMode mode = LayerMode::NORMAL) override;
+	void pushLayer(MaskSource const& mask, LayerMode mode = LayerMode::Normal) override;
 
 	void popLayer() override;
 
@@ -72,8 +72,14 @@ public:
 
 	/* ================= Effect Rendering ================== */
 	void renderEffect(
+		Effect const& effect) override;
+
+	void renderEffect(
 		EffectSource const& source,
 		Effect const& effect) override;
+
+	void renderEffect(
+		EffectCompose const& effect) override;
 
 	void renderEffect(
 		EffectSource const& source,

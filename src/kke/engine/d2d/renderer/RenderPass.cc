@@ -1,12 +1,15 @@
 #include "RenderPass.hh"
+#include <d2d1.h>
+
 #include "kke/engine/d2d/context/D2dContext.hh"
+
 
 using namespace kke;
 
 void RenderPass::beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget) {
 	D2dContext* d2dContext = context.getD2dContext();
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
-	
+
 	Microsoft::WRL::ComPtr<ID2D1CommandList> targetCommandList;
 
 	deviceContext->BeginDraw();
@@ -19,6 +22,8 @@ void RenderPass::beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget)
 	deviceContext->DrawBitmap(bitmapCopy.Get());
 
 	d2dContext->setTargetCommandList(targetCommandList);
+
+	lastRenderTarget = renderTarget;
 }
 
 void RenderPass::endDraw(D2dEngineContext& context) {
@@ -32,7 +37,11 @@ void RenderPass::endDraw(D2dEngineContext& context) {
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
 
 	deviceContext->SetTarget(lastRenderTarget);
-	deviceContext->DrawImage(d2dContext->getTargetCommandList().Get());
+
+	// FIXME: make target command list abstract
+	ID2D1CommandList* targetCommandList = d2dContext->getTargetCommandList().Get();
+	targetCommandList->Close();
+	deviceContext->DrawImage(targetCommandList);
 
 	deviceContext->EndDraw();
 }
@@ -49,15 +58,24 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap> RenderPass::createBitmapCopy(ID2D1DeviceCont
 	float dpiX, dpiY;
 	source->GetDpi(&dpiX, &dpiY);
 
-	auto properties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_NONE,
-											  source->GetPixelFormat(), dpiX, dpiY);
+	D2D1_SIZE_U pixelSize = source->GetPixelSize();
+	D2D1_BITMAP_PROPERTIES1 properties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_NONE,
+											  source->GetPixelFormat(), dpiX, dpiY);							
 
 	deviceContext->CreateBitmap(
-		source->GetPixelSize(),
+		pixelSize,
 		nullptr,
 		0.0f,
 		properties,
 		&bitmapCopy);
+
+	D2D1_POINT_2U origin = D2D1::Point2U(0, 0);
+	D2D1_RECT_U sourceRect = D2D1::RectU(0, 0, pixelSize.width, pixelSize.height);
+	bitmapCopy->CopyFromBitmap(
+		&origin,
+		source,
+		&sourceRect
+	);
 
 	return bitmapCopy;
 }

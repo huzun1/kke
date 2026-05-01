@@ -1,10 +1,12 @@
 #pragma once
 
-#include "kke/engine/d2d/d2d1_headers.hh"
-
 #include <algorithm>
 #include <cstdint>
 #include <unordered_map>
+#include <utility>
+#include <vector>
+
+#include "kke/engine/d2d/d2d1_headers.hh"
 
 namespace kke {
 template <typename T>
@@ -17,7 +19,6 @@ class KeyCacheStorage {
 		UsageCount usageCount;
 		Ptr ptr;
 	};
-
 
 	uint32_t limit;
 	std::unordered_map<CacheKey, CachedPtr> storage;
@@ -45,6 +46,10 @@ public:
 		}
 		it->second.usageCount++;
 		return it->second.ptr;
+	}
+
+	void clear() {
+		storage.clear();
 	}
 
 private:

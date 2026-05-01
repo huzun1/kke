@@ -16,9 +16,6 @@ namespace kke {
  */
 class Engine {
 public:
-	/**
-	 * @brief Virtual destructor.
-	 */
 	virtual ~Engine() = default;
 
 	/* =============== Render Statement ================ */
@@ -48,7 +45,7 @@ public:
 	 * @param mask The mask source applied to the layer.
 	 * @param mode The blending mode of the layer (default: NORMAL).
 	 */
-	virtual void pushLayer(MaskSource const& mask, LayerMode mode = LayerMode::NORMAL) = 0;
+	virtual void pushLayer(MaskSource const& mask, LayerMode mode = LayerMode::Normal) = 0;
 
 	/**
 	 * @brief Pops the most recently pushed layer from the stack.
@@ -154,8 +151,24 @@ public:
 	 * @param effect The effect to apply.
 	 */
 	virtual void renderEffect(
+		Effect const& effect) = 0;
+
+	/**
+	 * @brief Renders an effect using a single effect definition.
+	 * @param source The effect source.
+	 * @param effect The effect to apply.
+	 */
+	virtual void renderEffect(
 		EffectSource const& source,
 		Effect const& effect) = 0;
+
+	/**
+	 * @brief Renders a composed effect using multiple effects.
+	 * @param source The effect source.
+	 * @param effect The composed effect definition.
+	 */
+	virtual void renderEffect(
+		EffectCompose const& effect) = 0;
 
 	/**
 	 * @brief Renders a composed effect using multiple effects.

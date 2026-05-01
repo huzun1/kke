@@ -2,7 +2,7 @@
 
 namespace kke {
 enum class LayerMode {
-    NORMAL,
-    INVERSED
+    Normal,
+    Inverted
 };
 };

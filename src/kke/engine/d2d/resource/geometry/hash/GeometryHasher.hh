@@ -15,19 +15,19 @@
 namespace kke {
 class GeometryHasher {
 public:
-	static uint64_t hash(Geometry const& geometry, GeometryHashMode mode = GeometryHashMode::PositionDependent);
+	static uint64_t hash(Geometry const& geometry, GeometryHashMode mode);
 
-	static uint64_t hash(GeometryCompose const& compose, GeometryHashMode mode = GeometryHashMode::PositionDependent);
+	static uint64_t hash(GeometryCompose const& compose, GeometryHashMode mode);
 
 private:
-	static uint64_t hash(Triangle const& triangle, GeometryHashMode mode = GeometryHashMode::PositionDependent);
+	static uint64_t hash(Triangle const& triangle, GeometryHashMode mode);
 
-	static uint64_t hash(Rect const& rect, GeometryHashMode mode = GeometryHashMode::PositionDependent);
+	static uint64_t hash(Rect const& rect, GeometryHashMode mode);
 
-	static uint64_t hash(RoundedRect const& roundedRect, GeometryHashMode mode = GeometryHashMode::PositionDependent);
+	static uint64_t hash(RoundedRect const& roundedRect, GeometryHashMode mode);
 
-	static uint64_t hash(Ellipse const& ellipse, GeometryHashMode mode = GeometryHashMode::PositionDependent);
+	static uint64_t hash(Ellipse const& ellipse, GeometryHashMode mode);
 
-	static uint64_t hash(Polygon const& polygon, GeometryHashMode mode = GeometryHashMode::PositionDependent);
+	static uint64_t hash(Polygon const& polygon, GeometryHashMode mode);
 };
 };	// namespace kke
