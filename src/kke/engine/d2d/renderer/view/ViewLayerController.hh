@@ -1,5 +1,7 @@
 #pragma once
 
+#include <wrl/client.h>
+
 #include "kke/appearance/resource/GeometryCompose.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/Sources.hh"
@@ -17,15 +19,5 @@ public:
 	void popLayer(kke::D2dEngineContext const& context);
 
 private:
-	void pushLayer(kke::D2dEngineContext const& context, kke::Triangle const& mask, kke::LayerMode mode);
-
-	void pushLayer(kke::D2dEngineContext const& context, kke::Rect const& mask, kke::LayerMode mode);
-
-	void pushLayer(kke::D2dEngineContext const& context, kke::RoundedRect const& mask, kke::LayerMode mode);
-
-	void pushLayer(kke::D2dEngineContext const& context, kke::Ellipse const& mask, kke::LayerMode mode);
-
-	void pushLayer(kke::D2dEngineContext const& context, kke::Polygon const& mask, kke::LayerMode mode);
-
-	void pushLayer(kke::D2dEngineContext const& context, kke::GeometryCompose const& mask, kke::LayerMode mode);
+	Microsoft::WRL::ComPtr<ID2D1Geometry> createGeometry(kke::D2dEngineContext const& context, kke::MaskSource const& mask, kke::LayerMode mode);
 };

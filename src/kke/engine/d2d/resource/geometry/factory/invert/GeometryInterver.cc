@@ -3,7 +3,7 @@
 using namespace kke;
 using namespace Microsoft::WRL;
 
-ComPtr<ID2D1Geometry> InvertedGeometryFactory::create(
+ComPtr<ID2D1Geometry> GeometryInverter::create(
 	D2dContext const& context,
 	ID2D1Geometry* viewportGeometry,
 	ID2D1Geometry* maskGeometry) {

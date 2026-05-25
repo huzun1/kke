@@ -2,6 +2,7 @@
 
 #include <span>
 
+#include "kke/appearance/resource/GeometryCompose.hh"
 #include "kke/engine/d2d/context/D2dContext.hh"
 #include "kke/engine/d2d/d2d1_headers.hh"
 #include "kke/geometry/Geometry.hh"
@@ -10,6 +11,8 @@ namespace kke {
 class GeometryFactory {
 public:
 	static Microsoft::WRL::ComPtr<ID2D1Geometry> create(D2dContext const& context, Geometry const& geometry);
+
+	static Microsoft::WRL::ComPtr<ID2D1Geometry> create(D2dContext const& context, GeometryCompose const& compose);
 
 private:
 	static Microsoft::WRL::ComPtr<ID2D1Geometry> create(D2dContext const& context, Triangle const& triangle);

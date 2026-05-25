@@ -38,6 +38,11 @@ void D2dEngine::pushLayer(MaskSource const& mask, LayerMode mode) {
     viewLayerController.pushLayer(*this->engineContext, mask, mode);
 }
 
+void D2dEngine::popLayer() {
+    assertD2dContext();
+    viewLayerController.popLayer(*this->engineContext);
+}
+
 std::shared_ptr<Canvas> D2dEngine::createCanvas() {
     assertD2dContext();
     return canvasService.createCanvas(*this->engineContext);

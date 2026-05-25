@@ -11,6 +11,38 @@ ComPtr<ID2D1Geometry> GeometryFactory::create(D2dContext const& context, Geometr
 	}, geometry);
 }
 
+ComPtr<ID2D1Geometry> GeometryFactory::create(D2dContext const& context, GeometryCompose const& compose) {
+	std::vector<ComPtr<ID2D1Geometry>> geometries;
+	for (const auto& geo : compose.getGeometries()) {
+		ComPtr<ID2D1Geometry> createdGeo = create(context, geo);
+		if (!createdGeo) {
+			return nullptr;
+		}
+		geometries.push_back(createdGeo);
+	}
+
+	if (geometries.empty()) {
+		return nullptr;
+	}
+
+	if (geometries.size() == 1) {
+		return geometries.front();
+	}
+
+	ComPtr<ID2D1GeometryGroup> geometryGroup;
+	HRESULT result = context.getFactory()->CreateGeometryGroup(
+		D2D1_FILL_MODE_WINDING,
+		reinterpret_cast<ID2D1Geometry**>(geometries.data()),
+		static_cast<UINT32>(geometries.size()),
+		&geometryGroup);
+
+	if (FAILED(result)) {
+		return nullptr;
+	}
+
+	return geometryGroup;
+}
+
 ComPtr<ID2D1Geometry> GeometryFactory::create(D2dContext const& context, Triangle const& triangle) {
 	Point points[] = {triangle.a, triangle.b, triangle.c};
 	return createPathGeometry(context, points);
