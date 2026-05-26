@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 
@@ -7,6 +8,7 @@
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/effect/Effect.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
+#include "kke/appearance/resource/font/Font.hh"
 #include "kke/appearance/resource/texture/Texture.hh"
 #include "kke/engine/Engine.hh"
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
@@ -75,6 +77,11 @@ public:
 	void fill(
 		FillSource const& source,
 		Brush const& brush) override;
+
+	/* ================= Font Resource ================= */
+	std::shared_ptr<Font> uploadFont(
+		void const* data,
+		size_t size) override;
 
 	/* ================ Texture Rendering ================ */
 	std::shared_ptr<Texture> uploadTexture(

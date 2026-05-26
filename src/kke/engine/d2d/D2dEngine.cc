@@ -98,6 +98,10 @@ void D2dEngine::fill(
 	faceRenderer.fill(*this->engineContext, source, brush);
 }
 
+std::shared_ptr<Font> D2dEngine::uploadFont(void const* data, size_t size) {
+	return engineContext->getResourceProviders()->getFontProvider()->uploadFont(data, size);
+}
+
 std::shared_ptr<Texture> D2dEngine::uploadTexture(void const* data, size_t size) {
 	assertD2dContext();
 	(void)data;

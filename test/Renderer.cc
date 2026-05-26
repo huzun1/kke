@@ -1,18 +1,29 @@
 #include "Renderer.hh"
 
 #include <cstdio>
+#include <memory>
+
+#include <Windows.h>
 
 #include "kke/appearance/painting/StrokeAppearance.hh"
+#include "kke/appearance/Text.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/brush/impl/SolidColorBrush.hh"
+#include "kke/appearance/resource/font/FontWeight.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/d2d/context/D2dContext.hh"
 #include "kke/geometry/Geometry.hh"
 #include "kke/geometry/curved/Ellipse.hh"
 #include "kke/geometry/shapes/Rect.hh"
+#include "resources/resources.h"
 
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
+	auto [fontData, fontDataSize] = loadResource(FONT_SPACE_GROTESK);
+	std::shared_ptr<kke::Font> font = engine.uploadFont(fontData, fontDataSize);
+	if (font) {
+		std::printf("font uploaded: %p, %zu\n", fontData, fontDataSize);
+	}
 }
 
 void application::Renderer::render() {
@@ -52,5 +63,28 @@ void application::Renderer::renderFrame() {
 	engine.popLayer();
 	engine.draw(invertedMask, outline, {4.0f});
 
+	kke::Text label{
+		L"Space Grotesk via DWrite",
+		{120.0f, 500.0f},
+		{"Space Grotesk", 36.0f, kke::FontWeight::BOLD}
+	};
+	engine.fill(label, outline);
+
 	fpsCounter.frame();
+}
+
+std::pair<void const*, size_t> application::Renderer::loadResource(int resourceId) {
+	const HRSRC resourceInfo = FindResourceA(nullptr, MAKEINTRESOURCEA(resourceId), "WAVE");
+	if (!resourceInfo) {
+		return {nullptr, 0};
+	}
+
+	const HGLOBAL resourceData = LoadResource(nullptr, resourceInfo);
+	if (!resourceData) {
+		return {nullptr, 0};
+	}
+
+	const void* resourcePtr = LockResource(resourceData);
+	const DWORD resourceSize = SizeofResource(nullptr, resourceInfo);
+	return {resourcePtr, static_cast<size_t>(resourceSize)};
 }

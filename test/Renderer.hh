@@ -1,5 +1,8 @@
 #pragma once
 
+#include <cstddef>
+#include <utility>
+
 #include "FpsCounter.hh"
 #include "backend/D2D1.hh"
 #include "kke/engine/d2d/D2dEngine.hh"
@@ -17,5 +20,7 @@ public:
 
 private:
 	void renderFrame();
+
+	static std::pair<void const*, size_t> loadResource(int resourceId);
 };
 }	// namespace application

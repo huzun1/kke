@@ -26,6 +26,12 @@ add_library(kke STATIC
     src/kke/engine/d2d/resource/brush/BrushProvider.cc
     src/kke/engine/d2d/resource/brush/factory/BrushFactory.cc
     src/kke/engine/d2d/resource/brush/hash/BrushHasher.cc
+    src/kke/engine/d2d/resource/font/D2dFont.cc
+    src/kke/engine/d2d/resource/font/FontProvider.cc
+    src/kke/engine/d2d/resource/font/TextFormatProvider.cc
+    src/kke/engine/d2d/resource/font/TextLayoutProvider.cc
+    src/kke/engine/d2d/resource/font/factory/FontFactory.cc
+    src/kke/engine/d2d/resource/font/hash/FontHasher.cc
     src/kke/engine/d2d/resource/canvas/CanvasFactory.cc
     src/kke/engine/d2d/resource/canvas/D2dCanvas.cc
     src/kke/engine/d2d/resource/geometry/GeometryProvider.cc
@@ -57,6 +63,8 @@ target_include_directories(kke PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include>
 )
+
+target_link_libraries(kke PUBLIC dwrite)
 
 install(TARGETS kke
     EXPORT kkeTargets

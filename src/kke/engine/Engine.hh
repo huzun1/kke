@@ -1,11 +1,13 @@
 #pragma once
 
+#include <cstddef>
 #include <memory>
 #include <optional>
 
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
+#include "kke/appearance/resource/font/Font.hh"
 #include "kke/appearance/resource/texture/Texture.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/Sources.hh"
@@ -118,6 +120,18 @@ public:
 	virtual void fill(
 		FillSource const& source,
 		Brush const& brush) = 0;
+
+	/* ================= Font Resource ================= */
+
+	/**
+	 * @brief Uploads raw font data.
+	 * @param data Pointer to the font data.
+	 * @param size Size of the data in bytes.
+	 * @return A shared pointer to the uploaded font.
+	 */
+	virtual std::shared_ptr<Font> uploadFont(
+		void const* data,
+		size_t size) = 0;
 
 	/* ================ Texture Rendering ================ */
 

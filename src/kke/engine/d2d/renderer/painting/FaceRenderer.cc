@@ -47,7 +47,13 @@ void FaceRenderer::fill(
 	D2dEngineContext const& context,
 	Text const& text,
 	ID2D1Brush* brush) {
-	(void)context;
-	(void)text;
-	(void)brush;
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> textLayout = context.getResourceProviders()->getFontProvider()->createTextLayout(text);
+	if (!textLayout) {
+		return;
+	}
+
+	context.getD2dContext()->getDeviceContext()->DrawTextLayout(
+		{text.position.x, text.position.y},
+		textLayout.Get(),
+		brush);
 }
