@@ -1,23 +1,34 @@
 #pragma once
 
-#include "kke/geometry/curved/RoundedRect.hh"
-#include "kke/geometry/shapes/Rect.hh"
-#include "kke/geometry/shapes/Triangle.hh"
+#include "kke/appearance/Text.hh"
+#include "kke/appearance/resource/GeometryCompose.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
+#include "kke/engine/Sources.hh"
+#include "kke/engine/d2d/context/D2dEngineContext.hh"
+#include "kke/geometry/Geometry.hh"
 
 namespace kke {
 class FaceRenderer {
 public:
 	void fill(
-		kke::Triangle const& triangle,
-		kke::Brush const& brush);
+		D2dEngineContext const& context,
+		FillSource const& source,
+		Brush const& brush);
+
+private:
+	void fill(
+		D2dEngineContext const& context,
+		Geometry const& geometry,
+		ID2D1Brush* brush);
 
 	void fill(
-		kke::Rect const& rect,
-		kke::Brush const& brush);
+		D2dEngineContext const& context,
+		GeometryCompose const& compose,
+		ID2D1Brush* brush);
 
 	void fill(
-		kke::RoundedRect const& rounded,
-		kke::Brush const& brush);
+		D2dEngineContext const& context,
+		Text const& text,
+		ID2D1Brush* brush);
 };
-};	// namespace kke
+}	// namespace kke

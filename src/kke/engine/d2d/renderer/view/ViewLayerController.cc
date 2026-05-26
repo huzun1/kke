@@ -31,9 +31,10 @@ ComPtr<ID2D1Geometry> ViewLayerController::createGeometry(kke::D2dEngineContext 
 			}, mask);
 		case kke::LayerMode::Inverted:
 			return std::visit([&](auto const& maskVariant) {
-				return context.getResourceProviders()->getInvertedGeometryProvider()->get(*context.getD2dContext(),
-																						  *context.getResourceProviders()->getGeometryProvider(),
-																						  maskVariant);
+				return context.getResourceProviders()->getInvertedGeometryProvider()->get(
+					*context.getD2dContext(),
+					*context.getResourceProviders()->getGeometryProvider(),
+					maskVariant);
 			}, mask);
 		default:
 			// TODO: Log error

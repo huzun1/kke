@@ -9,8 +9,11 @@ namespace kke {
 class D2dEngineContext {
 	std::unique_ptr<D2dContext> d2dContext;
     std::unique_ptr<D2dResourceProviders> resourceProviders;
+	D2D1_SIZE_F viewportSize = {};
 
 public:
+	void update(D2D1_SIZE_F viewportSize);
+
     void setD2dContext(std::unique_ptr<D2dContext> context);
 
     D2dContext* getD2dContext() const;
@@ -20,5 +23,7 @@ public:
     void setResourceProviders(std::unique_ptr<D2dResourceProviders> resourceProviders);
 
     D2dResourceProviders* getResourceProviders() const;
+
+	D2D1_SIZE_F getViewportSize() const;
 };
 };	// namespace kke

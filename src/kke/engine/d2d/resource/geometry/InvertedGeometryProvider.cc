@@ -1,5 +1,7 @@
 #include "InvertedGeometryProvider.hh"
 
+#include <cstdio>
+
 #include "kke/engine/d2d/resource/geometry/factory/invert/InvertedGeometryFactory.hh"
 #include "kke/engine/d2d/resource/geometry/hash/GeometryHashMode.hh"
 #include "kke/engine/d2d/resource/geometry/hash/GeometryHasher.hh"
@@ -8,14 +10,17 @@
 using namespace kke;
 using namespace Microsoft::WRL;
 
-void InvertedGeometryProvider::syncViewportSize(D2dContext const& context) {
-	bool isViewportResized = this->isViewportResized(context);
+void InvertedGeometryProvider::syncViewportSize(D2dContext const& context, D2D1_SIZE_F viewportSize) {
+	bool isViewportResized = this->isViewportResized(viewportSize);
 	if (isViewportResized) {
+		std::printf("[kke][InvertedGeometryProvider] viewport resized: %.2f x %.2f\n",
+					viewportSize.width,
+					viewportSize.height);
 		geometries.clear();
-		viewportSize = context.getDeviceContext()->GetSize();
+		this->viewportSize = viewportSize;
 	}
 
-	viewportGeometryCache.syncViewportSize(context);
+	viewportGeometryCache.syncViewportSize(context, viewportSize);
 }
 
 ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
@@ -32,6 +37,7 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 	ComPtr<ID2D1Geometry> invertedGeometry = InvertedGeometryFactory::createInvertedGeometry(context, geometryProvider,
 																							 viewportGeometryCache.get(context), geometry);
 	if (!invertedGeometry) {
+		std::printf("[kke][InvertedGeometryProvider] failed to create inverted geometry\n");
 		return nullptr;
 	}
 
@@ -53,6 +59,7 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 	ComPtr<ID2D1Geometry> invertedGeometry = InvertedGeometryFactory::createInvertedGeometry(context, geometryProvider,
 																							 viewportGeometryCache.get(context), compose);
 	if (!invertedGeometry) {
+		std::printf("[kke][InvertedGeometryProvider] failed to create inverted compose geometry\n");
 		return nullptr;
 	}
 
@@ -61,8 +68,6 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 }
 
 uint64_t InvertedGeometryProvider::createInvertedGeometryKey(D2dContext const& context, Geometry const& geometry) {
-	D2D1_SIZE_F viewportSize = context.getDeviceContext()->GetSize();
-
 	Hasher hasher;
 	hasher.combine(viewportSize.width);
 	hasher.combine(viewportSize.height);
@@ -71,8 +76,6 @@ uint64_t InvertedGeometryProvider::createInvertedGeometryKey(D2dContext const& c
 }
 
 uint64_t InvertedGeometryProvider::createInvertedGeometryKey(D2dContext const& context, GeometryCompose const& compose) {
-	D2D1_SIZE_F viewportSize = context.getDeviceContext()->GetSize();
-
 	Hasher hasher;
 	hasher.combine(viewportSize.width);
 	hasher.combine(viewportSize.height);
@@ -80,7 +83,6 @@ uint64_t InvertedGeometryProvider::createInvertedGeometryKey(D2dContext const& c
 	return hasher.get();
 }
 
-bool InvertedGeometryProvider::isViewportResized(D2dContext const& context) const {
-	D2D1_SIZE_F currentViewportSize = context.getDeviceContext()->GetSize();
-	return viewportSize.width != currentViewportSize.width || viewportSize.height != currentViewportSize.height;
+bool InvertedGeometryProvider::isViewportResized(D2D1_SIZE_F viewportSize) const {
+	return this->viewportSize.width != viewportSize.width || this->viewportSize.height != viewportSize.height;
 }

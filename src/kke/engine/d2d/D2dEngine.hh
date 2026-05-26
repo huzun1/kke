@@ -1,13 +1,16 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 
 #include "kke/appearance/Text.hh"
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/effect/Effect.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
+#include "kke/appearance/resource/texture/Texture.hh"
 #include "kke/engine/Engine.hh"
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
+#include "kke/engine/d2d/renderer/Measurer.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
 #include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
 #include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
@@ -22,11 +25,14 @@ class D2dEngine : public Engine {
 	RenderPass renderPass;
 	MatrixState matrixState;
 	ViewLayerController viewLayerController;
+	Measurer measurer;
 	CanvasService canvasService;
 	FaceRenderer faceRenderer;
 	StrokeRenderer strokeRenderer;
 
 public:
+	D2dEngine();
+
 	/* =============== Render Statement ================ */
 	void beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget);
 
@@ -69,6 +75,17 @@ public:
 	void fill(
 		FillSource const& source,
 		Brush const& brush) override;
+
+	/* ================ Texture Rendering ================ */
+	std::shared_ptr<Texture> uploadTexture(
+		void const* data,
+		size_t size) override;
+
+	void draw(
+		std::shared_ptr<Texture> texture,
+		Rect const& destRect,
+		float opacity = 1.0f,
+		std::optional<Rect> srcRect = std::nullopt) override;
 
 	/* ================= Effect Rendering ================== */
 	void renderEffect(

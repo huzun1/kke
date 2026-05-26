@@ -19,6 +19,14 @@ void Matrix::pushTransform(Rotation const& rotate) {
 	manipulators.push_back(std::make_shared<kke::RotateManipulator>(rotate));
 }
 
+void Matrix::popTransform() {
+	if (manipulators.empty()) {
+		return;
+	}
+
+	manipulators.pop_back();
+}
+
 D2D1::Matrix3x2F kke::Matrix::build() {
 	D2D1::Matrix3x2F multiplied = D2D1::Matrix3x2F::Identity();
 	for (auto& manipulator : manipulators) {
