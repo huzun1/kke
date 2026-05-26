@@ -63,6 +63,13 @@ void application::Renderer::renderFrame() {
 	engine.popLayer();
 	engine.draw(invertedMask, outline, {4.0f});
 
+	std::shared_ptr<kke::Canvas> canvas = engine.createCanvas();
+	engine.pushCanvas(canvas);
+	engine.fill(kke::Geometry{kke::Rect{{930.0f, 440.0f}, {1110.0f, 600.0f}}}, normalLayerFill);
+	engine.draw(kke::Geometry{kke::Ellipse{{1020.0f, 520.0f}, 58.0f}}, outline, {4.0f});
+	engine.popCanvas();
+	engine.draw(canvas, 0.85f);
+
 	kke::Text label{
 		L"Space Grotesk via DWrite",
 		{120.0f, 500.0f},

@@ -69,8 +69,7 @@ void D2dEngine::popCanvas() {
 
 void D2dEngine::draw(std::shared_ptr<Canvas> canvas, float opacity) {
 	assertD2dContext();
-	(void)canvas;
-	(void)opacity;
+	canvasService.drawCanvas(*this->engineContext, canvas, opacity);
 }
 
 Scale D2dEngine::getViewportSize() {
