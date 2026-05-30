@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+#include "Renderer.hh"
+
 HWND application::Window::createWindow(HINSTANCE instance) {
 	printf("creating window\n");
 
@@ -39,6 +41,11 @@ LRESULT CALLBACK application::Window::wndProc(HWND hwnd, UINT msg, WPARAM wparam
 	LRESULT result = 0;
 	switch (msg) {
 		case WM_KEYDOWN: {
+			Renderer* renderer = reinterpret_cast<Renderer*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+			if (renderer) {
+				renderer->handleKeyDown(static_cast<uint32_t>(wparam));
+			}
+
 			if (wparam == VK_ESCAPE)
 				DestroyWindow(hwnd);
 			break;

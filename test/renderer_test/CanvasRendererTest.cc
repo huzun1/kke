@@ -5,6 +5,7 @@
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/brush/impl/SolidColorBrush.hh"
+#include "kke/engine/Sources.hh"
 #include "kke/geometry/Geometry.hh"
 #include "kke/geometry/curved/Ellipse.hh"
 #include "kke/geometry/shapes/Rect.hh"
@@ -20,7 +21,17 @@ void CanvasRendererTest::render() {
 	engine().fill(kke::Geometry{kke::Rect{{930.0f, 440.0f}, {1110.0f, 600.0f}}}, normalLayerFill);
 	engine().draw(kke::Geometry{kke::Ellipse{{1020.0f, 520.0f}, 58.0f}}, outline, {4.0f});
 	engine().popCanvas();
-	engine().draw(canvas, 0.85f);
+
+	engine().pushTransform(kke::Translation({-100.0f, -100.0f}));
+	engine().draw(canvas);
+	engine().popTransform();
+
+	kke::EffectSourceAppearance blurAppearance;
+	kke::BlurEffect blurEffect{
+		{10.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED, kke::BlurMode::Normal}
+	};
+
+	engine().renderEffect(canvas, blurAppearance, blurEffect);
 }
 }
 }

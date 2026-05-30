@@ -14,6 +14,7 @@ add_executable(kke_test WIN32
     renderer_test/TextureRendererTest.cc
     renderer_test/TextEffectRendererTest.cc
     renderer_test/FrameEffectRendererTest.cc
+    renderer_test/TransformRendererTest.cc
     backend/D2D1.cc
     backend/D3D11.cc
     resources/resources.h
