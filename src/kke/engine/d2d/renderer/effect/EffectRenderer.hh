@@ -62,11 +62,6 @@ private:
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
 		EffectCompose const& effectCompose);
 
-	Microsoft::WRL::ComPtr<ID2D1Image> cropSourceImage(
-		D2dEngineContext& context,
-		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
-		std::optional<EffectClipSource> const& clip);
-
 	void drawImage(
 		D2dEngineContext const& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> image,

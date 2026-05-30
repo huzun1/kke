@@ -16,12 +16,11 @@ void EffectRenderer::render(
 		return;
 	}
 
-	ComPtr<ID2D1Image> croppedSourceImage = cropSourceImage(context, sourceImage, clip);
 	if (clip.has_value()) {
 		drawImage(context, sourceImage, std::nullopt, viewLayerController);
 	}
 
-	drawImage(context, apply(context, croppedSourceImage, effect), clip, viewLayerController);
+	drawImage(context, apply(context, sourceImage, effect), clip, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -35,12 +34,11 @@ void EffectRenderer::render(
 		return;
 	}
 
-	ComPtr<ID2D1Image> croppedSourceImage = cropSourceImage(context, sourceImage, clip);
 	if (clip.has_value()) {
 		drawImage(context, sourceImage, std::nullopt, viewLayerController);
 	}
 
-	drawImage(context, apply(context, croppedSourceImage, effectCompose), clip, viewLayerController);
+	drawImage(context, apply(context, sourceImage, effectCompose), clip, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -70,8 +68,7 @@ void EffectRenderer::render(
 		return;
 	}
 
-	ComPtr<ID2D1Image> sourceImage = cropSourceImage(context, sourceCanvas->getCommandList(), clip);
-	drawImage(context, apply(context, sourceImage, effect), clip, viewLayerController);
+	drawImage(context, apply(context, sourceCanvas->getCommandList(), effect), clip, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -86,8 +83,7 @@ void EffectRenderer::render(
 		return;
 	}
 
-	ComPtr<ID2D1Image> sourceImage = cropSourceImage(context, sourceCanvas->getCommandList(), clip);
-	drawImage(context, apply(context, sourceImage, effectCompose), clip, viewLayerController);
+	drawImage(context, apply(context, sourceCanvas->getCommandList(), effectCompose), clip, viewLayerController);
 }
 
 ComPtr<ID2D1Image> EffectRenderer::apply(
@@ -122,39 +118,6 @@ ComPtr<ID2D1Image> EffectRenderer::apply(
 	}
 
 	return currentImage;
-}
-
-ComPtr<ID2D1Image> EffectRenderer::cropSourceImage(
-	D2dEngineContext& context,
-	ComPtr<ID2D1Image> sourceImage,
-	std::optional<EffectClipSource> const& clip) {
-	if (!clip.has_value()) {
-		return sourceImage;
-	}
-
-	Geometry const* geometry = std::get_if<Geometry>(&clip.value());
-	if (!geometry) {
-		return sourceImage;
-	}
-
-	Rect const* rect = std::get_if<Rect>(geometry);
-	if (!rect) {
-		return sourceImage;
-	}
-
-	ComPtr<ID2D1Effect> cropEffect;
-	HRESULT cropResult = context.getD2dContext()->getDeviceContext()->CreateEffect(CLSID_D2D1Crop, &cropEffect);
-	if (FAILED(cropResult) || !cropEffect) {
-		return sourceImage;
-	}
-
-	cropEffect->SetInput(0, sourceImage.Get());
-	cropEffect->SetValue(D2D1_CROP_PROP_RECT, D2D1::Vector4F(rect->min.x, rect->min.y, rect->max.x, rect->max.y));
-	cropEffect->SetValue(D2D1_CROP_PROP_BORDER_MODE, D2D1_BORDER_MODE_HARD);
-
-	ComPtr<ID2D1Image> croppedImage;
-	cropEffect->GetOutput(&croppedImage);
-	return croppedImage ? croppedImage : sourceImage;
 }
 
 void EffectRenderer::drawImage(

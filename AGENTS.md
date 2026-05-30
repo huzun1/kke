@@ -1,38 +1,34 @@
-# C++コードスタイルガイドライン
+# C++ Style Guidelines
 
-## プロジェクト固有の設計・実装ガイド
+## Project-Specific Design and Implementation Notes
 
-作業対象に関連する設計や実装の注意点が`docs/arch`や`docs/impl`に存在する場合は、実装前に参照する。
+If the task depends on project-specific architectural or implementation decisions, inspect the relevant code first and derive the local conventions from the existing implementation.
 
-これらのドキュメントは、このプロジェクト固有の判断をまとめたものであり、一般的な C++ や Direct2D のルールとして扱わない。
+This repository currently does not keep project notes under `docs/arch` or `docs/impl`, so do not assume those directories exist.
 
-作業中に新しいプロジェクト固有の判断、責務分割、実装パターン、注意点が明確になった場合は、必要に応じて`docs/arch`や`docs/impl`に新規ファイルを作成、または既存ファイルを更新する。
+If a new project-specific rule, responsibility split, implementation pattern, or caution becomes clear during the work, document it in an appropriate location only if the project later introduces a dedicated place for such notes.
 
-基本環境:
-- C++ std 23
-- Cmake
-- Windowsプラットフォーム
+Base environment:
+- C++23
+- CMake
+- Windows platform
 
-## プリプロセッサの記法
+## Preprocessor Conventions
 
-必ず、ヘッダーには`#pragma once`を最初につける。
+Always put `#pragma once` at the top of every header.
 
-基本的に、includeをする際には、
+When ordering includes, use this sequence:
 
-1. stdヘッダー (cstdintやstringなど)
-2. ライブラリ関連ヘッダー (Plog, Minhookなど)
-2. Windows関連ヘッダー (Windows.hやdwrite.hなど)
-3. プロジェクト固有のヘッダー (src/kke/Engine.hhなど)
+1. Standard library headers (`cstdint`, `string`, etc.)
+2. Third-party library headers (`Plog`, `MinHook`, etc.)
+3. Windows-related headers (`Windows.h`, `dwrite.h`, etc.)
+4. Project headers (`src/kke/Engine.hh`, etc.)
 
-の順番で行う。
-
-- 正しい例
-```
+- Correct example
+```cpp
 #include <cstdint>
 #include <string>
 #include <vector>
-
-#include "kke/resources/font/FontWeight.hh"
 
 #include <MinHook.h>
 #include <plog/Log.h>
@@ -40,15 +36,18 @@
 #include <dwrite.h>
 #include <dwrite_3.h>
 #include <wrl/client.h>
+
+#include "kke/resources/font/FontWeight.hh"
 ```
-## ネームスペース・構造体・クラスの記法
 
-### インデント・行間
+## Namespace, Struct, and Class Conventions
 
-ネームスペース宣言或いは、クラス宣言において、次の宣言の間にスペースを入れないようにする。
+### Indentation and Spacing
 
-- 正しくない例 1
-```
+Do not insert blank lines between consecutive namespace declarations or between a namespace declaration and the next class declaration.
+
+- Incorrect example 1
+```cpp
 namespace kke {
 
 class DWriteFontWrapper {
@@ -60,8 +59,8 @@ class DWriteFontWrapper {
 }
 ```
 
-- 正しくない例 2
-```
+- Incorrect example 2
+```cpp
 namespace kke {
 
 namespace oreik {
@@ -73,8 +72,8 @@ namespace oreik {
 }
 ```
 
-- 正しい例 1
-```
+- Correct example 1
+```cpp
 namespace kke {
 class DWriteFontWrapper {
 ...
@@ -82,21 +81,21 @@ class DWriteFontWrapper {
 }
 ```
 
-- 正しい例 2
-```
+- Correct example 2
+```cpp
 namespace kke {
 namespace oreik {
 namespace sushi {
-} // ここも改行してはならない
+} // do not add a blank line here either
 }
 }
 ...
 ```
 
-ネームスペース宣言の場合、次の行のインデントはそのままだが、クラスの場合は、一つずらす。
+For namespaces, the next line keeps the same indentation level. For classes, indent the contents by one level.
 
-- 正しくない例
-```
+- Incorrect example
+```cpp
 class kke {
 class oreik {
 class sushi {
@@ -106,8 +105,8 @@ class sushi {
 }
 ```
 
-- 正しい例
-```
+- Correct example
+```cpp
 class kke {
     class oreik {
         class sushi {
@@ -117,10 +116,10 @@ class kke {
 ...
 ```
 
-また、メソッド宣言は無条件で次の行を空行にする(最後のメソッドを除く。)
+Also, always leave one blank line after a method declaration, except after the last method in the group.
 
-- 正しくない例
-```
+- Incorrect example
+```cpp
 	DWriteFontWrapper() = default;
 	~DWriteFontWrapper();
 
@@ -138,10 +137,10 @@ class kke {
 		IDWriteTextFormat* textFormat);
 ```
 
-- 正しい例
-```
+- Correct example
+```cpp
 	DWriteFontWrapper() = default;
-    
+
 	~DWriteFontWrapper();
 
 	void initialize();
@@ -160,15 +159,14 @@ class kke {
 		IDWriteTextFormat* textFormat);
 ```
 
-### メンバー宣言について
+### Member Declarations
 
-クラスと構造体の場合に限るが、メンバー宣言に関しては一番最初に宣言を完了させておく。
+In classes and structs, declare data members first.
 
-そして、メソッドの間などに宣言をしない。
+Do not place member variable declarations between methods.
 
-- 正しい例
-
-```
+- Correct example
+```cpp
 class DWriteFontWrapper {
 private:
 	Microsoft::WRL::ComPtr<IDWriteFactory5> writeFactory;
@@ -179,9 +177,8 @@ private:
 ...
 ```
 
-- 正しくない例
-
-```
+- Incorrect example
+```cpp
 ...
 	Microsoft::WRL::ComPtr<IDWriteTextLayout> createTextLayout(
 		const std::wstring& text,
@@ -197,15 +194,15 @@ private:
 
 	DWRITE_FONT_WEIGHT toDWriteWeight(FontWeight weight) const;
 };
-}  // namespace kke
+} // namespace kke
 ```
 
-また、この際の注意点として、メソッドを宣言として含めてはならない。
+Also, do not mix method declarations into the member declaration block.
 
-プライベートメソッドが必要な場合は、別で新しく非公開スコープを作成する。
+If private methods are needed, open a separate private section for them.
 
-- 正しくない例
-```
+- Incorrect example
+```cpp
 class DWriteFontWrapper {
 private:
 	bool isRegistered = false;
@@ -214,8 +211,8 @@ private:
 ...
 ```
 
-- 正しい例
-```
+- Correct example
+```cpp
 class DWriteFontWrapper {
 private:
 	bool isRegistered = false;
@@ -229,14 +226,14 @@ private:
 }
 ```
 
-### メソッドの配置順
+### Method Ordering
 
-メソッドは公開/非公開に関わらず、依存順に配置する。
+Order methods by dependency, regardless of visibility.
 
-外部から呼ばれるメソッド、或いは呼び出し元になるメソッドを上に置き、そのメソッドが依存する補助メソッドを下に置く。
+Place externally called methods or higher-level entry points first, and place the helper methods they depend on below them.
 
-- 正しい例
-```
+- Correct example
+```cpp
 class GeometryFactory {
 public:
 	static Microsoft::WRL::ComPtr<ID2D1Geometry> create(D2dContext const& context, Geometry const& geometry);
@@ -254,8 +251,8 @@ private:
 };
 ```
 
-- 正しくない例
-```
+- Incorrect example
+```cpp
 class GeometryFactory {
 private:
 	static D2D1_POINT_2F pointToD2d(Point const& point);
@@ -266,16 +263,16 @@ private:
 };
 ```
 
-`.cc`側の実装順も、ヘッダーの宣言順と同じにする。
+Keep the implementation order in `.cc` files consistent with the declaration order in headers.
 
-### 非公開ヘルパー関数
+### Private Helper Functions
 
-`.cc`だけに存在する単体関数は避ける。
+Avoid standalone functions that exist only in a `.cc` file.
 
-匿名ネームスペースで関数を隠すのではなく、対象クラスの`private`メソッドとしてヘッダーに宣言する。
+Instead of hiding them in an anonymous namespace, declare them as `private` methods on the relevant class.
 
-- 正しくない例
-```
+- Incorrect example
+```cpp
 namespace {
 D2D1_POINT_2F pointToD2d(Point const& point) {
 	return {point.x, point.y};
@@ -283,8 +280,8 @@ D2D1_POINT_2F pointToD2d(Point const& point) {
 }
 ```
 
-- 正しい例
-```
+- Correct example
+```cpp
 class GeometryFactory {
 private:
 	static D2D1_POINT_2F pointToD2d(Point const& point);
@@ -295,23 +292,22 @@ D2D1_POINT_2F GeometryFactory::pointToD2d(Point const& point) {
 }
 ```
 
-ただし、クラスに所属しない独立した責務がある場合は、専用のクラスや名前付きnamespaceを検討する。
+If the responsibility is truly independent from the class, consider introducing a dedicated class or a named namespace instead.
 
-### 初期化の記法
+### Initialization Style
 
-単純な構造体への変換では、冗長なファクトリ関数よりも波括弧初期化を優先する。
+For simple struct conversions, prefer brace initialization over verbose factory helpers.
 
-- 正しくない例
-```
+- Incorrect example
+```cpp
 D2D1_POINT_2F GeometryFactory::pointToD2d(Point const& point) {
 	return D2D1::Point2F(point.x, point.y);
 }
 ```
 
-- 正しい例
-```
+- Correct example
+```cpp
 D2D1_POINT_2F GeometryFactory::pointToD2d(Point const& point) {
 	return {point.x, point.y};
 }
 ```
-

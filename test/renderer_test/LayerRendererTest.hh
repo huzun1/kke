@@ -9,6 +9,13 @@ public:
 	using RendererTest::RendererTest;
 
 	void render() override;
+
+private:
+	void renderRoundedRectClipDemo();
+
+	void renderInversedClipDemo();
+
+	void renderComposedGeometryImageDemo();
 };
 }
 }

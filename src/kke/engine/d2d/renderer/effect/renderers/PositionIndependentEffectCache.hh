@@ -23,6 +23,11 @@ private:
 		Point relativeDrawOffset;
 	};
 
+	struct SavedDeviceContextState {
+		Microsoft::WRL::ComPtr<ID2D1Image> target;
+		D2D1_MATRIX_3X2_F transform;
+	};
+
 	EffectSourceRenderer sourceRenderer;
 	std::unordered_map<uint64_t, CachedEffectResult> cache;
 
@@ -59,15 +64,16 @@ private:
 		EffectSourceAppearance const& sourceAppearance,
 		uint64_t effectHash) const;
 
-	Microsoft::WRL::ComPtr<ID2D1Image> cropSourceImage(
-		D2dEngineContext& context,
-		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
-		std::optional<EffectClipSource> const& clip);
-
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> createEffectBitmap(
 		D2dEngineContext& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> outputImage,
 		D2D1_RECT_F const& imageBounds);
+
+	SavedDeviceContextState saveDeviceContextState(D2dEngineContext const& context) const;
+
+	void restoreDeviceContextState(
+		D2dEngineContext const& context,
+		SavedDeviceContextState const& state) const;
 
 	static void recordHit();
 

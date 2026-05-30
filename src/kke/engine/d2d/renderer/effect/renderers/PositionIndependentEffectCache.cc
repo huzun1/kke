@@ -40,12 +40,18 @@ PositionIndependentEffectCache::RenderResult PositionIndependentEffectCache::ren
 		EffectSource normalizedSource = PositionIndependentEffectSource::normalize(source, sourceOrigin);
 		EffectSourceAppearance normalizedAppearance = sourceAppearance;
 		normalizedAppearance.brush = PositionIndependentBrush::normalize(sourceAppearance.brush, sourceOrigin);
+		SavedDeviceContextState savedState = saveDeviceContextState(context);
+		ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+		deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+
 		std::shared_ptr<D2dCanvas> normalizedSourceCanvas = sourceRenderer.render(context, normalizedSource, normalizedAppearance);
 		if (!normalizedSourceCanvas) {
+			restoreDeviceContextState(context, savedState);
 			return {nullptr, {0.0f, 0.0f}};
 		}
 
 		CachedEffectResult cachedBitmap = renderToBitmap(context, normalizedSourceCanvas->getCommandList(), effectRenderer);
+		restoreDeviceContextState(context, savedState);
 		if (!cachedBitmap.bitmap) {
 			return {nullptr, {0.0f, 0.0f}};
 		}
@@ -56,13 +62,8 @@ PositionIndependentEffectCache::RenderResult PositionIndependentEffectCache::ren
 	}
 
 	Point drawOffset = sourceOrigin + cached->second.relativeDrawOffset;
-	std::optional<EffectClipSource> normalizedClip = std::nullopt;
-	if (clip.has_value()) {
-		normalizedClip = PositionIndependentEffectSource::normalizeClip(clip.value(), drawOffset);
-	}
-
 	return {
-		cropSourceImage(context, cached->second.bitmap, normalizedClip),
+		cached->second.bitmap,
 		drawOffset
 	};
 }
@@ -109,39 +110,6 @@ uint64_t PositionIndependentEffectCache::createCacheKey(
 	return hasher.get();
 }
 
-ComPtr<ID2D1Image> PositionIndependentEffectCache::cropSourceImage(
-	D2dEngineContext& context,
-	ComPtr<ID2D1Image> sourceImage,
-	std::optional<EffectClipSource> const& clip) {
-	if (!clip.has_value()) {
-		return sourceImage;
-	}
-
-	Geometry const* geometry = std::get_if<Geometry>(&clip.value());
-	if (!geometry) {
-		return sourceImage;
-	}
-
-	Rect const* rect = std::get_if<Rect>(geometry);
-	if (!rect) {
-		return sourceImage;
-	}
-
-	ComPtr<ID2D1Effect> cropEffect;
-	HRESULT cropResult = context.getD2dContext()->getDeviceContext()->CreateEffect(CLSID_D2D1Crop, &cropEffect);
-	if (FAILED(cropResult) || !cropEffect) {
-		return sourceImage;
-	}
-
-	cropEffect->SetInput(0, sourceImage.Get());
-	cropEffect->SetValue(D2D1_CROP_PROP_RECT, D2D1::Vector4F(rect->min.x, rect->min.y, rect->max.x, rect->max.y));
-	cropEffect->SetValue(D2D1_CROP_PROP_BORDER_MODE, D2D1_BORDER_MODE_HARD);
-
-	ComPtr<ID2D1Image> croppedImage;
-	cropEffect->GetOutput(&croppedImage);
-	return croppedImage ? croppedImage : sourceImage;
-}
-
 ComPtr<ID2D1Bitmap1> PositionIndependentEffectCache::createEffectBitmap(
 	D2dEngineContext& context,
 	ComPtr<ID2D1Image> outputImage,
@@ -163,23 +131,36 @@ ComPtr<ID2D1Bitmap1> PositionIndependentEffectCache::createEffectBitmap(
 		return nullptr;
 	}
 
-	ComPtr<ID2D1Image> previousTarget;
-	deviceContext->GetTarget(&previousTarget);
-	D2D1_MATRIX_3X2_F previousTransform;
-	deviceContext->GetTransform(&previousTransform);
+	SavedDeviceContextState savedState = saveDeviceContextState(context);
 
 	deviceContext->SetTarget(bitmap.Get());
 	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	deviceContext->Clear();
 	deviceContext->DrawImage(outputImage.Get(), {0.0f - imageBounds.left, 0.0f - imageBounds.top});
 	HRESULT flushResult = deviceContext->Flush();
-	deviceContext->SetTarget(previousTarget.Get());
-	deviceContext->SetTransform(previousTransform);
+	restoreDeviceContextState(context, savedState);
 	if (FAILED(flushResult)) {
 		return nullptr;
 	}
 
 	return bitmap;
+}
+
+PositionIndependentEffectCache::SavedDeviceContextState PositionIndependentEffectCache::saveDeviceContextState(
+	D2dEngineContext const& context) const {
+	SavedDeviceContextState state;
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	deviceContext->GetTarget(&state.target);
+	deviceContext->GetTransform(&state.transform);
+	return state;
+}
+
+void PositionIndependentEffectCache::restoreDeviceContextState(
+	D2dEngineContext const& context,
+	SavedDeviceContextState const& state) const {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	deviceContext->SetTarget(state.target.Get());
+	deviceContext->SetTransform(state.transform);
 }
 
 void PositionIndependentEffectCache::recordHit() {

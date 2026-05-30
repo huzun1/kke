@@ -16,7 +16,7 @@ namespace application {
 namespace renderer_test {
 void TextureRendererTest::render() {
 	kke::Brush panelFill = kke::SolidColorBrush({0.12f, 0.16f, 0.22f, 1.0f});
-	engine().fill(kke::Geometry{kke::Rect{{80.0f, 80.0f}, {1220.0f, 640.0f}}}, panelFill);
+	engine().fill(kke::Rect{{80.0f, 80.0f}, {1220.0f, 640.0f}}, panelFill);
 
 	if (encodedTexture()) {
 		engine().draw(

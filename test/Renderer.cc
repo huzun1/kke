@@ -130,10 +130,10 @@ void application::Renderer::renderTestSelectorOverlay() {
 	float panelHeight = panelPadding * 2.0f + titleHeight + rendererTests.size() * lineHeight;
 
 	engine.fill(
-		kke::Geometry{kke::Rect{
+		kke::Rect{
 			{panelLeft, panelTop},
 			{panelLeft + panelWidth, panelTop + panelHeight}
-		}},
+		},
 		panelFill);
 
 	engine.fill(
@@ -195,10 +195,10 @@ void application::Renderer::renderFpsOverlay() {
 	kke::Brush textBrush = kke::SolidColorBrush({0.98f, 0.99f, 1.0f, 1.0f});
 
 	engine.fill(
-		kke::Geometry{kke::Rect{
+		kke::Rect{
 			{panelLeft, panelTop},
 			{panelRight, panelBottom}
-		}},
+		},
 		panelFill);
 
 	fpsText.position = {
