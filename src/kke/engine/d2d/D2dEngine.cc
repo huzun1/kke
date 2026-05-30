@@ -119,26 +119,36 @@ void D2dEngine::draw(
 	textureRenderer.draw(*this->engineContext, texture, destRect, appearance);
 }
 
-void D2dEngine::renderEffect(Effect const& effect) {
+void D2dEngine::renderEffect(
+	Effect const& effect,
+	std::optional<EffectClipSource> clip) {
 	assertD2dContext();
-	(void)effect;
+	effectRenderer.render(*this->engineContext, renderPass, effect, clip, viewLayerController);
 }
 
-void D2dEngine::renderEffect(EffectSource const& source, Effect const& effect) {
+void D2dEngine::renderEffect(
+	EffectSource const& source,
+	EffectSourceAppearance const& sourceAppearance,
+	Effect const& effect,
+	std::optional<EffectClipSource> clip) {
 	assertD2dContext();
-	(void)source;
-	(void)effect;
+	effectRenderer.render(*this->engineContext, source, sourceAppearance, effect, clip, viewLayerController);
 }
 
-void D2dEngine::renderEffect(EffectCompose const& effect) {
+void D2dEngine::renderEffect(
+	EffectCompose const& effect,
+	std::optional<EffectClipSource> clip) {
 	assertD2dContext();
-	(void)effect;
+	effectRenderer.render(*this->engineContext, renderPass, effect, clip, viewLayerController);
 }
 
-void D2dEngine::renderEffect(EffectSource const& source, EffectCompose const& effect) {
+void D2dEngine::renderEffect(
+	EffectSource const& source,
+	EffectSourceAppearance const& sourceAppearance,
+	EffectCompose const& effect,
+	std::optional<EffectClipSource> clip) {
 	assertD2dContext();
-	(void)source;
-	(void)effect;
+	effectRenderer.render(*this->engineContext, source, sourceAppearance, effect, clip, viewLayerController);
 }
 
 void D2dEngine::assertD2dContext() const {

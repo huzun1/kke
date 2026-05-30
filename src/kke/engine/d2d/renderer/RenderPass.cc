@@ -52,6 +52,31 @@ void RenderPass::clear(D2dEngineContext& context) {
 	deviceContext->Clear();
 }
 
+Microsoft::WRL::ComPtr<ID2D1Image> RenderPass::cycleTargetCommandList(D2dEngineContext& context) {
+	D2dContext* d2dContext = context.getD2dContext();
+	Microsoft::WRL::ComPtr<ID2D1CommandList> currentTargetCommandList = d2dContext->getTargetCommandList();
+	if (!currentTargetCommandList) {
+		return nullptr;
+	}
+
+	HRESULT closeResult = currentTargetCommandList->Close();
+	if (FAILED(closeResult)) {
+		return nullptr;
+	}
+
+	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
+
+	Microsoft::WRL::ComPtr<ID2D1CommandList> nextTargetCommandList;
+	HRESULT createResult = deviceContext->CreateCommandList(&nextTargetCommandList);
+	if (FAILED(createResult) || !nextTargetCommandList) {
+		return nullptr;
+	}
+
+	deviceContext->SetTarget(nextTargetCommandList.Get());
+	d2dContext->setTargetCommandList(nextTargetCommandList);
+	return currentTargetCommandList;
+}
+
 Microsoft::WRL::ComPtr<ID2D1Bitmap> RenderPass::createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* source) {
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmapCopy;
 

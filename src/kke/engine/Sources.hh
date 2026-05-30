@@ -29,6 +29,8 @@ using TransformSource = std::variant<Translation, Scaling, Rotation>;
  */
 using MaskSource = std::variant<Geometry, GeometryCompose>;
 
+using EffectClipSource = MaskSource;
+
 /**
  * @brief Represents a stroke rendering source.
  *

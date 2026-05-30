@@ -7,19 +7,14 @@
 
 #include <Windows.h>
 
-#include "kke/appearance/painting/StrokeAppearance.hh"
-#include "kke/appearance/Text.hh"
-#include "kke/appearance/resource/brush/Brush.hh"
-#include "kke/appearance/resource/brush/impl/SolidColorBrush.hh"
-#include "kke/appearance/resource/font/FontWeight.hh"
 #include "kke/appearance/resource/texture/RawTextureData.hh"
-#include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
-#include "kke/appearance/resource/texture/TextureInterpolation.hh"
-#include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/d2d/context/D2dContext.hh"
-#include "kke/geometry/Geometry.hh"
-#include "kke/geometry/curved/Ellipse.hh"
-#include "kke/geometry/shapes/Rect.hh"
+#include "renderer_test/CanvasRendererTest.hh"
+#include "renderer_test/FrameEffectRendererTest.hh"
+#include "renderer_test/LayerRendererTest.hh"
+#include "renderer_test/ShapeEffectRendererTest.hh"
+#include "renderer_test/TextEffectRendererTest.hh"
+#include "renderer_test/TextureRendererTest.hh"
 #include "resources/resources.h"
 
 application::Renderer::Renderer(application::D2D1& d2d1)
@@ -29,7 +24,11 @@ application::Renderer::Renderer(application::D2D1& d2d1)
 	if (font) {
 		std::printf("font uploaded: %p, %zu\n", fontData, fontDataSize);
 	}
+
+	initializeRendererTests();
 }
+
+application::Renderer::~Renderer() = default;
 
 void application::Renderer::render() {
 	ID2D1DeviceContext* deviceContext = d2d1.getDeviceContext();
@@ -71,56 +70,20 @@ void application::Renderer::ensureTexturesUploaded() {
 }
 
 void application::Renderer::renderFrame() {
-	kke::Brush background = kke::SolidColorBrush({0.08f, 0.10f, 0.12f, 1.0f});
-	kke::Brush normalLayerFill = kke::SolidColorBrush({0.20f, 0.80f, 0.46f, 0.9f});
-	kke::Brush invertedLayerFill = kke::SolidColorBrush({0.30f, 0.52f, 1.0f, 0.55f});
-	kke::Brush outline = kke::SolidColorBrush({0.92f, 0.94f, 0.96f, 1.0f});
-
-	kke::Geometry fullViewport = kke::Rect{{0.0f, 0.0f}, {1280.0f, 720.0f}};
-	kke::Geometry normalMask = kke::Rect{{120.0f, 110.0f}, {520.0f, 430.0f}};
-	kke::Geometry invertedMask = kke::Ellipse{{850.0f, 280.0f}, 145.0f};
-
-	engine.fill(fullViewport, background);
-
-	engine.pushLayer(normalMask);
-	engine.fill(fullViewport, normalLayerFill);
-	engine.popLayer();
-	engine.draw(normalMask, outline, {4.0f});
-
-	engine.pushLayer(invertedMask, kke::LayerMode::Inverted);
-	engine.fill(fullViewport, invertedLayerFill);
-	engine.popLayer();
-	engine.draw(invertedMask, outline, {4.0f});
-
-	std::shared_ptr<kke::Canvas> canvas = engine.createCanvas();
-	engine.pushCanvas(canvas);
-	engine.fill(kke::Geometry{kke::Rect{{930.0f, 440.0f}, {1110.0f, 600.0f}}}, normalLayerFill);
-	engine.draw(kke::Geometry{kke::Ellipse{{1020.0f, 520.0f}, 58.0f}}, outline, {4.0f});
-	engine.popCanvas();
-	engine.draw(canvas, 0.85f);
-
-	if (encodedTexture) {
-		engine.draw(
-			encodedTexture,
-			{{560.0f, 110.0f}, {860.0f, 320.0f}},
-			{0.95f, kke::TextureInterpolation::Linear, kke::Rect{{90.0f, 40.0f}, {360.0f, 220.0f}}});
+	for (auto& rendererTest : rendererTests) {
+		rendererTest->render();
 	}
-
-	if (rawTexture) {
-		engine.draw(
-			rawTexture,
-			{{900.0f, 110.0f}, {1160.0f, 370.0f}},
-			{0.90f, kke::TextureInterpolation::Nearest});
-	}
-
-	kke::Text label{
-		L"Space Grotesk via DWrite",
-		{120.0f, 500.0f},
-		{"Space Grotesk", 36.0f, kke::FontWeight::BOLD}
-	};
-	engine.fill(label, outline);
 
 	fpsCounter.frame();
+}
+
+void application::Renderer::initializeRendererTests() {
+	rendererTests.emplace_back(std::make_unique<renderer_test::LayerRendererTest>(*this));
+	rendererTests.emplace_back(std::make_unique<renderer_test::ShapeEffectRendererTest>(*this));
+	rendererTests.emplace_back(std::make_unique<renderer_test::CanvasRendererTest>(*this));
+	rendererTests.emplace_back(std::make_unique<renderer_test::TextureRendererTest>(*this));
+	rendererTests.emplace_back(std::make_unique<renderer_test::TextEffectRendererTest>(*this));
+	rendererTests.emplace_back(std::make_unique<renderer_test::FrameEffectRendererTest>(*this));
 }
 
 std::vector<uint8_t> application::Renderer::createRawTexturePixels(uint32_t width, uint32_t height) {

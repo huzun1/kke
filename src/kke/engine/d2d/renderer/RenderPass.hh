@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
 #include "kke/engine/d2d/d2d1_headers.hh"
 
@@ -13,6 +15,8 @@ public:
 	void endDraw(D2dEngineContext& context);
 
 	void clear(D2dEngineContext& context);
+
+	Microsoft::WRL::ComPtr<ID2D1Image> cycleTargetCommandList(D2dEngineContext& context);
 
 private:
 	static Microsoft::WRL::ComPtr<ID2D1Bitmap> createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* source);

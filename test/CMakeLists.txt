@@ -5,6 +5,13 @@ add_executable(kke_test WIN32
     Main.cc
     Window.cc
     Renderer.cc
+    renderer_test/RendererTest.cc
+    renderer_test/LayerRendererTest.cc
+    renderer_test/ShapeEffectRendererTest.cc
+    renderer_test/CanvasRendererTest.cc
+    renderer_test/TextureRendererTest.cc
+    renderer_test/TextEffectRendererTest.cc
+    renderer_test/FrameEffectRendererTest.cc
     backend/D2D1.cc
     backend/D3D11.cc
     resources/resources.h

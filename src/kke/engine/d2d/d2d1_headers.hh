@@ -4,6 +4,7 @@
 #define NOMINMAX
 #include <d2d1.h>
 #include <d2d1_1.h>
+#include <d2d1effects.h>
 #include <dwrite.h>
 #include <dwrite_3.h>
 #include <wincodec.h>

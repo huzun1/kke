@@ -3,10 +3,10 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
-
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
+#include "kke/appearance/resource/effect/EffectSourceAppearance.hh"
 #include "kke/appearance/resource/font/Font.hh"
 #include "kke/appearance/resource/texture/RawTextureData.hh"
 #include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
@@ -168,7 +168,8 @@ public:
 	 * @param effect The effect to apply.
 	 */
 	virtual void renderEffect(
-		Effect const& effect) = 0;
+		Effect const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt) = 0;
 
 	/**
 	 * @brief Renders an effect using a single effect definition.
@@ -177,7 +178,9 @@ public:
 	 */
 	virtual void renderEffect(
 		EffectSource const& source,
-		Effect const& effect) = 0;
+		EffectSourceAppearance const& sourceAppearance,
+		Effect const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt) = 0;
 
 	/**
 	 * @brief Renders a composed effect using multiple effects.
@@ -185,7 +188,8 @@ public:
 	 * @param effect The composed effect definition.
 	 */
 	virtual void renderEffect(
-		EffectCompose const& effect) = 0;
+		EffectCompose const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt) = 0;
 
 	/**
 	 * @brief Renders a composed effect using multiple effects.
@@ -194,6 +198,8 @@ public:
 	 */
 	virtual void renderEffect(
 		EffectSource const& source,
-		EffectCompose const& effect) = 0;
+		EffectSourceAppearance const& sourceAppearance,
+		EffectCompose const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt) = 0;
 };
 } // namespace kke

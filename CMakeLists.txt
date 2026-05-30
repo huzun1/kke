@@ -9,6 +9,8 @@ add_library(kke STATIC
     src/kke/appearance/Color.cc
     src/kke/appearance/Scale.cc
     src/kke/appearance/resource/GeometryCompose.cc
+    src/kke/appearance/resource/effect/EffectCompose.cc
+    src/kke/appearance/resource/effect/EffectIdentifier.cc
     src/kke/appearance/resource/brush/impl/LinearGradientBrush.cc
     src/kke/appearance/resource/brush/impl/SolidColorBrush.cc
     src/kke/engine/d2d/D2dEngine.cc
@@ -19,6 +21,12 @@ add_library(kke STATIC
     src/kke/engine/d2d/renderer/RenderPass.cc
     src/kke/engine/d2d/renderer/canvas/CanvasRenderTargetStack.cc
     src/kke/engine/d2d/renderer/canvas/CanvasService.cc
+    src/kke/engine/d2d/renderer/effect/EffectRenderer.cc
+    src/kke/engine/d2d/renderer/effect/EffectSourceRenderer.cc
+    src/kke/engine/d2d/renderer/effect/renderers/BlurEffectRenderer.cc
+    src/kke/engine/d2d/renderer/effect/renderers/ColorMatrixEffectRenderer.cc
+    src/kke/engine/d2d/renderer/effect/renderers/DirectionalBlurEffectRenderer.cc
+    src/kke/engine/d2d/renderer/effect/renderers/ShadowEffectRenderer.cc
     src/kke/engine/d2d/renderer/painting/FaceRenderer.cc
     src/kke/engine/d2d/renderer/painting/StrokeRenderer.cc
     src/kke/engine/d2d/renderer/painting/TextureRenderer.cc

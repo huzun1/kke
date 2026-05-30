@@ -3,7 +3,6 @@
 #include <cstddef>
 #include <memory>
 #include <optional>
-
 #include "kke/appearance/Text.hh"
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/effect/Effect.hh"
@@ -17,6 +16,7 @@
 #include "kke/engine/d2d/renderer/Measurer.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
 #include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
+#include "kke/engine/d2d/renderer/effect/EffectRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/TextureRenderer.hh"
@@ -35,6 +35,7 @@ class D2dEngine : public Engine {
 	FaceRenderer faceRenderer;
 	StrokeRenderer strokeRenderer;
 	TextureRenderer textureRenderer;
+	EffectRenderer effectRenderer;
 
 public:
 	D2dEngine();
@@ -102,18 +103,24 @@ public:
 
 	/* ================= Effect Rendering ================== */
 	void renderEffect(
-		Effect const& effect) override;
+		Effect const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt) override;
 
 	void renderEffect(
 		EffectSource const& source,
-		Effect const& effect) override;
+		EffectSourceAppearance const& sourceAppearance,
+		Effect const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt) override;
 
 	void renderEffect(
-		EffectCompose const& effect) override;
+		EffectCompose const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt) override;
 
 	void renderEffect(
 		EffectSource const& source,
-		EffectCompose const& effect) override;
+		EffectSourceAppearance const& sourceAppearance,
+		EffectCompose const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt) override;
 
 private:
 	void assertD2dContext() const;
