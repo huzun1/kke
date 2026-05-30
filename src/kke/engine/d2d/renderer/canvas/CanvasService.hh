@@ -1,0 +1,21 @@
+#pragma once
+
+#include <memory>
+
+#include "CanvasRenderTargetStack.hh"
+#include "kke/engine/d2d/context/D2dEngineContext.hh"
+
+namespace kke {
+class CanvasService {
+    CanvasRenderTargetStack renderTargetStack;
+
+public:
+    std::shared_ptr<D2dCanvas> createCanvas(D2dEngineContext const& context);
+
+    void pushCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> /* std::shared_ptr<D2dCanvas> */ canvas);
+
+    void popCanvas(D2dEngineContext const& context);
+
+	void drawCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas, float opacity);
+};
+};

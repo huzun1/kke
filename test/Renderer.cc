@@ -1,189 +1,306 @@
 #include "Renderer.hh"
 
-#include <D2D1.h>
-#include <d2d1_1.h>
-#include <d2d1_2.h>
-#include <wincodec.h>
-
-#include <cmath>
+#include <cstdio>
+#include <cstdint>
 #include <memory>
+#include <sstream>
+#include <string>
+#include <vector>
 
-#include "FpsCounter.hh"
-#include "kke/brush/LinearGradientBrush.hh"
-#include "kke/brush/SolidColorBrush.hh"
-#include "kke/common/Color.hh"
-#include "kke/common/geometry/Ellipse.hh"
-#include "kke/common/geometry/Rect.hh"
-#include "kke/common/geometry/RoundedRect.hh"
-#include "kke/font/FontData.hh"
+#include <Windows.h>
+
+#include "kke/appearance/resource/texture/RawTextureData.hh"
+#include "kke/appearance/resource/brush/impl/SolidColorBrush.hh"
+#include "kke/appearance/resource/font/FontWeight.hh"
+#include "kke/appearance/Text.hh"
+#include "kke/engine/d2d/context/D2dContext.hh"
+#include "renderer_test/BlurStressRendererTest.hh"
+#include "renderer_test/CanvasRendererTest.hh"
+#include "renderer_test/FrameEffectRendererTest.hh"
+#include "renderer_test/LayerRendererTest.hh"
+#include "renderer_test/ShadowStressRendererTest.hh"
+#include "renderer_test/ShapeEffectRendererTest.hh"
+#include "renderer_test/TextEffectRendererTest.hh"
+#include "renderer_test/TransformRendererTest.hh"
+#include "renderer_test/TextureRendererTest.hh"
+#include "kke/engine/d2d/renderer/effect/renderers/PositionIndependentEffectCache.hh"
+#include "kke/geometry/shapes/Rect.hh"
 #include "resources/resources.h"
 
-static FpsCounter counter;
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
-	this->engine = std::make_unique<kke::Engine>(d2d1.getFactory(), d2d1.getDeviceContext());
-
-	// Load font resources
 	auto [fontData, fontDataSize] = loadResource(FONT_SPACE_GROTESK);
-	std::vector<FontData> fonts;
-	if (fontData) {
-		fonts.push_back({fontData, fontDataSize});
-		printf("font loaded: %p, %lld\n", fontData, fontDataSize);
+	std::shared_ptr<kke::Font> font = engine.uploadFont(fontData, fontDataSize);
+	if (font) {
+		std::printf("font uploaded: %p, %zu\n", fontData, fontDataSize);
 	}
 
-	// Initialize engine with loaded fonts
-	this->engine->init(fonts);
-
-	auto [data, size] = loadResource(TEXTURE_DYCONTRAST);
-	if (data) {
-		dyconTexId = this->engine->loadTexture(data, size);
-		printf("resource loaded: %p, %lld\n", data, size);
-		printf("texture loaded: %lld\n", dyconTexId);
-	}
+	initializeRendererTests();
 }
+
+application::Renderer::~Renderer() = default;
 
 void application::Renderer::render() {
-	// preRender();
-
 	ID2D1DeviceContext* deviceContext = d2d1.getDeviceContext();
 	ID2D1Bitmap1* renderTarget = d2d1.getRenderTarget();
+	if (!deviceContext || !renderTarget) {
+		return;
+	}
 
-	this->engine->begin(renderTarget);
+	kke::D2dContext context(d2d1.getFactory(), deviceContext);
+
+	engine.beginDraw(context, renderTarget);
+	engine.clear();
+	ensureTexturesUploaded();
 	renderFrame();
-	ID2D1Image* output;
-	this->engine->end(&output);
-
-	// render the output
-	deviceContext->SetTarget(renderTarget);
-	deviceContext->BeginDraw();
-	deviceContext->DrawImage(output);
-	deviceContext->EndDraw();
-
-	output->Release();
+	engine.endDraw();
 }
 
-void application::Renderer::preRender() {
-	ID2D1DeviceContext* deviceContext = d2d1.getDeviceContext();
-	ID2D1Bitmap1* renderTarget = d2d1.getRenderTarget();
+void application::Renderer::handleKeyDown(uint32_t virtualKey) {
+	if (virtualKey >= VK_NUMPAD1 && virtualKey <= VK_NUMPAD9) {
+		virtualKey = '1' + (virtualKey - VK_NUMPAD1);
+	}
 
-	deviceContext->SetTarget(renderTarget);
-	deviceContext->BeginDraw();
+	for (size_t index = 0; index < rendererTests.size(); ++index) {
+		if (rendererTests[index].virtualKey != virtualKey) {
+			continue;
+		}
 
-	D2D1_RECT_F rect{90, 90, 200, 200};
-	D2D1_COLOR_F color{1.0f, 0.0f, 0.0f, 1.0f};
-	ID2D1SolidColorBrush* brush;
-	deviceContext->CreateSolidColorBrush(&color, nullptr, &brush);
-	deviceContext->FillRectangle(rect, brush);
+		switchRendererTest(index);
+		return;
+	}
+}
 
-	deviceContext->EndDraw();
+void application::Renderer::ensureTexturesUploaded() {
+	if (!encodedTexture) {
+		auto [textureData, textureDataSize] = loadResource(TEXTURE_DYCONTRAST);
+		encodedTexture = engine.uploadTexture(textureData, textureDataSize);
+	}
+
+	if (!rawTexture) {
+		constexpr uint32_t rawTextureWidth = 8;
+		constexpr uint32_t rawTextureHeight = 8;
+
+		if (rawTexturePixels.empty()) {
+			rawTexturePixels = createRawTexturePixels(rawTextureWidth, rawTextureHeight);
+		}
+
+		rawTexture = engine.uploadTexture({
+			rawTexturePixels.data(),
+			rawTextureWidth,
+			rawTextureHeight,
+			rawTextureWidth * 4
+		});
+	}
 }
 
 void application::Renderer::renderFrame() {
-	// Generic Rendering Test
-	this->engine->drawRect(kke::Rect{20, 20, 100, 100}, kke::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}), 10.0f);
-	this->engine->fillRect(kke::Rect{60, 20, 160, 100}, kke::SolidColorBrush({0.0f, 1.0f, 1.0f, 1.0f}));
-	this->engine->fillRounded(kke::RoundedRect({20, 60, 160, 220}, 3.0f), kke::SolidColorBrush({1.0f, 0.0f, 1.0f, 0.5f}));
-	this->engine->fillEllipse(kke::Ellipse(300, 300, 30), kke::SolidColorBrush({1.0, 0.0f, 0.0f, 1.0f}));
-
-	// Scale Test
-	static int angle = 0;
-	angle++;
-	kke::Rect rotRect{300, 90, 500, 200};
-	this->engine->pushRotate(rotRect.center(), angle);
-	this->engine->fillRounded({rotRect, 3.0f}, kke::SolidColorBrush({0.0f, 0.0f, 1.0f, 1.0f}));
-	this->engine->popTransform();
-
-	// Rotate Test
-	static float theta = 0;
-	theta += 0.01f;
-	kke::Rect scaleRect{200, 400, 400, 600};
-	this->engine->pushScale(scaleRect.center(), {std::sin(theta) * 0.5f + 1.0f, std::sin(theta) * 0.5f + 1.0f});
-	this->engine->fillRounded({scaleRect, 3.0f}, kke::SolidColorBrush({0.0f, 1.0f, 0.0f, 1.0f}));
-	this->engine->popTransform();
-
-	// Shadow Test
-	kke::RoundedRect rect{{200.0f, 200.0f, 400.0f, 400.0f}, 15.0f};
-	static float gradientAngle = 0.0f;
-	gradientAngle += 0.5f;
-
-	auto brush = kke::LinearGradientBrush({kke::Color4f(KKE_COLOR_16(0x205034)),
-										   kke::Color4f(KKE_COLOR_16(0x680620)), kke::Color4f(KKE_COLOR_16(0xFF06FF))},
-										  {rect.x1, rect.y1},
-										  {rect.x2, rect.y2});
-	brush.setAngle(gradientAngle);
-	this->engine->drawRoundedShadow(rect, brush, 10.0f);
-	this->engine->fillRounded(rect, brush);
-
-	this->engine->drawRectShadow({600, 300, 800, 400}, kke::SolidColorBrush({1.0f, 0.0f, 0.0f, 1.0f}), 10.0f);
-
-	// Texture Test
-	static int dyconAngle = 0;
-	dyconAngle += 3;
-	kke::Rect dyconRect{500, 500, 700, 700};
-	this->engine->pushRotate(dyconRect.center(), dyconAngle);
-	this->engine->drawTexture(dyconTexId, dyconRect);
-	this->engine->popTransform();
-
-	// Text Test
-	this->engine->drawText(
-		{50, 300},
-		L"Hello, kke!",
-		kke::FontWeight::BOLD,
-		L"Space Grotesk",
-		32,
-		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
-
-	this->engine->drawTextShadow(
-		{50, 350},
-		L"Hello, kke with Shadow!",
-		kke::FontWeight::BOLD,
-		L"Space Grotesk",
-		32,
-		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}),
-		5.0f);
-	this->engine->drawText(
-		{50, 350},
-		L"Hello, kke with Shadow! ggggggggggggggyyyyyyyyyyyyy",
-		kke::FontWeight::BOLD,
-		L"Space Grotesk",
-		32,
-		kke::SolidColorBrush({0.0f, 0.0f, 0.0f, 1.0f}));
-
-	// Draw FPS
-	counter.frame();
-	this->engine->drawText(
-		{10, 10},
-		L"FPS: " + std::to_wstring(static_cast<int>(counter.fps())),
-		kke::FontWeight::NORMAL,
-		L"Space Grotesk",
-		16,
-		kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
-
-	// Ranged-blur Test
-	float offset = 50 + std::sin(theta) * 50.0f;
-	kke::RoundedRect blurRect{{0.0f + offset, 50.0f + offset, 300.0f + offset, 300.0f + offset}, 10.0f};
-	this->engine->flush(); // Ensure all previous drawing commands are executed
-	this->engine->blur(30.0f, &blurRect);
-	this->engine->drawRounded(blurRect, kke::SolidColorBrush(KKE_COLOR_24(0x000000FF)), 2.0f);
-
-	// Triangle Test
-	kke::Triangle triangle{{600.0f, 100.0f}, {700.0f, 300.0f}, {500.0f, 300.0f}};
-	this->engine->fillTriangle(triangle, kke::SolidColorBrush(KKE_COLOR_24(0x00FF00FF)));
-
-	// Shadow inverted-geometry test
-	this->engine->drawRectShadow({800, 20, 900, 100}, kke::SolidColorBrush(KKE_COLOR_16(0x000000)), 3.0f, true);
+	renderActiveRendererTest();
+	renderTestSelectorOverlay();
+	fpsCounter.frame();
+	renderFpsOverlay();
+	logFps();
 }
 
-std::pair<void*, size_t> application::Renderer::loadResource(int resourceId) {
-	const HRSRC resourceInfo = FindResourceA(NULL, MAKEINTRESOURCEA(resourceId), "WAVE");
+void application::Renderer::renderActiveRendererTest() {
+	if (rendererTests.empty()) {
+		return;
+	}
+
+	rendererTests[activeRendererTestIndex].rendererTest->render();
+}
+
+void application::Renderer::renderTestSelectorOverlay() {
+	if (rendererTests.empty()) {
+		return;
+	}
+
+	kke::Brush panelFill = kke::SolidColorBrush({0.05f, 0.07f, 0.10f, 0.82f});
+	kke::Brush titleBrush = kke::SolidColorBrush({0.96f, 0.97f, 0.99f, 1.0f});
+	kke::Brush activeBrush = kke::SolidColorBrush({0.56f, 0.84f, 1.0f, 1.0f});
+	kke::Brush inactiveBrush = kke::SolidColorBrush({0.80f, 0.84f, 0.88f, 1.0f});
+
+	constexpr float panelLeft = 24.0f;
+	constexpr float panelTop = 24.0f;
+	constexpr float panelWidth = 360.0f;
+	constexpr float titleHeight = 28.0f;
+	constexpr float lineHeight = 22.0f;
+	constexpr float panelPadding = 18.0f;
+
+	float panelHeight = panelPadding * 2.0f + titleHeight + rendererTests.size() * lineHeight;
+
+	engine.fill(
+		kke::Rect{
+			{panelLeft, panelTop},
+			{panelLeft + panelWidth, panelTop + panelHeight}
+		},
+		panelFill);
+
+	engine.fill(
+		kke::Text{
+			L"Renderer Tests",
+			{panelLeft + panelPadding, panelTop + panelPadding},
+			{"Space Grotesk", 24.0f, kke::FontWeight::BOLD}
+		},
+		titleBrush);
+
+	for (size_t index = 0; index < rendererTests.size(); ++index) {
+		RendererTestEntry const& entry = rendererTests[index];
+		std::wstring line = L"[";
+		line += static_cast<wchar_t>(entry.virtualKey);
+		line += L"] ";
+		line.append(entry.title.begin(), entry.title.end());
+
+		engine.fill(
+			kke::Text{
+				line,
+				{
+					panelLeft + panelPadding,
+					panelTop + panelPadding + titleHeight + index * lineHeight
+				},
+				{"Space Grotesk", 16.0f, index == activeRendererTestIndex ? kke::FontWeight::BOLD : kke::FontWeight::MEDIUM}
+			},
+			index == activeRendererTestIndex ? activeBrush : inactiveBrush);
+	}
+}
+
+void application::Renderer::renderFpsOverlay() {
+	std::ostringstream stream;
+	stream.setf(std::ios::fixed);
+	stream.precision(1);
+	stream << "FPS " << fpsCounter.fps();
+
+	std::string fpsString = stream.str();
+	std::wstring fpsTextString(fpsString.begin(), fpsString.end());
+
+	kke::Text fpsText{
+		fpsTextString,
+		{0.0f, 0.0f},
+		{"Space Grotesk", 18.0f, kke::FontWeight::BOLD}
+	};
+
+	kke::Scale viewportSize = engine.getViewportSize();
+	kke::Scale textSize = engine.measureTextSize(fpsText);
+
+	constexpr float panelMargin = 24.0f;
+	constexpr float panelInsetX = 14.0f;
+	constexpr float panelInsetY = 10.0f;
+
+	float panelLeft = viewportSize.x - textSize.x - panelInsetX * 2.0f - panelMargin;
+	float panelTop = panelMargin;
+	float panelRight = viewportSize.x - panelMargin;
+	float panelBottom = panelTop + textSize.y + panelInsetY * 2.0f;
+
+	kke::Brush panelFill = kke::SolidColorBrush({0.04f, 0.05f, 0.08f, 0.82f});
+	kke::Brush textBrush = kke::SolidColorBrush({0.98f, 0.99f, 1.0f, 1.0f});
+
+	engine.fill(
+		kke::Rect{
+			{panelLeft, panelTop},
+			{panelRight, panelBottom}
+		},
+		panelFill);
+
+	fpsText.position = {
+		panelLeft + panelInsetX,
+		panelTop + panelInsetY - 2.0f
+	};
+
+	engine.fill(fpsText, textBrush);
+}
+
+void application::Renderer::logFps() {
+	using clock = std::chrono::steady_clock;
+	using seconds = std::chrono::duration<float>;
+
+	const auto now = clock::now();
+	if (seconds(now - lastFpsLogTime).count() < 1.0f) {
+		return;
+	}
+
+	lastFpsLogTime = now;
+	kke::PositionIndependentEffectCache::StatsSnapshot cacheStats = kke::PositionIndependentEffectCache::consumeStats();
+	std::printf(
+		"fps: %.2f, cache hits: %llu, cache misses: %llu\n",
+		fpsCounter.fps(),
+		static_cast<unsigned long long>(cacheStats.hits),
+		static_cast<unsigned long long>(cacheStats.misses));
+}
+
+void application::Renderer::initializeRendererTests() {
+	addRendererTest('1', "Blur Stress", std::make_unique<renderer_test::BlurStressRendererTest>(*this));
+	addRendererTest('2', "Shadow Stress", std::make_unique<renderer_test::ShadowStressRendererTest>(*this));
+	addRendererTest('3', "Shape Effect", std::make_unique<renderer_test::ShapeEffectRendererTest>(*this));
+	addRendererTest('4', "Text Effect", std::make_unique<renderer_test::TextEffectRendererTest>(*this));
+	addRendererTest('5', "Frame Effect", std::make_unique<renderer_test::FrameEffectRendererTest>(*this));
+	addRendererTest('6', "Canvas", std::make_unique<renderer_test::CanvasRendererTest>(*this));
+	addRendererTest('7', "Layer", std::make_unique<renderer_test::LayerRendererTest>(*this));
+	addRendererTest('8', "Texture", std::make_unique<renderer_test::TextureRendererTest>(*this));
+	addRendererTest('9', "Transform", std::make_unique<renderer_test::TransformRendererTest>(*this));
+
+	switchRendererTest(0);
+}
+
+void application::Renderer::addRendererTest(
+	uint32_t virtualKey,
+	std::string title,
+	std::unique_ptr<renderer_test::RendererTest> rendererTest) {
+	rendererTests.emplace_back(RendererTestEntry{
+		virtualKey,
+		std::move(title),
+		std::move(rendererTest)
+	});
+}
+
+void application::Renderer::switchRendererTest(size_t index) {
+	if (index >= rendererTests.size()) {
+		return;
+	}
+
+	if (hasActiveRendererTest && activeRendererTestIndex == index) {
+		return;
+	}
+
+	activeRendererTestIndex = index;
+	hasActiveRendererTest = true;
+
+	RendererTestEntry const& activeTest = rendererTests[activeRendererTestIndex];
+	std::printf(
+		"renderer test switched: [%c] %s\n",
+		static_cast<int>(activeTest.virtualKey),
+		activeTest.title.c_str());
+}
+
+std::vector<uint8_t> application::Renderer::createRawTexturePixels(uint32_t width, uint32_t height) {
+	std::vector<uint8_t> pixels(static_cast<size_t>(width) * height * 4);
+
+	for (uint32_t y = 0; y < height; ++y) {
+		for (uint32_t x = 0; x < width; ++x) {
+			size_t pixelIndex = (static_cast<size_t>(y) * width + x) * 4;
+			bool isBrightCell = ((x / 2) + (y / 2)) % 2 == 0;
+
+			pixels[pixelIndex + 0] = isBrightCell ? 0xFF : 0x1F;
+			pixels[pixelIndex + 1] = isBrightCell ? 0xB3 : 0x92;
+			pixels[pixelIndex + 2] = isBrightCell ? 0x2D : 0xFF;
+			pixels[pixelIndex + 3] = (x == y || x + y == width - 1) ? 0xA8 : 0xFF;
+		}
+	}
+
+	return pixels;
+}
+
+std::pair<void const*, size_t> application::Renderer::loadResource(int resourceId) {
+	const HRSRC resourceInfo = FindResourceA(nullptr, MAKEINTRESOURCEA(resourceId), "WAVE");
 	if (!resourceInfo) {
 		return {nullptr, 0};
 	}
-	const HGLOBAL resourceData = LoadResource(NULL, resourceInfo);
+
+	const HGLOBAL resourceData = LoadResource(nullptr, resourceInfo);
 	if (!resourceData) {
 		return {nullptr, 0};
 	}
-	const LPVOID resourcePtr = LockResource(resourceData);
-	const DWORD resourceSize = SizeofResource(NULL, resourceInfo);
-	return {static_cast<char*>(resourcePtr), resourceSize};
+
+	const void* resourcePtr = LockResource(resourceData);
+	const DWORD resourceSize = SizeofResource(nullptr, resourceInfo);
+	return {resourcePtr, static_cast<size_t>(resourceSize)};
 }

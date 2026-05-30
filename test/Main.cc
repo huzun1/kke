@@ -31,6 +31,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 	d2d1.init(d3d11);
 
 	application::Renderer* renderer = new application::Renderer(d2d1);
+	SetWindowLongPtrW(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(renderer));
 
 	bool isRunning = true;
 	while (isRunning) {
