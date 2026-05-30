@@ -8,6 +8,8 @@
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/appearance/resource/font/Font.hh"
+#include "kke/appearance/resource/texture/RawTextureData.hh"
+#include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
 #include "kke/appearance/resource/texture/Texture.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/Sources.hh"
@@ -144,18 +146,19 @@ public:
 	virtual std::shared_ptr<Texture> uploadTexture(
 		void const* data, size_t size) = 0;
 
+	virtual std::shared_ptr<Texture> uploadTexture(
+		RawTextureData const& data) = 0;
+
 	/**
 	 * @brief Draws a texture onto the current render target.
 	 * @param texture The texture to draw.
 	 * @param destRect Destination rectangle.
-	 * @param opacity Opacity value (default: 1.0).
-	 * @param srcRect Optional source rectangle within the texture.
+	 * @param appearance Texture draw appearance.
 	 */
 	virtual void draw(
 		std::shared_ptr<Texture> texture,
 		Rect const& destRect,
-		float opacity = 1.0f,
-		std::optional<Rect> srcRect = std::nullopt) = 0;
+		TextureDrawAppearance const& appearance = TextureDrawAppearance{}) = 0;
 
 	/* ================= Effect Rendering ================= */
 

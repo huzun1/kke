@@ -3,6 +3,6 @@
 namespace kke {
 class Texture {
 public:
-	~Texture() = default;
+	virtual ~Texture() = default;
 };
-};	// namespace kke
+}	// namespace kke

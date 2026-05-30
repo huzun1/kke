@@ -3,10 +3,11 @@
 using namespace kke;
 
 D2dResourceProviders::D2dResourceProviders() {
-    brushProvider = std::make_unique<BrushProvider>();
+	brushProvider = std::make_unique<BrushProvider>();
 	fontProvider = std::make_unique<FontProvider>();
-    geometryProvider = std::make_unique<GeometryProvider>();
-    invertedGeometryProvider = std::make_unique<InvertedGeometryProvider>();
+	geometryProvider = std::make_unique<GeometryProvider>();
+	invertedGeometryProvider = std::make_unique<InvertedGeometryProvider>();
+	textureProvider = std::make_unique<TextureProvider>();
 }
 
 void D2dResourceProviders::update(D2dContext const& context, D2D1_SIZE_F viewportSize) {
@@ -22,9 +23,13 @@ FontProvider* D2dResourceProviders::getFontProvider() {
 }
 
 GeometryProvider* D2dResourceProviders::getGeometryProvider() {
-    return geometryProvider.get();
+	return geometryProvider.get();
 }
 
 InvertedGeometryProvider* D2dResourceProviders::getInvertedGeometryProvider() {
-    return invertedGeometryProvider.get();
+	return invertedGeometryProvider.get();
+}
+
+TextureProvider* D2dResourceProviders::getTextureProvider() {
+	return textureProvider.get();
 }

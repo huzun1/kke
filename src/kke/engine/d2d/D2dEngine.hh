@@ -9,6 +9,8 @@
 #include "kke/appearance/resource/effect/Effect.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/appearance/resource/font/Font.hh"
+#include "kke/appearance/resource/texture/RawTextureData.hh"
+#include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
 #include "kke/appearance/resource/texture/Texture.hh"
 #include "kke/engine/Engine.hh"
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
@@ -17,6 +19,7 @@
 #include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
 #include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
+#include "kke/engine/d2d/renderer/painting/TextureRenderer.hh"
 #include "kke/engine/d2d/renderer/view/MatrixState.hh"
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
 
@@ -31,6 +34,7 @@ class D2dEngine : public Engine {
 	CanvasService canvasService;
 	FaceRenderer faceRenderer;
 	StrokeRenderer strokeRenderer;
+	TextureRenderer textureRenderer;
 
 public:
 	D2dEngine();
@@ -88,11 +92,13 @@ public:
 		void const* data,
 		size_t size) override;
 
+	std::shared_ptr<Texture> uploadTexture(
+		RawTextureData const& data) override;
+
 	void draw(
 		std::shared_ptr<Texture> texture,
 		Rect const& destRect,
-		float opacity = 1.0f,
-		std::optional<Rect> srcRect = std::nullopt) override;
+		TextureDrawAppearance const& appearance = TextureDrawAppearance{}) override;
 
 	/* ================= Effect Rendering ================== */
 	void renderEffect(
@@ -112,4 +118,4 @@ public:
 private:
 	void assertD2dContext() const;
 };
-};	// namespace kke
+}	// namespace kke

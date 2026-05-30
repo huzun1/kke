@@ -103,21 +103,20 @@ std::shared_ptr<Font> D2dEngine::uploadFont(void const* data, size_t size) {
 
 std::shared_ptr<Texture> D2dEngine::uploadTexture(void const* data, size_t size) {
 	assertD2dContext();
-	(void)data;
-	(void)size;
-	return nullptr;
+	return engineContext->getResourceProviders()->getTextureProvider()->uploadTexture(*engineContext->getD2dContext(), data, size);
+}
+
+std::shared_ptr<Texture> D2dEngine::uploadTexture(RawTextureData const& data) {
+	assertD2dContext();
+	return engineContext->getResourceProviders()->getTextureProvider()->uploadTexture(*engineContext->getD2dContext(), data);
 }
 
 void D2dEngine::draw(
 	std::shared_ptr<Texture> texture,
 	Rect const& destRect,
-	float opacity,
-	std::optional<Rect> srcRect) {
+	TextureDrawAppearance const& appearance) {
 	assertD2dContext();
-	(void)texture;
-	(void)destRect;
-	(void)opacity;
-	(void)srcRect;
+	textureRenderer.draw(*this->engineContext, texture, destRect, appearance);
 }
 
 void D2dEngine::renderEffect(Effect const& effect) {

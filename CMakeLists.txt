@@ -21,6 +21,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/renderer/canvas/CanvasService.cc
     src/kke/engine/d2d/renderer/painting/FaceRenderer.cc
     src/kke/engine/d2d/renderer/painting/StrokeRenderer.cc
+    src/kke/engine/d2d/renderer/painting/TextureRenderer.cc
     src/kke/engine/d2d/renderer/view/MatrixState.cc
     src/kke/engine/d2d/renderer/view/ViewLayerController.cc
     src/kke/engine/d2d/resource/brush/BrushProvider.cc
@@ -41,6 +42,9 @@ add_library(kke STATIC
     src/kke/engine/d2d/resource/geometry/factory/invert/GeometryInterver.cc
     src/kke/engine/d2d/resource/geometry/factory/invert/InvertedGeometryFactory.cc
     src/kke/engine/d2d/resource/geometry/hash/GeometryHasher.cc
+    src/kke/engine/d2d/resource/texture/D2dTexture.cc
+    src/kke/engine/d2d/resource/texture/TextureProvider.cc
+    src/kke/engine/d2d/resource/texture/factory/TextureFactory.cc
     src/kke/engine/d2d/transform/Matrix.cc
     src/kke/engine/d2d/transform/impl/RotateManipulator.cc
     src/kke/engine/d2d/transform/impl/ScaleManipulator.cc
@@ -64,7 +68,7 @@ target_include_directories(kke PUBLIC
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(kke PUBLIC dwrite)
+target_link_libraries(kke PUBLIC d2d1 dwrite windowscodecs)
 
 install(TARGETS kke
     EXPORT kkeTargets

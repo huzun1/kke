@@ -1,7 +1,9 @@
 #include "Renderer.hh"
 
 #include <cstdio>
+#include <cstdint>
 #include <memory>
+#include <vector>
 
 #include <Windows.h>
 
@@ -10,6 +12,9 @@
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/brush/impl/SolidColorBrush.hh"
 #include "kke/appearance/resource/font/FontWeight.hh"
+#include "kke/appearance/resource/texture/RawTextureData.hh"
+#include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
+#include "kke/appearance/resource/texture/TextureInterpolation.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/d2d/context/D2dContext.hh"
 #include "kke/geometry/Geometry.hh"
@@ -37,8 +42,32 @@ void application::Renderer::render() {
 
 	engine.beginDraw(context, renderTarget);
 	engine.clear();
+	ensureTexturesUploaded();
 	renderFrame();
 	engine.endDraw();
+}
+
+void application::Renderer::ensureTexturesUploaded() {
+	if (!encodedTexture) {
+		auto [textureData, textureDataSize] = loadResource(TEXTURE_DYCONTRAST);
+		encodedTexture = engine.uploadTexture(textureData, textureDataSize);
+	}
+
+	if (!rawTexture) {
+		constexpr uint32_t rawTextureWidth = 8;
+		constexpr uint32_t rawTextureHeight = 8;
+
+		if (rawTexturePixels.empty()) {
+			rawTexturePixels = createRawTexturePixels(rawTextureWidth, rawTextureHeight);
+		}
+
+		rawTexture = engine.uploadTexture({
+			rawTexturePixels.data(),
+			rawTextureWidth,
+			rawTextureHeight,
+			rawTextureWidth * 4
+		});
+	}
 }
 
 void application::Renderer::renderFrame() {
@@ -70,6 +99,20 @@ void application::Renderer::renderFrame() {
 	engine.popCanvas();
 	engine.draw(canvas, 0.85f);
 
+	if (encodedTexture) {
+		engine.draw(
+			encodedTexture,
+			{{560.0f, 110.0f}, {860.0f, 320.0f}},
+			{0.95f, kke::TextureInterpolation::Linear, kke::Rect{{90.0f, 40.0f}, {360.0f, 220.0f}}});
+	}
+
+	if (rawTexture) {
+		engine.draw(
+			rawTexture,
+			{{900.0f, 110.0f}, {1160.0f, 370.0f}},
+			{0.90f, kke::TextureInterpolation::Nearest});
+	}
+
 	kke::Text label{
 		L"Space Grotesk via DWrite",
 		{120.0f, 500.0f},
@@ -78,6 +121,24 @@ void application::Renderer::renderFrame() {
 	engine.fill(label, outline);
 
 	fpsCounter.frame();
+}
+
+std::vector<uint8_t> application::Renderer::createRawTexturePixels(uint32_t width, uint32_t height) {
+	std::vector<uint8_t> pixels(static_cast<size_t>(width) * height * 4);
+
+	for (uint32_t y = 0; y < height; ++y) {
+		for (uint32_t x = 0; x < width; ++x) {
+			size_t pixelIndex = (static_cast<size_t>(y) * width + x) * 4;
+			bool isBrightCell = ((x / 2) + (y / 2)) % 2 == 0;
+
+			pixels[pixelIndex + 0] = isBrightCell ? 0xFF : 0x1F;
+			pixels[pixelIndex + 1] = isBrightCell ? 0xB3 : 0x92;
+			pixels[pixelIndex + 2] = isBrightCell ? 0x2D : 0xFF;
+			pixels[pixelIndex + 3] = (x == y || x + y == width - 1) ? 0xA8 : 0xFF;
+		}
+	}
+
+	return pixels;
 }
 
 std::pair<void const*, size_t> application::Renderer::loadResource(int resourceId) {
