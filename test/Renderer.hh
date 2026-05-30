@@ -1,5 +1,6 @@
 #pragma once
 
+#include <chrono>
 #include <cstddef>
 #include <cstdint>
 #include <memory>
@@ -23,6 +24,7 @@ class Renderer {
 	std::shared_ptr<kke::Texture> rawTexture;
 	std::vector<uint8_t> rawTexturePixels;
 	std::vector<std::unique_ptr<renderer_test::RendererTest>> rendererTests;
+	std::chrono::steady_clock::time_point lastFpsLogTime = std::chrono::steady_clock::now();
 
 public:
 	Renderer(application::D2D1& d2d1);
@@ -35,6 +37,8 @@ private:
 	void ensureTexturesUploaded();
 
 	void renderFrame();
+
+	void logFps();
 
 	void initializeRendererTests();
 

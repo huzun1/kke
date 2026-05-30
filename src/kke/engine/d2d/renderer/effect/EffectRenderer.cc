@@ -50,6 +50,21 @@ void EffectRenderer::render(
 	Effect const& effect,
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController) {
+	switch (EffectIdentifier::identify(effect)) {
+	case EffectKind::Shadow: {
+		auto result = shadowEffectRenderer.render(context, source, sourceAppearance, std::get<ShadowEffect>(effect), clip);
+		drawImage(context, result.image, result.targetOffset, clip, viewLayerController);
+		return;
+	}
+	case EffectKind::Blur: {
+		auto result = blurEffectRenderer.render(context, source, sourceAppearance, std::get<BlurEffect>(effect), clip);
+		drawImage(context, result.image, result.targetOffset, clip, viewLayerController);
+		return;
+	}
+	default:
+		break;
+	}
+
 	std::shared_ptr<D2dCanvas> sourceCanvas = sourceRenderer.render(context, source, sourceAppearance);
 	if (!sourceCanvas) {
 		return;
@@ -158,5 +173,25 @@ void EffectRenderer::drawImage(
 
 	viewLayerController.pushLayer(context, clip.value(), LayerMode::Normal);
 	context.getD2dContext()->getDeviceContext()->DrawImage(image.Get());
+	viewLayerController.popLayer(context);
+}
+
+void EffectRenderer::drawImage(
+	D2dEngineContext const& context,
+	ComPtr<ID2D1Image> image,
+	Point const& targetOffset,
+	std::optional<EffectClipSource> const& clip,
+	ViewLayerController& viewLayerController) {
+	if (!image) {
+		return;
+	}
+
+	if (!clip.has_value()) {
+		context.getD2dContext()->getDeviceContext()->DrawImage(image.Get(), {targetOffset.x, targetOffset.y});
+		return;
+	}
+
+	viewLayerController.pushLayer(context, clip.value(), LayerMode::Normal);
+	context.getD2dContext()->getDeviceContext()->DrawImage(image.Get(), {targetOffset.x, targetOffset.y});
 	viewLayerController.popLayer(context);
 }

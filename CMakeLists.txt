@@ -23,9 +23,12 @@ add_library(kke STATIC
     src/kke/engine/d2d/renderer/canvas/CanvasService.cc
     src/kke/engine/d2d/renderer/effect/EffectRenderer.cc
     src/kke/engine/d2d/renderer/effect/EffectSourceRenderer.cc
+    src/kke/engine/d2d/renderer/effect/cache/PositionIndependentBrush.cc
+    src/kke/engine/d2d/renderer/effect/cache/PositionIndependentEffectSource.cc
     src/kke/engine/d2d/renderer/effect/renderers/BlurEffectRenderer.cc
     src/kke/engine/d2d/renderer/effect/renderers/ColorMatrixEffectRenderer.cc
     src/kke/engine/d2d/renderer/effect/renderers/DirectionalBlurEffectRenderer.cc
+    src/kke/engine/d2d/renderer/effect/renderers/PositionIndependentEffectCache.cc
     src/kke/engine/d2d/renderer/effect/renderers/ShadowEffectRenderer.cc
     src/kke/engine/d2d/renderer/painting/FaceRenderer.cc
     src/kke/engine/d2d/renderer/painting/StrokeRenderer.cc

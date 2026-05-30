@@ -72,5 +72,12 @@ private:
 		Microsoft::WRL::ComPtr<ID2D1Image> image,
 		std::optional<EffectClipSource> const& clip,
 		ViewLayerController& viewLayerController);
+
+	void drawImage(
+		D2dEngineContext const& context,
+		Microsoft::WRL::ComPtr<ID2D1Image> image,
+		Point const& targetOffset,
+		std::optional<EffectClipSource> const& clip,
+		ViewLayerController& viewLayerController);
 };
 }	// namespace kke

@@ -1,7 +1,35 @@
 #include "ShadowEffectRenderer.hh"
 
+#include "kke/utils/Hasher.hh"
+
 using namespace kke;
 using Microsoft::WRL::ComPtr;
+
+PositionIndependentEffectCache::RenderResult ShadowEffectRenderer::render(
+	D2dEngineContext& context,
+	EffectSource const& source,
+	EffectSourceAppearance const& sourceAppearance,
+	ShadowEffect const& effect,
+	std::optional<EffectClipSource> const& clip) {
+	if (cache.supports(source)) {
+		return cache.render(
+			context,
+			source,
+			sourceAppearance,
+			hashEffect(effect),
+			clip,
+			[&](D2dEngineContext& renderContext, ComPtr<ID2D1Image> sourceImage) {
+				return render(renderContext, sourceImage, effect);
+			});
+	}
+
+	std::shared_ptr<D2dCanvas> sourceCanvas = sourceRenderer.render(context, source, sourceAppearance);
+	if (!sourceCanvas) {
+		return {nullptr, {0.0f, 0.0f}};
+	}
+
+	return {render(context, sourceCanvas->getCommandList(), effect), {0.0f, 0.0f}};
+}
 
 ComPtr<ID2D1Image> ShadowEffectRenderer::render(
 	D2dEngineContext& context,
@@ -49,6 +77,19 @@ ComPtr<ID2D1Image> ShadowEffectRenderer::render(
 	ComPtr<ID2D1Image> outputImage;
 	compositeEffect->GetOutput(&outputImage);
 	return outputImage;
+}
+
+uint64_t ShadowEffectRenderer::hashEffect(ShadowEffect const& effect) {
+	Hasher hasher;
+	hasher.combine(effect.offset.x);
+	hasher.combine(effect.offset.y);
+	hasher.combine(effect.blurStandardDeviation);
+	hasher.combine(effect.color.r);
+	hasher.combine(effect.color.g);
+	hasher.combine(effect.color.b);
+	hasher.combine(effect.color.a);
+	hasher.combine(effect.mode);
+	return hasher.get();
 }
 
 ComPtr<ID2D1Effect> ShadowEffectRenderer::createShadowEffect(

@@ -10,12 +10,24 @@
 #include "kke/appearance/resource/texture/RawTextureData.hh"
 #include "kke/engine/d2d/context/D2dContext.hh"
 #include "renderer_test/CanvasRendererTest.hh"
+#include "renderer_test/BlurStressRendererTest.hh"
 #include "renderer_test/FrameEffectRendererTest.hh"
 #include "renderer_test/LayerRendererTest.hh"
+#include "renderer_test/ShadowStressRendererTest.hh"
 #include "renderer_test/ShapeEffectRendererTest.hh"
 #include "renderer_test/TextEffectRendererTest.hh"
 #include "renderer_test/TextureRendererTest.hh"
+#include "kke/engine/d2d/renderer/effect/renderers/PositionIndependentEffectCache.hh"
 #include "resources/resources.h"
+
+namespace {
+enum class StressBenchmark {
+	Shadow,
+	Blur
+};
+
+constexpr StressBenchmark stressBenchmark = StressBenchmark::Blur;
+}
 
 application::Renderer::Renderer(application::D2D1& d2d1)
 	: d2d1(d2d1) {
@@ -75,15 +87,37 @@ void application::Renderer::renderFrame() {
 	}
 
 	fpsCounter.frame();
+	logFps();
+}
+
+void application::Renderer::logFps() {
+	using clock = std::chrono::steady_clock;
+	using seconds = std::chrono::duration<float>;
+
+	const auto now = clock::now();
+	if (seconds(now - lastFpsLogTime).count() < 1.0f) {
+		return;
+	}
+
+	lastFpsLogTime = now;
+	kke::PositionIndependentEffectCache::StatsSnapshot cacheStats = kke::PositionIndependentEffectCache::consumeStats();
+	std::printf(
+		"fps: %.2f, cache hits: %llu, cache misses: %llu\n",
+		fpsCounter.fps(),
+		static_cast<unsigned long long>(cacheStats.hits),
+		static_cast<unsigned long long>(cacheStats.misses));
 }
 
 void application::Renderer::initializeRendererTests() {
-	rendererTests.emplace_back(std::make_unique<renderer_test::LayerRendererTest>(*this));
-	rendererTests.emplace_back(std::make_unique<renderer_test::ShapeEffectRendererTest>(*this));
-	rendererTests.emplace_back(std::make_unique<renderer_test::CanvasRendererTest>(*this));
-	rendererTests.emplace_back(std::make_unique<renderer_test::TextureRendererTest>(*this));
-	rendererTests.emplace_back(std::make_unique<renderer_test::TextEffectRendererTest>(*this));
-	rendererTests.emplace_back(std::make_unique<renderer_test::FrameEffectRendererTest>(*this));
+	switch (stressBenchmark) {
+	case StressBenchmark::Blur:
+		rendererTests.emplace_back(std::make_unique<renderer_test::BlurStressRendererTest>(*this));
+		return;
+	case StressBenchmark::Shadow:
+	default:
+		rendererTests.emplace_back(std::make_unique<renderer_test::ShadowStressRendererTest>(*this));
+		return;
+	}
 }
 
 std::vector<uint8_t> application::Renderer::createRawTexturePixels(uint32_t width, uint32_t height) {

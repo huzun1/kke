@@ -8,6 +8,10 @@ effect 描画は `D2dEngine` に直接ロジックを増やさず、`EffectRende
 
 `D2dEngine` は他の renderer と同様に、API entry point から `EffectRenderer` へ委譲する薄い層として扱う。
 
+`EffectRenderer` は effect 分岐と clip orchestration に留め、`Blur` / `Shadow` の position-independent cache は専用 cache class をそれぞれの renderer 側で使う。
+
+position-independent cache 自体は brush や geometry 正規化の知識を抱え込まず、source/brush の正規化は別 helper に切り出して再利用可能に保つ。
+
 ## Source Rasterization Rule
 
 `EffectSource` の `Geometry` / `GeometryCompose` / `Line` / `Text` は、そのまま D2D effect へ渡さず、一度 command list canvas へ rasterize して `ID2D1Image` 化する。

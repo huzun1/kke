@@ -6,7 +6,9 @@ add_executable(kke_test WIN32
     Window.cc
     Renderer.cc
     renderer_test/RendererTest.cc
+    renderer_test/BlurStressRendererTest.cc
     renderer_test/LayerRendererTest.cc
+    renderer_test/ShadowStressRendererTest.cc
     renderer_test/ShapeEffectRendererTest.cc
     renderer_test/CanvasRendererTest.cc
     renderer_test/TextureRendererTest.cc
