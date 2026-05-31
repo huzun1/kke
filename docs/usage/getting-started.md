@@ -58,3 +58,5 @@ Depending on what you draw, these headers are the ones you will reach for most o
 - For text drawing, see [Text](text.md).
 - For texture drawing, see [Textures](textures.md).
 - For clipping, offscreen rendering, and effects, see [Layers, Canvas, and Effects](layers-canvas-effects.md).
+- For choosing and tuning individual effects, see [Effects](effects.md).
+- For a quick map of the appearance-side public types, see [Appearance API](appearance-api.md).

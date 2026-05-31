@@ -8,5 +8,8 @@
 #include "kke/appearance/resource/effect/shadow/ShadowEffect.hh"
 
 namespace kke {
+/**
+ * @brief Variant of all built-in effects that can be rendered by the engine.
+ */
 using Effect = std::variant<ShadowEffect, BlurEffect, DirectionalBlurEffect, ColorMatrixEffect>;
 }	// namespace kke

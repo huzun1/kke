@@ -1,7 +1,6 @@
 #include "Scale.hh"
 
-using namespace kke;
-
+namespace kke {
 Scale operator+(Scale lhs, float rhs) {
 	lhs += rhs;
 	return lhs;
@@ -88,4 +87,5 @@ Scale& operator/=(Scale& lhs, Scale const& rhs) {
 	lhs.x /= rhs.x;
 	lhs.y /= rhs.y;
 	return lhs;
+}
 }

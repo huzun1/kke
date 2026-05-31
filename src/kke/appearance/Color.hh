@@ -61,9 +61,7 @@ struct Color {
 	float a;
 
 	/**
-	 * @brief Default constructor.
-	 *
-	 * Initializes the color to a default value (implementation-defined).
+	 * @brief Constructs an opaque black color.
 	 */
 	Color();
 

@@ -1,9 +1,23 @@
 #pragma once
 
 namespace kke {
+/**
+ * @brief Performance and quality hint for blur-based effects.
+ */
 enum class BlurOptimization {
-	SPEED,	   // Applies internal optimizations such as pre-scaling at relatively small radii. Uses linear filtering.
-	BALANCED,  // Uses the same optimization thresholds as Speed mode, but uses trilinear filtering.
-	QUALITY	   // Only uses internal optimizations with large blur radii, where approximations are less likely to be visible. Uses trilinear filtering.
+	/**
+	 * @brief Prefers faster execution, potentially with more approximation.
+	 */
+	SPEED,
+
+	/**
+	 * @brief Balances quality and performance for general use.
+	 */
+	BALANCED,
+
+	/**
+	 * @brief Prefers higher-quality sampling at the cost of speed.
+	 */
+	QUALITY
 };
-};
+}	// namespace kke

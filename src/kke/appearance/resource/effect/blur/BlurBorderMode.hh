@@ -1,8 +1,18 @@
 #pragma once
 
 namespace kke {
+/**
+ * @brief Border sampling strategy used by blur-based effects.
+ */
 enum class BlurBorderMode {
-	SOFT,  // If the crop rectangle falls on fractional pixel coordinates, the effect applies antialiasing which results in a soft edge.
-	HARD   // If the crop rectangle falls on fractional pixel coordinates, the effect clamps which results in a hard edge.
+	/**
+	 * @brief Produces antialiased, softer edges near cropped boundaries.
+	 */
+	SOFT,
+
+	/**
+	 * @brief Clamps boundaries to preserve a harder edge.
+	 */
+	HARD
 };
-};
+}	// namespace kke

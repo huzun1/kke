@@ -1,7 +1,6 @@
 #pragma once
 
 namespace kke {
-
 /**
  * @brief Represents a 2D scale or size.
  *
@@ -28,7 +27,6 @@ struct Scale {
 	 */
 	Scale(float x, float y);
 };
+}	// namespace kke
 
 #include "ScaleOperators.hh"
-
-};	// namespace kke
