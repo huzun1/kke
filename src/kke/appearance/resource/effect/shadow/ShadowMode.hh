@@ -20,4 +20,4 @@ enum class ShadowMode {
 	 */
 	ShadowWithSource
 };
-}	// namespace kke
+} // namespace kke

@@ -10,7 +10,8 @@ void TextureRenderer::draw(
 	D2dEngineContext const& context,
 	std::shared_ptr<Texture> texture,
 	Rect const& destRect,
-	TextureDrawAppearance const& appearance) {
+	TextureDrawAppearance const& appearance
+) {
 	std::shared_ptr<D2dTexture> d2dTexture = std::dynamic_pointer_cast<D2dTexture>(texture);
 	if (!d2dTexture) {
 		return;
@@ -27,20 +28,22 @@ void TextureRenderer::draw(
 		&d2dDestRect,
 		appearance.opacity,
 		toD2dInterpolation(appearance.interpolation),
-		d2dSourceRect ? &*d2dSourceRect : nullptr);
+		d2dSourceRect ? &*d2dSourceRect : nullptr
+	);
 }
 
 D2D1_RECT_F TextureRenderer::toD2dRect(Rect const& rect) {
 	return {rect.min.x, rect.min.y, rect.max.x, rect.max.y};
 }
 
-D2D1_BITMAP_INTERPOLATION_MODE TextureRenderer::toD2dInterpolation(TextureInterpolation interpolation) {
+D2D1_BITMAP_INTERPOLATION_MODE
+TextureRenderer::toD2dInterpolation(TextureInterpolation interpolation) {
 	switch (interpolation) {
-		case TextureInterpolation::Nearest:
-			return D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
-		case TextureInterpolation::Linear:
-			return D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
-		default:
-			return D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
+	case TextureInterpolation::Nearest:
+		return D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
+	case TextureInterpolation::Linear:
+		return D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
+	default:
+		return D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
 	}
 }

@@ -5,17 +5,17 @@
 namespace application {
 namespace renderer_test {
 class LayerRendererTest : public RendererTest {
-public:
+  public:
 	using RendererTest::RendererTest;
 
 	void render() override;
 
-private:
+  private:
 	void renderRoundedRectClipDemo();
 
 	void renderInversedClipDemo();
 
 	void renderComposedGeometryImageDemo();
 };
-}
-}
+} // namespace renderer_test
+} // namespace application

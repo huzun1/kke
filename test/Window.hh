@@ -4,10 +4,10 @@
 
 namespace application {
 class Window {
-public:
+  public:
 	static HWND createWindow(HINSTANCE instance);
 
-private:
+  private:
 	static LRESULT CALLBACK wndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam);
 };
-};	// namespace application
+}; // namespace application

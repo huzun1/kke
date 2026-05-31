@@ -9,9 +9,7 @@
 using namespace kke;
 
 uint64_t BrushHasher::hash(Brush const& brush) {
-	return std::visit([](auto const& brushVariant) {
-		return hash(brushVariant);
-	}, brush);
+	return std::visit([](auto const& brushVariant) { return hash(brushVariant); }, brush);
 }
 
 uint64_t BrushHasher::hash(SolidColorBrush const& brush) {

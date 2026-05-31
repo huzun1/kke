@@ -7,10 +7,9 @@ Scale Measurer::getViewportSize(D2dEngineContext const& context) {
 	return {viewportSize.width, viewportSize.height};
 }
 
-Scale Measurer::measureTextSize(
-	D2dEngineContext const& context,
-	Text const& text) {
-	Microsoft::WRL::ComPtr<IDWriteTextLayout> textLayout = context.getResourceProviders()->getFontProvider()->createTextLayout(text);
+Scale Measurer::measureTextSize(D2dEngineContext const& context, Text const& text) {
+	Microsoft::WRL::ComPtr<IDWriteTextLayout> textLayout =
+		context.getResourceProviders()->getFontProvider()->createTextLayout(text);
 	if (!textLayout) {
 		return {0.0f, 0.0f};
 	}

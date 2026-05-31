@@ -19,4 +19,4 @@ struct Ellipse : public Boundable {
 
 #include "EllipseOperators.hh"
 
-};	// namespace kke
+}; // namespace kke

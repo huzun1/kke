@@ -16,7 +16,7 @@ class LinearGradientBrush {
 	Point endPoint;
 	float angle;
 
-public:
+  public:
 	/**
 	 * @brief Constructs a linear gradient brush.
 	 *
@@ -25,7 +25,12 @@ public:
 	 * @param endPoint Gradient end position.
 	 * @param angle Optional angle override for backends that support it.
 	 */
-	LinearGradientBrush(std::vector<Color> const& colors, Point const& startPoint, Point const& endPoint, float angle = 0.0f);
+	LinearGradientBrush(
+		std::vector<Color> const& colors,
+		Point const& startPoint,
+		Point const& endPoint,
+		float angle = 0.0f
+	);
 
 	/**
 	 * @brief Returns the colors used by the gradient.
@@ -47,4 +52,4 @@ public:
 	 */
 	float getAngle() const;
 };
-}	// namespace kke
+} // namespace kke

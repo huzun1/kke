@@ -22,7 +22,8 @@ void TextureRendererTest::render() {
 		engine().draw(
 			encodedTexture(),
 			{{560.0f, 110.0f}, {860.0f, 320.0f}},
-			{0.95f, kke::TextureInterpolation::Linear, kke::Rect{{90.0f, 40.0f}, {360.0f, 220.0f}}});
+			{0.95f, kke::TextureInterpolation::Linear, kke::Rect{{90.0f, 40.0f}, {360.0f, 220.0f}}}
+		);
 	}
 
 	if (!rawTexture()) {
@@ -32,16 +33,13 @@ void TextureRendererTest::render() {
 	engine().draw(
 		rawTexture(),
 		{{900.0f, 110.0f}, {1160.0f, 370.0f}},
-		{0.90f, kke::TextureInterpolation::Nearest});
+		{0.90f, kke::TextureInterpolation::Nearest}
+	);
 
 	kke::ColorMatrixEffect colorMatrixEffect;
-	colorMatrixEffect.colorMatrix.values = {
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 0.0f, 0.0f
-	};
+	colorMatrixEffect.colorMatrix.values = {0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+											0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+											0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 	colorMatrixEffect.clampOutput = true;
 
 	engine().renderEffect(colorMatrixEffect, kke::Rect{{900.0f, 110.0f}, {1160.0f, 370.0f}});
@@ -53,13 +51,15 @@ void TextureRendererTest::render() {
 		engine().draw(
 			encodedTexture(),
 			{{120.0f, 420.0f}, {420.0f, 610.0f}},
-			{0.98f, kke::TextureInterpolation::Linear, kke::Rect{{40.0f, 20.0f}, {330.0f, 220.0f}}});
+			{0.98f, kke::TextureInterpolation::Linear, kke::Rect{{40.0f, 20.0f}, {330.0f, 220.0f}}}
+		);
 	}
 
 	engine().draw(
 		rawTexture(),
 		{{300.0f, 460.0f}, {520.0f, 620.0f}},
-		{0.88f, kke::TextureInterpolation::Nearest});
+		{0.88f, kke::TextureInterpolation::Nearest}
+	);
 
 	engine().popCanvas();
 
@@ -68,7 +68,13 @@ void TextureRendererTest::render() {
 	engine().renderEffect(
 		effectCanvas,
 		canvasAppearance,
-		kke::ShadowEffect{{20.0f, 18.0f}, 16.0f, {0.0f, 0.0f, 0.0f, 0.50f}, kke::ShadowMode::OuterShadowOnly});
+		kke::ShadowEffect{
+			{20.0f, 18.0f},
+			16.0f,
+			{0.0f, 0.0f, 0.0f, 0.50f},
+			kke::ShadowMode::OuterShadowOnly
+		}
+	);
 
 	engine().draw(effectCanvas, 1.0f);
 
@@ -76,11 +82,12 @@ void TextureRendererTest::render() {
 		effectCanvas,
 		canvasAppearance,
 		kke::BlurEffect{{10.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED}},
-		kke::Rect{{620.0f, 420.0f}, {1060.0f, 640.0f}});
+		kke::Rect{{620.0f, 420.0f}, {1060.0f, 640.0f}}
+	);
 
 	engine().pushTransform(kke::Translation{{500.0f, 0.0f}});
 	engine().draw(effectCanvas, 0.96f);
 	engine().popTransform();
 }
-}
-}
+} // namespace renderer_test
+} // namespace application

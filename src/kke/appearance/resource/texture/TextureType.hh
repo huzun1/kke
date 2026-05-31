@@ -15,4 +15,4 @@ enum class TextureType {
 	 */
 	JPEG,
 };
-}	// namespace kke
+} // namespace kke

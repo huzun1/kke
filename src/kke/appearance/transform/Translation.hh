@@ -12,4 +12,4 @@ struct Translation {
 	 */
 	Point offset;
 };
-}	// namespace kke
+} // namespace kke

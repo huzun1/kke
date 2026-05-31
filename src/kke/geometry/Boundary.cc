@@ -8,17 +8,17 @@ Boundary::Boundary(float top, float left, float right, float bottom)
 }
 
 float Boundary::width() const {
-    return right - left;
+	return right - left;
 }
 
 float Boundary::height() const {
-    return bottom - top;
+	return bottom - top;
 }
 
 Boundary Boundary::shrink(float amount) {
-    return Boundary(top + amount, left + amount, right - amount, bottom - amount);
+	return Boundary(top + amount, left + amount, right - amount, bottom - amount);
 }
 
 Boundary Boundary::expand(float amount) {
-    return Boundary(top - amount, left - amount, right + amount, bottom + amount);
+	return Boundary(top - amount, left - amount, right + amount, bottom + amount);
 }

@@ -28,17 +28,26 @@ ID3D11RenderTargetView* application::D3D11::getFramebuffer() {
 	return d3d11FramebufferView;
 }
 
-bool application::D3D11::createD3D11Device(ID3D11Device1** deviceOut, ID3D11DeviceContext1** deviceContextOut) {
+bool application::D3D11::createD3D11Device(
+	ID3D11Device1** deviceOut, ID3D11DeviceContext1** deviceContextOut
+) {
 	ID3D11Device* baseDevice;
 	ID3D11DeviceContext* baseDeviceContext;
 	D3D_FEATURE_LEVEL featureLevels[] = {D3D_FEATURE_LEVEL_11_0};
 	UINT creationFlags = D3D11_CREATE_DEVICE_BGRA_SUPPORT;
 
-	HRESULT hResult = D3D11CreateDevice(0, D3D_DRIVER_TYPE_HARDWARE,
-										0, creationFlags,
-										featureLevels, ARRAYSIZE(featureLevels),
-										D3D11_SDK_VERSION, &baseDevice,
-										0, &baseDeviceContext);
+	HRESULT hResult = D3D11CreateDevice(
+		0,
+		D3D_DRIVER_TYPE_HARDWARE,
+		0,
+		creationFlags,
+		featureLevels,
+		ARRAYSIZE(featureLevels),
+		D3D11_SDK_VERSION,
+		&baseDevice,
+		0,
+		&baseDeviceContext
+	);
 	if (FAILED(hResult)) {
 		return false;
 	}
@@ -47,7 +56,8 @@ bool application::D3D11::createD3D11Device(ID3D11Device1** deviceOut, ID3D11Devi
 	assert(SUCCEEDED(hResult));
 	baseDevice->Release();
 
-	hResult = baseDeviceContext->QueryInterface(__uuidof(ID3D11DeviceContext1), (void**)deviceContextOut);
+	hResult =
+		baseDeviceContext->QueryInterface(__uuidof(ID3D11DeviceContext1), (void**)deviceContextOut);
 	assert(SUCCEEDED(hResult));
 	baseDeviceContext->Release();
 
@@ -75,10 +85,12 @@ void application::D3D11::createDxgiFactory(ID3D11Device1* device, IDXGIFactory2*
 	dxgiAdapter->Release();
 }
 
-void application::D3D11::createSwapChain(HWND hwnd, ID3D11Device1* device, IDXGIFactory2* factory, IDXGISwapChain1** swapChainOut) {
+void application::D3D11::createSwapChain(
+	HWND hwnd, ID3D11Device1* device, IDXGIFactory2* factory, IDXGISwapChain1** swapChainOut
+) {
 	DXGI_SWAP_CHAIN_DESC1 d3d11SwapChainDesc = {};
-	d3d11SwapChainDesc.Width = 0;	// use window width
-	d3d11SwapChainDesc.Height = 0;	// use window height
+	d3d11SwapChainDesc.Width = 0;  // use window width
+	d3d11SwapChainDesc.Height = 0; // use window height
 	// Use UNORM (not _SRGB) for flip model compatibility
 	d3d11SwapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
 	d3d11SwapChainDesc.SampleDesc.Count = 1;
@@ -93,11 +105,14 @@ void application::D3D11::createSwapChain(HWND hwnd, ID3D11Device1* device, IDXGI
 	// Enable allow-tearing so Present can present without vsync when supported
 	d3d11SwapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
 
-	HRESULT hResult = factory->CreateSwapChainForHwnd(device, hwnd, &d3d11SwapChainDesc, 0, 0, swapChainOut);
+	HRESULT hResult =
+		factory->CreateSwapChainForHwnd(device, hwnd, &d3d11SwapChainDesc, 0, 0, swapChainOut);
 	assert(SUCCEEDED(hResult));
 }
 
-void application::D3D11::createRenderTarget(ID3D11Device1* device, IDXGISwapChain1* swapChain, ID3D11RenderTargetView** FramebufferViewOut) {
+void application::D3D11::createRenderTarget(
+	ID3D11Device1* device, IDXGISwapChain1* swapChain, ID3D11RenderTargetView** FramebufferViewOut
+) {
 	ID3D11Texture2D* d3d11Framebuffer;
 	HRESULT hResult = swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&d3d11Framebuffer);
 	assert(SUCCEEDED(hResult));

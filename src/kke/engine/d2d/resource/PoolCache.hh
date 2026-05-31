@@ -5,8 +5,7 @@
 #include "kke/engine/d2d/d2d1_headers.hh"
 
 namespace kke {
-template <typename T>
-class PoolCache {
+template <typename T> class PoolCache {
 	struct CachedPtr {
 		bool isUsing;
 		T ptr;
@@ -14,7 +13,7 @@ class PoolCache {
 
 	std::vector<CachedPtr> storage;
 
-public:
+  public:
 	void putAndUse(T val) {
 		storage.push_back({true, val});
 	}
@@ -39,4 +38,4 @@ public:
 		}
 	}
 };
-}  // namespace kke
+} // namespace kke

@@ -16,20 +16,22 @@ class InvertedGeometryProvider {
 	ViewportGeometryCache viewportGeometryCache;
 	D2D1_SIZE_F viewportSize = {};
 
-public:
+  public:
 	void syncViewportSize(D2dContext const& context, D2D1_SIZE_F viewportSize);
 
-	Microsoft::WRL::ComPtr<ID2D1Geometry> get(
-		D2dContext const& context, GeometryProvider& geometryProvider, Geometry const& geometry);
+	Microsoft::WRL::ComPtr<ID2D1Geometry>
+	get(D2dContext const& context, GeometryProvider& geometryProvider, Geometry const& geometry);
 
-	Microsoft::WRL::ComPtr<ID2D1Geometry> get(
-		D2dContext const& context, GeometryProvider& geometryProvider, GeometryCompose const& compose);
+	Microsoft::WRL::ComPtr<ID2D1Geometry>
+	get(D2dContext const& context,
+		GeometryProvider& geometryProvider,
+		GeometryCompose const& compose);
 
-private:
+  private:
 	uint64_t createInvertedGeometryKey(D2dContext const& context, Geometry const& geometry);
 
 	uint64_t createInvertedGeometryKey(D2dContext const& context, GeometryCompose const& compose);
 
 	bool isViewportResized(D2D1_SIZE_F viewportSize) const;
 };
-}  // namespace kke
+} // namespace kke

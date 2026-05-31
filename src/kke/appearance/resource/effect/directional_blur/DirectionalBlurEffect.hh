@@ -28,4 +28,4 @@ struct DirectionalBlurEffect {
 	 */
 	BlurOptimization optimization = BlurOptimization::BALANCED;
 };
-}	// namespace kke
+} // namespace kke

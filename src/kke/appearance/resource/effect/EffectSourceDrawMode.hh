@@ -15,4 +15,4 @@ enum class EffectSourceDrawMode {
 	 */
 	Stroke
 };
-}	// namespace kke
+} // namespace kke

@@ -10,7 +10,8 @@ void EffectRenderer::render(
 	RenderPass& renderPass,
 	Effect const& effect,
 	std::optional<EffectClipSource> clip,
-	ViewLayerController& viewLayerController) {
+	ViewLayerController& viewLayerController
+) {
 	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetCommandList(context);
 	if (!sourceImage) {
 		return;
@@ -28,7 +29,8 @@ void EffectRenderer::render(
 	RenderPass& renderPass,
 	EffectCompose const& effectCompose,
 	std::optional<EffectClipSource> clip,
-	ViewLayerController& viewLayerController) {
+	ViewLayerController& viewLayerController
+) {
 	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetCommandList(context);
 	if (!sourceImage) {
 		return;
@@ -47,15 +49,20 @@ void EffectRenderer::render(
 	EffectSourceAppearance const& sourceAppearance,
 	Effect const& effect,
 	std::optional<EffectClipSource> clip,
-	ViewLayerController& viewLayerController) {
+	ViewLayerController& viewLayerController
+) {
 	switch (EffectIdentifier::identify(effect)) {
 	case EffectKind::Shadow: {
-		auto result = shadowEffectRenderer.render(context, source, sourceAppearance, std::get<ShadowEffect>(effect), clip);
+		auto result =
+			shadowEffectRenderer
+				.render(context, source, sourceAppearance, std::get<ShadowEffect>(effect), clip);
 		drawImage(context, result.image, result.targetOffset, clip, viewLayerController);
 		return;
 	}
 	case EffectKind::Blur: {
-		auto result = blurEffectRenderer.render(context, source, sourceAppearance, std::get<BlurEffect>(effect), clip);
+		auto result =
+			blurEffectRenderer
+				.render(context, source, sourceAppearance, std::get<BlurEffect>(effect), clip);
 		drawImage(context, result.image, result.targetOffset, clip, viewLayerController);
 		return;
 	}
@@ -63,12 +70,18 @@ void EffectRenderer::render(
 		break;
 	}
 
-	std::shared_ptr<D2dCanvas> sourceCanvas = sourceRenderer.render(context, source, sourceAppearance);
+	std::shared_ptr<D2dCanvas> sourceCanvas =
+		sourceRenderer.render(context, source, sourceAppearance);
 	if (!sourceCanvas) {
 		return;
 	}
 
-	drawImage(context, apply(context, sourceCanvas->getCommandList(), effect), clip, viewLayerController);
+	drawImage(
+		context,
+		apply(context, sourceCanvas->getCommandList(), effect),
+		clip,
+		viewLayerController
+	);
 }
 
 void EffectRenderer::render(
@@ -77,37 +90,44 @@ void EffectRenderer::render(
 	EffectSourceAppearance const& sourceAppearance,
 	EffectCompose const& effectCompose,
 	std::optional<EffectClipSource> clip,
-	ViewLayerController& viewLayerController) {
-	std::shared_ptr<D2dCanvas> sourceCanvas = sourceRenderer.render(context, source, sourceAppearance);
+	ViewLayerController& viewLayerController
+) {
+	std::shared_ptr<D2dCanvas> sourceCanvas =
+		sourceRenderer.render(context, source, sourceAppearance);
 	if (!sourceCanvas) {
 		return;
 	}
 
-	drawImage(context, apply(context, sourceCanvas->getCommandList(), effectCompose), clip, viewLayerController);
+	drawImage(
+		context,
+		apply(context, sourceCanvas->getCommandList(), effectCompose),
+		clip,
+		viewLayerController
+	);
 }
 
 ComPtr<ID2D1Image> EffectRenderer::apply(
-	D2dEngineContext& context,
-	ComPtr<ID2D1Image> sourceImage,
-	Effect const& effect) {
+	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, Effect const& effect
+) {
 	switch (EffectIdentifier::identify(effect)) {
 	case EffectKind::Shadow:
 		return shadowEffectRenderer.render(context, sourceImage, std::get<ShadowEffect>(effect));
 	case EffectKind::Blur:
 		return blurEffectRenderer.render(context, sourceImage, std::get<BlurEffect>(effect));
 	case EffectKind::DirectionalBlur:
-		return directionalBlurEffectRenderer.render(context, sourceImage, std::get<DirectionalBlurEffect>(effect));
+		return directionalBlurEffectRenderer
+			.render(context, sourceImage, std::get<DirectionalBlurEffect>(effect));
 	case EffectKind::ColorMatrix:
-		return colorMatrixEffectRenderer.render(context, sourceImage, std::get<ColorMatrixEffect>(effect));
+		return colorMatrixEffectRenderer
+			.render(context, sourceImage, std::get<ColorMatrixEffect>(effect));
 	default:
 		return nullptr;
 	}
 }
 
 ComPtr<ID2D1Image> EffectRenderer::apply(
-	D2dEngineContext& context,
-	ComPtr<ID2D1Image> sourceImage,
-	EffectCompose const& effectCompose) {
+	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, EffectCompose const& effectCompose
+) {
 	ComPtr<ID2D1Image> currentImage = sourceImage;
 
 	for (Effect const& effect : effectCompose.getCompose()) {
@@ -124,7 +144,8 @@ void EffectRenderer::drawImage(
 	D2dEngineContext const& context,
 	ComPtr<ID2D1Image> image,
 	std::optional<EffectClipSource> const& clip,
-	ViewLayerController& viewLayerController) {
+	ViewLayerController& viewLayerController
+) {
 	if (!image) {
 		return;
 	}
@@ -144,17 +165,24 @@ void EffectRenderer::drawImage(
 	ComPtr<ID2D1Image> image,
 	Point const& targetOffset,
 	std::optional<EffectClipSource> const& clip,
-	ViewLayerController& viewLayerController) {
+	ViewLayerController& viewLayerController
+) {
 	if (!image) {
 		return;
 	}
 
 	if (!clip.has_value()) {
-		context.getD2dContext()->getDeviceContext()->DrawImage(image.Get(), {targetOffset.x, targetOffset.y});
+		context.getD2dContext()->getDeviceContext()->DrawImage(
+			image.Get(),
+			{targetOffset.x, targetOffset.y}
+		);
 		return;
 	}
 
 	viewLayerController.pushLayer(context, clip.value(), LayerMode::Normal);
-	context.getD2dContext()->getDeviceContext()->DrawImage(image.Get(), {targetOffset.x, targetOffset.y});
+	context.getD2dContext()->getDeviceContext()->DrawImage(
+		image.Get(),
+		{targetOffset.x, targetOffset.y}
+	);
 	viewLayerController.popLayer(context);
 }

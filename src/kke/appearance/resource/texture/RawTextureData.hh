@@ -28,4 +28,4 @@ struct RawTextureData {
 	 */
 	size_t stride = 0;
 };
-}	// namespace kke
+} // namespace kke

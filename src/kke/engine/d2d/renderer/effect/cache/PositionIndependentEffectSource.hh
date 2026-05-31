@@ -4,43 +4,27 @@
 
 namespace kke {
 class PositionIndependentEffectSource {
-public:
-	static EffectSource normalize(
-		EffectSource const& source,
-		Point const& origin);
+  public:
+	static EffectSource normalize(EffectSource const& source, Point const& origin);
 
-	static EffectClipSource normalizeClip(
-		EffectClipSource const& clip,
-		Point const& origin);
+	static EffectClipSource normalizeClip(EffectClipSource const& clip, Point const& origin);
 
 	static Point getOrigin(EffectSource const& source);
 
 	static uint64_t hash(EffectSource const& source);
 
-private:
-	static Geometry normalize(
-		Geometry const& geometry,
-		Point const& origin);
+  private:
+	static Geometry normalize(Geometry const& geometry, Point const& origin);
 
-	static Triangle normalize(
-		Triangle const& triangle,
-		Point const& origin);
+	static Triangle normalize(Triangle const& triangle, Point const& origin);
 
-	static Rect normalize(
-		Rect const& rect,
-		Point const& origin);
+	static Rect normalize(Rect const& rect, Point const& origin);
 
-	static RoundedRect normalize(
-		RoundedRect const& roundedRect,
-		Point const& origin);
+	static RoundedRect normalize(RoundedRect const& roundedRect, Point const& origin);
 
-	static Ellipse normalize(
-		Ellipse const& ellipse,
-		Point const& origin);
+	static Ellipse normalize(Ellipse const& ellipse, Point const& origin);
 
-	static Polygon normalize(
-		Polygon const& polygon,
-		Point const& origin);
+	static Polygon normalize(Polygon const& polygon, Point const& origin);
 
 	static Point getOrigin(Geometry const& geometry);
 
@@ -56,4 +40,4 @@ private:
 
 	static uint64_t hash(Line const& line);
 };
-}	// namespace kke
+} // namespace kke

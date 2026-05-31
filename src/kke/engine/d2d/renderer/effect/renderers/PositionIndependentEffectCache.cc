@@ -12,17 +12,14 @@ using Microsoft::WRL::ComPtr;
 namespace {
 std::atomic<uint64_t> cacheHits = 0;
 std::atomic<uint64_t> cacheMisses = 0;
-}
+} // namespace
 
 bool PositionIndependentEffectCache::supports(EffectSource const& source) const {
 	return !std::holds_alternative<std::shared_ptr<Canvas>>(source);
 }
 
 PositionIndependentEffectCache::StatsSnapshot PositionIndependentEffectCache::consumeStats() {
-	return {
-		cacheHits.exchange(0),
-		cacheMisses.exchange(0)
-	};
+	return {cacheHits.exchange(0), cacheMisses.exchange(0)};
 }
 
 PositionIndependentEffectCache::RenderResult PositionIndependentEffectCache::render(
@@ -31,26 +28,31 @@ PositionIndependentEffectCache::RenderResult PositionIndependentEffectCache::ren
 	EffectSourceAppearance const& sourceAppearance,
 	uint64_t effectHash,
 	std::optional<EffectClipSource> const& clip,
-	EffectImageRenderer const& effectRenderer) {
+	EffectImageRenderer const& effectRenderer
+) {
 	Point sourceOrigin = PositionIndependentEffectSource::getOrigin(source);
 	uint64_t cacheKey = createCacheKey(source, sourceAppearance, effectHash);
 	auto cached = cache.find(cacheKey);
 	if (cached == cache.end()) {
 		recordMiss();
-		EffectSource normalizedSource = PositionIndependentEffectSource::normalize(source, sourceOrigin);
+		EffectSource normalizedSource =
+			PositionIndependentEffectSource::normalize(source, sourceOrigin);
 		EffectSourceAppearance normalizedAppearance = sourceAppearance;
-		normalizedAppearance.brush = PositionIndependentBrush::normalize(sourceAppearance.brush, sourceOrigin);
+		normalizedAppearance.brush =
+			PositionIndependentBrush::normalize(sourceAppearance.brush, sourceOrigin);
 		SavedDeviceContextState savedState = saveDeviceContextState(context);
 		ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 		deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 
-		std::shared_ptr<D2dCanvas> normalizedSourceCanvas = sourceRenderer.render(context, normalizedSource, normalizedAppearance);
+		std::shared_ptr<D2dCanvas> normalizedSourceCanvas =
+			sourceRenderer.render(context, normalizedSource, normalizedAppearance);
 		if (!normalizedSourceCanvas) {
 			restoreDeviceContextState(context, savedState);
 			return {nullptr, {0.0f, 0.0f}};
 		}
 
-		CachedEffectResult cachedBitmap = renderToBitmap(context, normalizedSourceCanvas->getCommandList(), effectRenderer);
+		CachedEffectResult cachedBitmap =
+			renderToBitmap(context, normalizedSourceCanvas->getCommandList(), effectRenderer);
 		restoreDeviceContextState(context, savedState);
 		if (!cachedBitmap.bitmap) {
 			return {nullptr, {0.0f, 0.0f}};
@@ -62,16 +64,14 @@ PositionIndependentEffectCache::RenderResult PositionIndependentEffectCache::ren
 	}
 
 	Point drawOffset = sourceOrigin + cached->second.relativeDrawOffset;
-	return {
-		cached->second.bitmap,
-		drawOffset
-	};
+	return {cached->second.bitmap, drawOffset};
 }
 
 PositionIndependentEffectCache::CachedEffectResult PositionIndependentEffectCache::renderToBitmap(
 	D2dEngineContext& context,
 	ComPtr<ID2D1Image> sourceImage,
-	EffectImageRenderer const& effectRenderer) {
+	EffectImageRenderer const& effectRenderer
+) {
 	ComPtr<ID2D1Image> outputImage = effectRenderer(context, sourceImage);
 	if (!outputImage) {
 		return {nullptr, {0.0f, 0.0f}};
@@ -89,16 +89,12 @@ PositionIndependentEffectCache::CachedEffectResult PositionIndependentEffectCach
 		return {nullptr, {0.0f, 0.0f}};
 	}
 
-	return {
-		bitmap,
-		{imageBounds.left, imageBounds.top}
-	};
+	return {bitmap, {imageBounds.left, imageBounds.top}};
 }
 
 uint64_t PositionIndependentEffectCache::createCacheKey(
-	EffectSource const& source,
-	EffectSourceAppearance const& sourceAppearance,
-	uint64_t effectHash) const {
+	EffectSource const& source, EffectSourceAppearance const& sourceAppearance, uint64_t effectHash
+) const {
 	Point origin = PositionIndependentEffectSource::getOrigin(source);
 
 	Hasher hasher;
@@ -111,9 +107,8 @@ uint64_t PositionIndependentEffectCache::createCacheKey(
 }
 
 ComPtr<ID2D1Bitmap1> PositionIndependentEffectCache::createEffectBitmap(
-	D2dEngineContext& context,
-	ComPtr<ID2D1Image> outputImage,
-	D2D1_RECT_F const& imageBounds) {
+	D2dEngineContext& context, ComPtr<ID2D1Image> outputImage, D2D1_RECT_F const& imageBounds
+) {
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 
 	D2D1_SIZE_U pixelSize{
@@ -123,7 +118,8 @@ ComPtr<ID2D1Bitmap1> PositionIndependentEffectCache::createEffectBitmap(
 
 	D2D1_BITMAP_PROPERTIES1 properties = D2D1::BitmapProperties1(
 		D2D1_BITMAP_OPTIONS_TARGET,
-		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
+		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+	);
 
 	ComPtr<ID2D1Bitmap1> bitmap;
 	HRESULT createResult = deviceContext->CreateBitmap(pixelSize, nullptr, 0, &properties, &bitmap);
@@ -146,8 +142,8 @@ ComPtr<ID2D1Bitmap1> PositionIndependentEffectCache::createEffectBitmap(
 	return bitmap;
 }
 
-PositionIndependentEffectCache::SavedDeviceContextState PositionIndependentEffectCache::saveDeviceContextState(
-	D2dEngineContext const& context) const {
+PositionIndependentEffectCache::SavedDeviceContextState
+PositionIndependentEffectCache::saveDeviceContextState(D2dEngineContext const& context) const {
 	SavedDeviceContextState state;
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 	deviceContext->GetTarget(&state.target);
@@ -156,8 +152,8 @@ PositionIndependentEffectCache::SavedDeviceContextState PositionIndependentEffec
 }
 
 void PositionIndependentEffectCache::restoreDeviceContextState(
-	D2dEngineContext const& context,
-	SavedDeviceContextState const& state) const {
+	D2dEngineContext const& context, SavedDeviceContextState const& state
+) const {
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 	deviceContext->SetTarget(state.target.Get());
 	deviceContext->SetTransform(state.transform);

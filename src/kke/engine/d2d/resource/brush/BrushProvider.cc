@@ -6,8 +6,7 @@
 using namespace kke;
 using Microsoft::WRL::ComPtr;
 
-BrushProvider::BrushProvider(uint32_t limit)
-	: storage(limit) {
+BrushProvider::BrushProvider(uint32_t limit) : storage(limit) {
 }
 
 ComPtr<ID2D1Brush> BrushProvider::get(D2dContext const& context, Brush const& brush) {

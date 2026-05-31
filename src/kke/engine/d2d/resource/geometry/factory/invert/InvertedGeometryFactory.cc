@@ -12,8 +12,9 @@ using namespace Microsoft::WRL;
 ComPtr<ID2D1Geometry> InvertedGeometryFactory::createInvertedGeometry(
 	D2dContext const& context,
 	GeometryProvider& geometryProvider,
-    Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
-	Geometry const& geometry) {
+	Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
+	Geometry const& geometry
+) {
 	ComPtr<ID2D1Geometry> maskGeometry = geometryProvider.get(context, geometry);
 	if (!maskGeometry) {
 		std::printf("[kke][InvertedGeometryFactory] mask geometry is null\n");
@@ -26,8 +27,9 @@ ComPtr<ID2D1Geometry> InvertedGeometryFactory::createInvertedGeometry(
 ComPtr<ID2D1Geometry> InvertedGeometryFactory::createInvertedGeometry(
 	D2dContext const& context,
 	GeometryProvider& geometryProvider,
-    Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
-	GeometryCompose const& compose) {
+	Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
+	GeometryCompose const& compose
+) {
 	ComPtr<ID2D1Geometry> maskGeometry = geometryProvider.get(context, compose);
 	if (!maskGeometry) {
 		std::printf("[kke][InvertedGeometryFactory] mask compose geometry is null\n");
@@ -39,8 +41,9 @@ ComPtr<ID2D1Geometry> InvertedGeometryFactory::createInvertedGeometry(
 
 ComPtr<ID2D1Geometry> InvertedGeometryFactory::createInvertedGeometry(
 	D2dContext const& context,
-    Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
-	ID2D1Geometry* maskGeometry) {
+	Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
+	ID2D1Geometry* maskGeometry
+) {
 	if (!viewportGeometry) {
 		std::printf("[kke][InvertedGeometryFactory] viewport geometry is null\n");
 	}

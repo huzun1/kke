@@ -7,9 +7,9 @@ struct RoundedRect : public Rect {
 	float rounding;
 
 	~RoundedRect() = default;
-	
+
 	RoundedRect();
 
 	RoundedRect(Rect const& rect, float rounding);
 };
-};	// namespace kke
+}; // namespace kke

@@ -7,9 +7,9 @@ namespace kke {
 class TranslateManipulator : public Manipulator {
 	Translation translation;
 
-public:
+  public:
 	TranslateManipulator(Translation const& translation);
 
 	void transform(D2D1::Matrix3x2F& matrix) override;
 };
-};	// namespace kke
+}; // namespace kke

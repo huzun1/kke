@@ -20,7 +20,7 @@ class D3D11 {
 
 	ID3D11RenderTargetView* d3d11FramebufferView;
 
-public:
+  public:
 	void init(HWND hwnd);
 
 	ID3D11Device1* getDevice();
@@ -31,13 +31,20 @@ public:
 
 	ID3D11RenderTargetView* getFramebuffer();
 
-private:
-	static bool createD3D11Device(ID3D11Device1** deviceOut, ID3D11DeviceContext1** deviceContextOut);
+  private:
+	static bool
+	createD3D11Device(ID3D11Device1** deviceOut, ID3D11DeviceContext1** deviceContextOut);
 
 	static void createDxgiFactory(ID3D11Device1* device, IDXGIFactory2** factoryOut);
 
-	static void createSwapChain(HWND hwnd, ID3D11Device1* device, IDXGIFactory2* factory, IDXGISwapChain1** swapChainOut);
+	static void createSwapChain(
+		HWND hwnd, ID3D11Device1* device, IDXGIFactory2* factory, IDXGISwapChain1** swapChainOut
+	);
 
-	static void createRenderTarget(ID3D11Device1* device, IDXGISwapChain1* swapChain, ID3D11RenderTargetView** FramebufferViewOut);
+	static void createRenderTarget(
+		ID3D11Device1* device,
+		IDXGISwapChain1* swapChain,
+		ID3D11RenderTargetView** FramebufferViewOut
+	);
 };
-}  // namespace application
+} // namespace application

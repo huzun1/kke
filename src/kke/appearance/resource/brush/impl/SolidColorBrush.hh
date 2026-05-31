@@ -9,7 +9,7 @@ namespace kke {
 class SolidColorBrush {
 	Color color;
 
-public:
+  public:
 	/**
 	 * @brief Constructs a brush from a color value.
 	 */
@@ -20,4 +20,4 @@ public:
 	 */
 	Color const& getColor() const;
 };
-}	// namespace kke
+} // namespace kke

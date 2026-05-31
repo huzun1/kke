@@ -1,8 +1,7 @@
 #include "ScaleManipulator.hh"
 
 kke::ScaleManipulator::ScaleManipulator(Scaling const& scale)
-	: center(scale.center),
-	  scale(scale.scale) {
+	: center(scale.center), scale(scale.scale) {
 }
 
 void kke::ScaleManipulator::transform(D2D1::Matrix3x2F& matrix) {

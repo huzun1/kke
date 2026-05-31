@@ -5,8 +5,7 @@
 #include "Renderer.hh"
 namespace application {
 namespace renderer_test {
-RendererTest::RendererTest(Renderer& renderer)
-	: renderer(renderer) {
+RendererTest::RendererTest(Renderer& renderer) : renderer(renderer) {
 }
 
 RendererTest::~RendererTest() = default;
@@ -22,5 +21,5 @@ std::shared_ptr<kke::Texture> const& RendererTest::encodedTexture() const {
 std::shared_ptr<kke::Texture> const& RendererTest::rawTexture() const {
 	return renderer.rawTexture;
 }
-}
-}
+} // namespace renderer_test
+} // namespace application

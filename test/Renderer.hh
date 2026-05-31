@@ -35,7 +35,7 @@ class Renderer {
 	bool hasActiveRendererTest = false;
 	std::chrono::steady_clock::time_point lastFpsLogTime = std::chrono::steady_clock::now();
 
-public:
+  public:
 	Renderer(application::D2D1& d2d1);
 
 	~Renderer();
@@ -44,7 +44,7 @@ public:
 
 	void handleKeyDown(uint32_t virtualKey);
 
-private:
+  private:
 	void ensureTexturesUploaded();
 
 	void renderFrame();
@@ -62,7 +62,8 @@ private:
 	void addRendererTest(
 		uint32_t virtualKey,
 		std::string title,
-		std::unique_ptr<renderer_test::RendererTest> rendererTest);
+		std::unique_ptr<renderer_test::RendererTest> rendererTest
+	);
 
 	void switchRendererTest(size_t index);
 
@@ -72,4 +73,4 @@ private:
 
 	friend class renderer_test::RendererTest;
 };
-}	// namespace application
+} // namespace application

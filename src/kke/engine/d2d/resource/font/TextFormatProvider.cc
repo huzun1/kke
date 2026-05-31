@@ -9,7 +9,8 @@ using Microsoft::WRL::ComPtr;
 ComPtr<IDWriteTextFormat> TextFormatProvider::get(
 	IDWriteFactory5* writeFactory,
 	IDWriteFontCollection1* fontCollection,
-	FontAppearance const& appearance) {
+	FontAppearance const& appearance
+) {
 	uint64_t key = FontHasher::hash(appearance);
 
 	ComPtr<IDWriteTextFormat> cachedFormat = storage.get(key);
@@ -17,7 +18,8 @@ ComPtr<IDWriteTextFormat> TextFormatProvider::get(
 		return cachedFormat;
 	}
 
-	ComPtr<IDWriteTextFormat> createdFormat = FontFactory::createTextFormat(writeFactory, fontCollection, appearance);
+	ComPtr<IDWriteTextFormat> createdFormat =
+		FontFactory::createTextFormat(writeFactory, fontCollection, appearance);
 	if (!createdFormat) {
 		return nullptr;
 	}

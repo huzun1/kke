@@ -42,18 +42,14 @@ void TransformRendererTest::render() {
 	shadowAppearance.brush = accentFill;
 	shadowAppearance.drawMode = kke::EffectSourceDrawMode::Fill;
 
-	engine().fill(kke::Text{
-		L"Scaling",
-		{124.0f, 116.0f},
-		{"Space Grotesk", 22.0f, kke::FontWeight::BOLD}
-	}, outline);
+	engine().fill(
+		kke::Text{L"Scaling", {124.0f, 116.0f}, {"Space Grotesk", 22.0f, kke::FontWeight::BOLD}},
+		outline
+	);
 
 	engine().fill(kke::Rect{{80.0f, 140.0f}, {360.0f, 420.0f}}, panelFill);
 
-	kke::RoundedRect scalingShape{
-		kke::Rect{{164.0f, 236.0f}, {276.0f, 324.0f}},
-		22.0f
-	};
+	kke::RoundedRect scalingShape{kke::Rect{{164.0f, 236.0f}, {276.0f, 324.0f}}, 22.0f};
 
 	kke::Point scalingCenter{220.0f, 280.0f};
 
@@ -65,7 +61,8 @@ void TransformRendererTest::render() {
 	engine().renderEffect(
 		kke::Geometry{scalingShape},
 		glowAppearance,
-		kke::BlurEffect{{18.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED}});
+		kke::BlurEffect{{18.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED}}
+	);
 
 	engine().pushTransform(kke::Scaling{scalingCenter, {1.55f, 1.30f}});
 	engine().fill(kke::Geometry{scalingShape}, shapeFill);
@@ -73,29 +70,38 @@ void TransformRendererTest::render() {
 	engine().popTransform();
 	engine().fill(kke::Ellipse{scalingCenter, 4.0f}, outline);
 
-	engine().fill(kke::Text{
-		L"Rotate",
-		{504.0f, 116.0f},
-		{"Space Grotesk", 22.0f, kke::FontWeight::BOLD}
-	}, outline);
+	engine().fill(
+		kke::Text{L"Rotate", {504.0f, 116.0f}, {"Space Grotesk", 22.0f, kke::FontWeight::BOLD}},
+		outline
+	);
 
 	engine().fill(kke::Rect{{440.0f, 140.0f}, {840.0f, 420.0f}}, panelFill);
 
 	engine().renderEffect(
 		kke::Triangle{{640.0f, 180.0f}, {730.0f, 330.0f}, {550.0f, 330.0f}},
 		shadowAppearance,
-		kke::ShadowEffect{{14.0f, 16.0f}, 12.0f, {0.0f, 0.0f, 0.0f, 0.42f}, kke::ShadowMode::OuterShadowOnly});
+		kke::ShadowEffect{
+			{14.0f, 16.0f},
+			12.0f,
+			{0.0f, 0.0f, 0.0f, 0.42f},
+			kke::ShadowMode::OuterShadowOnly
+		}
+	);
 
 	engine().pushTransform(kke::Rotation{{640.0f, 255.0f}, 28.0f});
 	engine().fill(kke::Triangle{{640.0f, 180.0f}, {730.0f, 330.0f}, {550.0f, 330.0f}}, accentFill);
-	engine().draw(kke::Triangle{{640.0f, 180.0f}, {730.0f, 330.0f}, {550.0f, 330.0f}}, outline, {3.0f});
+	engine()
+		.draw(kke::Triangle{{640.0f, 180.0f}, {730.0f, 330.0f}, {550.0f, 330.0f}}, outline, {3.0f});
 	engine().popTransform();
 
-	engine().fill(kke::Text{
-		L"Transform Stack",
-		{904.0f, 116.0f},
-		{"Space Grotesk", 22.0f, kke::FontWeight::BOLD}
-	}, outline);
+	engine().fill(
+		kke::Text{
+			L"Transform Stack",
+			{904.0f, 116.0f},
+			{"Space Grotesk", 22.0f, kke::FontWeight::BOLD}
+		},
+		outline
+	);
 
 	engine().fill(kke::Rect{{880.0f, 140.0f}, {1200.0f, 520.0f}}, panelFill);
 
@@ -106,7 +112,13 @@ void TransformRendererTest::render() {
 	engine().renderEffect(
 		kke::Ellipse{{1010.0f, 300.0f}, 72.0f},
 		glowAppearance,
-		kke::BlurEffect{{16.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED, kke::BlurMode::OuterOnly}});
+		kke::BlurEffect{
+			{16.0f,
+			 kke::BlurBorderMode::SOFT,
+			 kke::BlurOptimization::BALANCED,
+			 kke::BlurMode::OuterOnly}
+		}
+	);
 
 	engine().fill(kke::Ellipse{{1010.0f, 300.0f}, 72.0f}, shapeFill);
 	engine().draw(kke::Rect{{950.0f, 250.0f}, {1070.0f, 350.0f}}, outline, {3.0f});
@@ -117,5 +129,5 @@ void TransformRendererTest::render() {
 
 	engine().fill(kke::Ellipse{{1010.0f, 300.0f}, 4.0f}, outline);
 }
-}
-}
+} // namespace renderer_test
+} // namespace application

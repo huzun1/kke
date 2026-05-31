@@ -10,7 +10,7 @@ class Renderer;
 
 namespace renderer_test {
 class RendererTest {
-protected:
+  protected:
 	Renderer& renderer;
 
 	kke::D2dEngine& engine();
@@ -19,12 +19,12 @@ protected:
 
 	std::shared_ptr<kke::Texture> const& rawTexture() const;
 
-public:
+  public:
 	explicit RendererTest(Renderer& renderer);
 
 	virtual ~RendererTest();
 
 	virtual void render() = 0;
 };
-}
-}
+} // namespace renderer_test
+} // namespace application

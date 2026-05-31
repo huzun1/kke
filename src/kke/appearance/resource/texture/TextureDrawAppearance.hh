@@ -26,4 +26,4 @@ struct TextureDrawAppearance {
 	 */
 	std::optional<Rect> srcRect = std::nullopt;
 };
-}	// namespace kke
+} // namespace kke

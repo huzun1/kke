@@ -34,4 +34,4 @@ struct FontAppearance {
 	 */
 	FontWeight weight;
 };
-};	// namespace kke
+}; // namespace kke

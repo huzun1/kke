@@ -17,4 +17,4 @@ struct Rotation {
 	 */
 	float angle;
 };
-}	// namespace kke
+} // namespace kke

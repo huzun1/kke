@@ -11,7 +11,7 @@ ID2D1Factory* D2dContext::getFactory() const {
 }
 
 ID2D1DeviceContext* D2dContext::getDeviceContext() const {
-    return deviceContext;
+	return deviceContext;
 }
 
 Microsoft::WRL::ComPtr<ID2D1CommandList> D2dContext::getTargetCommandList() const {

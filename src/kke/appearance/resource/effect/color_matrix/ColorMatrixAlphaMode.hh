@@ -15,4 +15,4 @@ enum class ColorMatrixAlphaMode {
 	 */
 	Straight
 };
-}	// namespace kke
+} // namespace kke

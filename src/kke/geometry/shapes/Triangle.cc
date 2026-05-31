@@ -1,5 +1,5 @@
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 #include <kke/geometry/shapes/Triangle.hh>
 
@@ -8,9 +8,7 @@
 using namespace kke;
 
 Triangle::Triangle()
-	: a(kke::Point{0.0f, 0.0f}),
-	  b(kke::Point{0.0f, 0.0f}),
-	  c(kke::Point{0.0f, 0.0f}) {
+	: a(kke::Point{0.0f, 0.0f}), b(kke::Point{0.0f, 0.0f}), c(kke::Point{0.0f, 0.0f}) {
 }
 
 Triangle::Triangle(kke::Point const& a, kke::Point const& b, kke::Point const& c)
@@ -40,7 +38,8 @@ Triangle Triangle::shrink(float amount) const {
 	return Triangle(
 		moveToward(a, center, amount),
 		moveToward(b, center, amount),
-		moveToward(c, center, amount));
+		moveToward(c, center, amount)
+	);
 }
 
 Triangle Triangle::expand(float amount) const {
@@ -49,5 +48,6 @@ Triangle Triangle::expand(float amount) const {
 	return Triangle(
 		moveToward(a, center, -amount),
 		moveToward(b, center, -amount),
-		moveToward(c, center, -amount));
+		moveToward(c, center, -amount)
+	);
 }

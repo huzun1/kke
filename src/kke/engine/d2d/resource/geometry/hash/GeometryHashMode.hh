@@ -1,8 +1,5 @@
 #pragma once
 
 namespace kke {
-enum class GeometryHashMode {
-	PositionDependent,
-	PositionIndependent
-};
+enum class GeometryHashMode { PositionDependent, PositionIndependent };
 };

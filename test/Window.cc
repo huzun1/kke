@@ -25,14 +25,20 @@ HWND application::Window::createWindow(HINSTANCE instance) {
 	AdjustWindowRectEx(&initialRect, WS_OVERLAPPEDWINDOW, FALSE, WS_EX_OVERLAPPEDWINDOW);
 	LONG initialWidth = initialRect.right - initialRect.left;
 	LONG initialHeight = initialRect.bottom - initialRect.top;
-	HWND hwnd = CreateWindowExW(WS_EX_OVERLAPPEDWINDOW,
-								winClass.lpszClassName,
-								L"kke",
-								WS_OVERLAPPEDWINDOW | WS_VISIBLE,
-								CW_USEDEFAULT, CW_USEDEFAULT,
-								initialWidth,
-								initialHeight,
-								0, 0, instance, 0);
+	HWND hwnd = CreateWindowExW(
+		WS_EX_OVERLAPPEDWINDOW,
+		winClass.lpszClassName,
+		L"kke",
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		CW_USEDEFAULT,
+		CW_USEDEFAULT,
+		initialWidth,
+		initialHeight,
+		0,
+		0,
+		instance,
+		0
+	);
 
 	return hwnd;
 }
@@ -40,22 +46,22 @@ HWND application::Window::createWindow(HINSTANCE instance) {
 LRESULT CALLBACK application::Window::wndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam) {
 	LRESULT result = 0;
 	switch (msg) {
-		case WM_KEYDOWN: {
-			Renderer* renderer = reinterpret_cast<Renderer*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
-			if (renderer) {
-				renderer->handleKeyDown(static_cast<uint32_t>(wparam));
-			}
+	case WM_KEYDOWN: {
+		Renderer* renderer = reinterpret_cast<Renderer*>(GetWindowLongPtrW(hwnd, GWLP_USERDATA));
+		if (renderer) {
+			renderer->handleKeyDown(static_cast<uint32_t>(wparam));
+		}
 
-			if (wparam == VK_ESCAPE)
-				DestroyWindow(hwnd);
-			break;
-		}
-		case WM_DESTROY: {
-			PostQuitMessage(0);
-			break;
-		}
-		default:
-			result = DefWindowProcW(hwnd, msg, wparam, lparam);
+		if (wparam == VK_ESCAPE)
+			DestroyWindow(hwnd);
+		break;
+	}
+	case WM_DESTROY: {
+		PostQuitMessage(0);
+		break;
+	}
+	default:
+		result = DefWindowProcW(hwnd, msg, wparam, lparam);
 	}
 	return result;
 }

@@ -8,17 +8,19 @@
 
 namespace kke {
 class TextRenderer {
-public:
+  public:
 	void fillText(
 		std::string_view text,
 		kke::Point const& position,
 		kke::Brush const& brush,
-		kke::FontStyle const& style);
+		kke::FontStyle const& style
+	);
 
 	void fillText(
 		std::wstring_view text,
 		kke::Point const& position,
 		kke::Brush const& brush,
-		kke::FontStyle const& style);		
+		kke::FontStyle const& style
+	);
 };
-};
+}; // namespace kke

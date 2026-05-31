@@ -10,7 +10,8 @@ PositionIndependentEffectCache::RenderResult ShadowEffectRenderer::render(
 	EffectSource const& source,
 	EffectSourceAppearance const& sourceAppearance,
 	ShadowEffect const& effect,
-	std::optional<EffectClipSource> const& clip) {
+	std::optional<EffectClipSource> const& clip
+) {
 	if (cache.supports(source)) {
 		return cache.render(
 			context,
@@ -20,10 +21,12 @@ PositionIndependentEffectCache::RenderResult ShadowEffectRenderer::render(
 			clip,
 			[&](D2dEngineContext& renderContext, ComPtr<ID2D1Image> sourceImage) {
 				return render(renderContext, sourceImage, effect);
-			});
+			}
+		);
 	}
 
-	std::shared_ptr<D2dCanvas> sourceCanvas = sourceRenderer.render(context, source, sourceAppearance);
+	std::shared_ptr<D2dCanvas> sourceCanvas =
+		sourceRenderer.render(context, source, sourceAppearance);
 	if (!sourceCanvas) {
 		return {nullptr, {0.0f, 0.0f}};
 	}
@@ -32,9 +35,8 @@ PositionIndependentEffectCache::RenderResult ShadowEffectRenderer::render(
 }
 
 ComPtr<ID2D1Image> ShadowEffectRenderer::render(
-	D2dEngineContext& context,
-	ComPtr<ID2D1Image> sourceImage,
-	ShadowEffect const& effect) const {
+	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, ShadowEffect const& effect
+) const {
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 
 	ComPtr<ID2D1Effect> shadowEffect = createShadowEffect(deviceContext, sourceImage, effect);
@@ -42,7 +44,8 @@ ComPtr<ID2D1Image> ShadowEffectRenderer::render(
 		return nullptr;
 	}
 
-	ComPtr<ID2D1Effect> offsetEffect = createOffsetEffect(deviceContext, shadowEffect.Get(), effect);
+	ComPtr<ID2D1Effect> offsetEffect =
+		createOffsetEffect(deviceContext, shadowEffect.Get(), effect);
 	if (!offsetEffect) {
 		return nullptr;
 	}
@@ -60,7 +63,8 @@ ComPtr<ID2D1Image> ShadowEffectRenderer::render(
 		break;
 	}
 
-	ComPtr<ID2D1Image> outerShadowImage = createOuterShadowImage(deviceContext, offsetEffect.Get(), sourceImage);
+	ComPtr<ID2D1Image> outerShadowImage =
+		createOuterShadowImage(deviceContext, offsetEffect.Get(), sourceImage);
 	if (!outerShadowImage) {
 		return nullptr;
 	}
@@ -93,9 +97,8 @@ uint64_t ShadowEffectRenderer::hashEffect(ShadowEffect const& effect) {
 }
 
 ComPtr<ID2D1Effect> ShadowEffectRenderer::createShadowEffect(
-	ID2D1DeviceContext* deviceContext,
-	ComPtr<ID2D1Image> sourceImage,
-	ShadowEffect const& effect) const {
+	ID2D1DeviceContext* deviceContext, ComPtr<ID2D1Image> sourceImage, ShadowEffect const& effect
+) const {
 	ComPtr<ID2D1Effect> shadowEffect;
 	HRESULT shadowResult = deviceContext->CreateEffect(CLSID_D2D1Shadow, &shadowEffect);
 	if (FAILED(shadowResult) || !shadowEffect) {
@@ -104,14 +107,16 @@ ComPtr<ID2D1Effect> ShadowEffectRenderer::createShadowEffect(
 
 	shadowEffect->SetInput(0, sourceImage.Get());
 	shadowEffect->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, effect.blurStandardDeviation);
-	shadowEffect->SetValue(D2D1_SHADOW_PROP_COLOR, D2D1::Vector4F(effect.color.r, effect.color.g, effect.color.b, effect.color.a));
+	shadowEffect->SetValue(
+		D2D1_SHADOW_PROP_COLOR,
+		D2D1::Vector4F(effect.color.r, effect.color.g, effect.color.b, effect.color.a)
+	);
 	return shadowEffect;
 }
 
 ComPtr<ID2D1Effect> ShadowEffectRenderer::createOffsetEffect(
-	ID2D1DeviceContext* deviceContext,
-	ID2D1Effect* shadowEffect,
-	ShadowEffect const& effect) const {
+	ID2D1DeviceContext* deviceContext, ID2D1Effect* shadowEffect, ShadowEffect const& effect
+) const {
 	ComPtr<ID2D1Effect> offsetEffect;
 	HRESULT offsetResult = deviceContext->CreateEffect(CLSID_D2D12DAffineTransform, &offsetEffect);
 	if (FAILED(offsetResult) || !offsetEffect) {
@@ -119,14 +124,16 @@ ComPtr<ID2D1Effect> ShadowEffectRenderer::createOffsetEffect(
 	}
 
 	offsetEffect->SetInputEffect(0, shadowEffect);
-	offsetEffect->SetValue(D2D1_2DAFFINETRANSFORM_PROP_TRANSFORM_MATRIX, D2D1::Matrix3x2F::Translation(effect.offset.x, effect.offset.y));
+	offsetEffect->SetValue(
+		D2D1_2DAFFINETRANSFORM_PROP_TRANSFORM_MATRIX,
+		D2D1::Matrix3x2F::Translation(effect.offset.x, effect.offset.y)
+	);
 	return offsetEffect;
 }
 
 ComPtr<ID2D1Image> ShadowEffectRenderer::createOuterShadowImage(
-	ID2D1DeviceContext* deviceContext,
-	ID2D1Effect* offsetEffect,
-	ComPtr<ID2D1Image> sourceImage) const {
+	ID2D1DeviceContext* deviceContext, ID2D1Effect* offsetEffect, ComPtr<ID2D1Image> sourceImage
+) const {
 	ComPtr<ID2D1Effect> compositeEffect;
 	HRESULT compositeResult = deviceContext->CreateEffect(CLSID_D2D1Composite, &compositeEffect);
 	if (FAILED(compositeResult) || !compositeEffect) {

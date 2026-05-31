@@ -45,19 +45,13 @@ void ShadowStressRendererTest::render() {
 		for (int column = 0; column < columns; ++column) {
 			float left = originX + column * (width + gapX);
 			float top = originY + row * (height + gapY);
-			kke::RoundedRect panel{
-				kke::Rect{{left, top}, {left + width, top + height}},
-				rounding
-			};
+			kke::RoundedRect panel{kke::Rect{{left, top}, {left + width, top + height}}, rounding};
 
-			engine().renderEffect(
-				kke::Geometry{panel},
-				shadowAppearance,
-				shadowEffect);
+			engine().renderEffect(kke::Geometry{panel}, shadowAppearance, shadowEffect);
 
 			engine().fill(kke::Geometry{panel}, panelFill);
 		}
 	}
 }
-}
-}
+} // namespace renderer_test
+} // namespace application

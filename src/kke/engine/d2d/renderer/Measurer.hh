@@ -6,11 +6,9 @@
 
 namespace kke {
 class Measurer {
-public:
+  public:
 	Scale getViewportSize(D2dEngineContext const& context);
 
-	Scale measureTextSize(
-		D2dEngineContext const& context,
-		Text const& text);
+	Scale measureTextSize(D2dEngineContext const& context, Text const& text);
 };
-}	// namespace kke
+} // namespace kke

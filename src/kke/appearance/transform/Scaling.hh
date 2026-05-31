@@ -18,4 +18,4 @@ struct Scaling {
 	 */
 	Scale scale;
 };
-}	// namespace kke
+} // namespace kke

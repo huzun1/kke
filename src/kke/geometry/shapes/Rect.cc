@@ -31,4 +31,3 @@ Rect Rect::shrink(float amount) const {
 Rect Rect::expand(float amount) const {
 	return Rect(min - Point(amount, amount), max + Point(amount, amount));
 }
-

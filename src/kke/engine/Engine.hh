@@ -1,25 +1,25 @@
 #pragma once
 
-#include <cstddef>
-#include <memory>
-#include <optional>
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/appearance/resource/effect/EffectSourceAppearance.hh"
 #include "kke/appearance/resource/font/Font.hh"
 #include "kke/appearance/resource/texture/RawTextureData.hh"
-#include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
 #include "kke/appearance/resource/texture/Texture.hh"
+#include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/Sources.hh"
+#include <cstddef>
+#include <memory>
+#include <optional>
 
 namespace kke {
 /**
  * @brief Abstract interface for a rendering engine.
  */
 class Engine {
-public:
+  public:
 	virtual ~Engine() = default;
 
 	/* =============== Render Statement ================ */
@@ -80,9 +80,7 @@ public:
 	 * @param canvas The canvas to draw.
 	 * @param opacity The opacity value (default: 1.0).
 	 */
-	virtual void draw(
-		std::shared_ptr<Canvas> canvas,
-		float opacity = 1.0f) = 0;
+	virtual void draw(std::shared_ptr<Canvas> canvas, float opacity = 1.0f) = 0;
 
 	/* ================= Measurement =================== */
 
@@ -107,10 +105,8 @@ public:
 	 * @param brush The brush used for rendering.
 	 * @param appearance The stroke appearance settings.
 	 */
-	virtual void draw(
-		StrokeSource const& source,
-		Brush const& brush,
-		StrokeAppearance const& appearance) = 0;
+	virtual void
+	draw(StrokeSource const& source, Brush const& brush, StrokeAppearance const& appearance) = 0;
 
 	/* ================= Fill Rendering ================= */
 
@@ -119,9 +115,7 @@ public:
 	 * @param source The fill source geometry.
 	 * @param brush The brush used for filling.
 	 */
-	virtual void fill(
-		FillSource const& source,
-		Brush const& brush) = 0;
+	virtual void fill(FillSource const& source, Brush const& brush) = 0;
 
 	/* ================= Font Resource ================= */
 
@@ -131,9 +125,7 @@ public:
 	 * @param size Size of the data in bytes.
 	 * @return A shared pointer to the uploaded font.
 	 */
-	virtual std::shared_ptr<Font> uploadFont(
-		void const* data,
-		size_t size) = 0;
+	virtual std::shared_ptr<Font> uploadFont(void const* data, size_t size) = 0;
 
 	/* ================ Texture Rendering ================ */
 
@@ -143,11 +135,9 @@ public:
 	 * @param size Size of the data in bytes.
 	 * @return A shared pointer to the uploaded texture.
 	 */
-	virtual std::shared_ptr<Texture> uploadTexture(
-		void const* data, size_t size) = 0;
+	virtual std::shared_ptr<Texture> uploadTexture(void const* data, size_t size) = 0;
 
-	virtual std::shared_ptr<Texture> uploadTexture(
-		RawTextureData const& data) = 0;
+	virtual std::shared_ptr<Texture> uploadTexture(RawTextureData const& data) = 0;
 
 	/**
 	 * @brief Draws a texture onto the current render target.
@@ -158,7 +148,8 @@ public:
 	virtual void draw(
 		std::shared_ptr<Texture> texture,
 		Rect const& destRect,
-		TextureDrawAppearance const& appearance = TextureDrawAppearance{}) = 0;
+		TextureDrawAppearance const& appearance = TextureDrawAppearance{}
+	) = 0;
 
 	/* ================= Effect Rendering ================= */
 
@@ -167,9 +158,8 @@ public:
 	 * @param source The effect source.
 	 * @param effect The effect to apply.
 	 */
-	virtual void renderEffect(
-		Effect const& effect,
-		std::optional<EffectClipSource> clip = std::nullopt) = 0;
+	virtual void
+	renderEffect(Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt) = 0;
 
 	/**
 	 * @brief Renders an effect using a single effect definition.
@@ -180,7 +170,8 @@ public:
 		EffectSource const& source,
 		EffectSourceAppearance const& sourceAppearance,
 		Effect const& effect,
-		std::optional<EffectClipSource> clip = std::nullopt) = 0;
+		std::optional<EffectClipSource> clip = std::nullopt
+	) = 0;
 
 	/**
 	 * @brief Renders a composed effect using multiple effects.
@@ -188,8 +179,8 @@ public:
 	 * @param effect The composed effect definition.
 	 */
 	virtual void renderEffect(
-		EffectCompose const& effect,
-		std::optional<EffectClipSource> clip = std::nullopt) = 0;
+		EffectCompose const& effect, std::optional<EffectClipSource> clip = std::nullopt
+	) = 0;
 
 	/**
 	 * @brief Renders a composed effect using multiple effects.
@@ -200,6 +191,7 @@ public:
 		EffectSource const& source,
 		EffectSourceAppearance const& sourceAppearance,
 		EffectCompose const& effect,
-		std::optional<EffectClipSource> clip = std::nullopt) = 0;
+		std::optional<EffectClipSource> clip = std::nullopt
+	) = 0;
 };
 } // namespace kke

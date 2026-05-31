@@ -9,7 +9,7 @@ class D2dContext {
 
 	Microsoft::WRL::ComPtr<ID2D1CommandList> targetCommandList = nullptr;
 
-public:
+  public:
 	D2dContext(ID2D1Factory* factory, ID2D1DeviceContext* deviceContext);
 
 	ID2D1Factory* getFactory() const;
@@ -20,4 +20,4 @@ public:
 
 	void setTargetCommandList(Microsoft::WRL::ComPtr<ID2D1CommandList> commandList);
 };
-};	// namespace kke
+}; // namespace kke

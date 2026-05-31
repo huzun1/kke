@@ -15,4 +15,4 @@ enum class BlurBorderMode {
 	 */
 	HARD
 };
-}	// namespace kke
+} // namespace kke

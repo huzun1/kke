@@ -5,9 +5,9 @@
 
 namespace kke {
 class PositionIndependentBrush {
-public:
+  public:
 	static Brush normalize(Brush const& brush, Point const& origin);
 
 	static uint64_t hash(Brush const& brush, Point const& origin);
 };
-}	// namespace kke
+} // namespace kke

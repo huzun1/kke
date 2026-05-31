@@ -11,7 +11,7 @@ namespace kke {
 class GeometryCompose {
 	std::vector<Geometry> geometries;
 
-public:
+  public:
 	/**
 	 * @brief Appends a geometry to the composition in draw order.
 	 */
@@ -22,4 +22,4 @@ public:
 	 */
 	std::vector<Geometry> const& getGeometries() const;
 };
-}	// namespace kke
+} // namespace kke

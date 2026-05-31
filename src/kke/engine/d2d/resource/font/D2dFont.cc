@@ -4,8 +4,7 @@
 
 using namespace kke;
 
-D2dFont::D2dFont(void const* data, size_t size)
-	: data(size) {
+D2dFont::D2dFont(void const* data, size_t size) : data(size) {
 	std::memcpy(this->data.data(), data, size);
 }
 

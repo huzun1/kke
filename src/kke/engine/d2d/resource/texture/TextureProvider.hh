@@ -13,19 +13,16 @@ namespace kke {
 class TextureProvider {
 	Microsoft::WRL::ComPtr<IWICImagingFactory2> imagingFactory;
 
-public:
+  public:
 	TextureProvider();
 
-	std::shared_ptr<D2dTexture> uploadTexture(
-		D2dContext const& context,
-		void const* data,
-		size_t size);
+	std::shared_ptr<D2dTexture>
+	uploadTexture(D2dContext const& context, void const* data, size_t size);
 
-	std::shared_ptr<D2dTexture> uploadTexture(
-		D2dContext const& context,
-		RawTextureData const& data);
+	std::shared_ptr<D2dTexture>
+	uploadTexture(D2dContext const& context, RawTextureData const& data);
 
-private:
+  private:
 	void initialize();
 };
-}	// namespace kke
+} // namespace kke

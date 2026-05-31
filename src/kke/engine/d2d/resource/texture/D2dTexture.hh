@@ -7,9 +7,9 @@ namespace kke {
 class D2dTexture : public Texture {
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmap;
 
-public:
+  public:
 	D2dTexture(Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmap);
 
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> getBitmap() const;
 };
-}	// namespace kke
+} // namespace kke

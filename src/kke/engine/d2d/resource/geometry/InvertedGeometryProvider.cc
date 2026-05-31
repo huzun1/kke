@@ -10,12 +10,16 @@
 using namespace kke;
 using namespace Microsoft::WRL;
 
-void InvertedGeometryProvider::syncViewportSize(D2dContext const& context, D2D1_SIZE_F viewportSize) {
+void InvertedGeometryProvider::syncViewportSize(
+	D2dContext const& context, D2D1_SIZE_F viewportSize
+) {
 	bool isViewportResized = this->isViewportResized(viewportSize);
 	if (isViewportResized) {
-		std::printf("[kke][InvertedGeometryProvider] viewport resized: %.2f x %.2f\n",
-					viewportSize.width,
-					viewportSize.height);
+		std::printf(
+			"[kke][InvertedGeometryProvider] viewport resized: %.2f x %.2f\n",
+			viewportSize.width,
+			viewportSize.height
+		);
 		geometries.clear();
 		this->viewportSize = viewportSize;
 	}
@@ -24,9 +28,8 @@ void InvertedGeometryProvider::syncViewportSize(D2dContext const& context, D2D1_
 }
 
 ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
-	D2dContext const& context,
-	GeometryProvider& geometryProvider,
-	Geometry const& geometry) {
+	D2dContext const& context, GeometryProvider& geometryProvider, Geometry const& geometry
+) {
 	uint64_t key = createInvertedGeometryKey(context, geometry);
 
 	ComPtr<ID2D1Geometry> cachedGeometry = geometries.get(key);
@@ -34,8 +37,12 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 		return cachedGeometry;
 	}
 
-	ComPtr<ID2D1Geometry> invertedGeometry = InvertedGeometryFactory::createInvertedGeometry(context, geometryProvider,
-																							 viewportGeometryCache.get(context), geometry);
+	ComPtr<ID2D1Geometry> invertedGeometry = InvertedGeometryFactory::createInvertedGeometry(
+		context,
+		geometryProvider,
+		viewportGeometryCache.get(context),
+		geometry
+	);
 	if (!invertedGeometry) {
 		std::printf("[kke][InvertedGeometryProvider] failed to create inverted geometry\n");
 		return nullptr;
@@ -46,9 +53,8 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 }
 
 ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
-	D2dContext const& context,
-	GeometryProvider& geometryProvider,
-	GeometryCompose const& compose) {
+	D2dContext const& context, GeometryProvider& geometryProvider, GeometryCompose const& compose
+) {
 	uint64_t key = createInvertedGeometryKey(context, compose);
 
 	ComPtr<ID2D1Geometry> cachedGeometry = geometries.get(key);
@@ -56,8 +62,12 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 		return cachedGeometry;
 	}
 
-	ComPtr<ID2D1Geometry> invertedGeometry = InvertedGeometryFactory::createInvertedGeometry(context, geometryProvider,
-																							 viewportGeometryCache.get(context), compose);
+	ComPtr<ID2D1Geometry> invertedGeometry = InvertedGeometryFactory::createInvertedGeometry(
+		context,
+		geometryProvider,
+		viewportGeometryCache.get(context),
+		compose
+	);
 	if (!invertedGeometry) {
 		std::printf("[kke][InvertedGeometryProvider] failed to create inverted compose geometry\n");
 		return nullptr;
@@ -67,7 +77,9 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 	return invertedGeometry;
 }
 
-uint64_t InvertedGeometryProvider::createInvertedGeometryKey(D2dContext const& context, Geometry const& geometry) {
+uint64_t InvertedGeometryProvider::createInvertedGeometryKey(
+	D2dContext const& context, Geometry const& geometry
+) {
 	Hasher hasher;
 	hasher.combine(viewportSize.width);
 	hasher.combine(viewportSize.height);
@@ -75,7 +87,9 @@ uint64_t InvertedGeometryProvider::createInvertedGeometryKey(D2dContext const& c
 	return hasher.get();
 }
 
-uint64_t InvertedGeometryProvider::createInvertedGeometryKey(D2dContext const& context, GeometryCompose const& compose) {
+uint64_t InvertedGeometryProvider::createInvertedGeometryKey(
+	D2dContext const& context, GeometryCompose const& compose
+) {
 	Hasher hasher;
 	hasher.combine(viewportSize.width);
 	hasher.combine(viewportSize.height);
@@ -84,5 +98,6 @@ uint64_t InvertedGeometryProvider::createInvertedGeometryKey(D2dContext const& c
 }
 
 bool InvertedGeometryProvider::isViewportResized(D2D1_SIZE_F viewportSize) const {
-	return this->viewportSize.width != viewportSize.width || this->viewportSize.height != viewportSize.height;
+	return this->viewportSize.width != viewportSize.width ||
+		   this->viewportSize.height != viewportSize.height;
 }

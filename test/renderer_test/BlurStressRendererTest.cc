@@ -25,7 +25,8 @@ void BlurStressRendererTest::render() {
 	blurAppearance.drawMode = kke::EffectSourceDrawMode::Fill;
 
 	kke::BlurEffect blurEffect{
-		{10.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED, kke::BlurMode::OuterOnly}
+		{10.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED, kke::BlurMode::OuterOnly
+		}
 	};
 
 	constexpr int columns = 20;
@@ -42,17 +43,11 @@ void BlurStressRendererTest::render() {
 		for (int column = 0; column < columns; ++column) {
 			float left = originX + column * (width + gapX);
 			float top = originY + row * (height + gapY);
-			kke::RoundedRect panel{
-				kke::Rect{{left, top}, {left + width, top + height}},
-				rounding
-			};
+			kke::RoundedRect panel{kke::Rect{{left, top}, {left + width, top + height}}, rounding};
 
-			engine().renderEffect(
-				kke::Geometry{panel},
-				blurAppearance,
-				blurEffect);
+			engine().renderEffect(kke::Geometry{panel}, blurAppearance, blurEffect);
 		}
 	}
 }
-}
-}
+} // namespace renderer_test
+} // namespace application

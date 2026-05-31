@@ -11,12 +11,12 @@ namespace kke {
 class MatrixState {
 	Matrix matrix;
 
-public:
+  public:
 	void pushTransform(D2dEngineContext const& context, TransformSource const& transform);
 
 	void popTransform(D2dEngineContext const& context);
 
-private:
+  private:
 	void pushTransform(D2dEngineContext const& context, Translation const& translation);
 
 	void pushTransform(D2dEngineContext const& context, Scaling const& scale);
@@ -25,4 +25,4 @@ private:
 
 	void applyTransform(D2dEngineContext const& context);
 };
-};	// namespace kke
+}; // namespace kke

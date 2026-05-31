@@ -8,12 +8,12 @@ namespace kke {
 class TextFormatProvider {
 	KeyCacheStorage<IDWriteTextFormat> storage;
 
-public:
-	Microsoft::WRL::ComPtr<IDWriteTextFormat> get(
-		IDWriteFactory5* writeFactory,
+  public:
+	Microsoft::WRL::ComPtr<IDWriteTextFormat>
+	get(IDWriteFactory5* writeFactory,
 		IDWriteFontCollection1* fontCollection,
 		FontAppearance const& appearance);
 
 	void clear();
 };
-}	// namespace kke
+} // namespace kke

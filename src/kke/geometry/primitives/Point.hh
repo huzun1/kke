@@ -8,4 +8,4 @@ struct Point {
 };
 
 #include "PointOperators.hh"
-};	// namespace kke
+}; // namespace kke

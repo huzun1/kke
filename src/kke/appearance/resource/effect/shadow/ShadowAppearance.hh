@@ -10,4 +10,4 @@ struct ShadowAppearance {
 	 */
 	float deviation;
 };
-}	// namespace kke
+} // namespace kke

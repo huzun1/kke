@@ -11,9 +11,9 @@ namespace kke {
 class D2dFont : public Font {
 	std::vector<uint8_t> data;
 
-public:
+  public:
 	D2dFont(void const* data, size_t size);
 
 	std::span<uint8_t const> getData() const;
 };
-}	// namespace kke
+} // namespace kke

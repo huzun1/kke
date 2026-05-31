@@ -14,12 +14,12 @@
 
 namespace kke {
 class GeometryHasher {
-public:
+  public:
 	static uint64_t hash(Geometry const& geometry, GeometryHashMode mode);
 
 	static uint64_t hash(GeometryCompose const& compose, GeometryHashMode mode);
 
-private:
+  private:
 	static uint64_t hash(Triangle const& triangle, GeometryHashMode mode);
 
 	static uint64_t hash(Rect const& rect, GeometryHashMode mode);
@@ -30,4 +30,4 @@ private:
 
 	static uint64_t hash(Polygon const& polygon, GeometryHashMode mode);
 };
-};	// namespace kke
+}; // namespace kke

@@ -15,4 +15,4 @@ enum class BlurMode {
 	 */
 	OuterOnly
 };
-}	// namespace kke
+} // namespace kke

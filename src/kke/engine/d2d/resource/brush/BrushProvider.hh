@@ -11,9 +11,9 @@ namespace kke {
 class BrushProvider {
 	KeyCacheStorage<ID2D1Brush> storage;
 
-public:
+  public:
 	BrushProvider(uint32_t limit = UINT32_MAX);
 
 	Microsoft::WRL::ComPtr<ID2D1Brush> get(D2dContext const& context, Brush const& brush);
 };
-}	// namespace kke
+} // namespace kke

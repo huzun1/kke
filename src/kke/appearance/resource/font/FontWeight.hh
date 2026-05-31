@@ -42,4 +42,4 @@ enum class FontWeight {
 	 */
 	BOLD
 };
-}  // namespace kke
+} // namespace kke

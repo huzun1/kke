@@ -1,7 +1,7 @@
 #include "Renderer.hh"
 
-#include <cstdio>
 #include <cstdint>
+#include <cstdio>
 #include <memory>
 #include <sstream>
 #include <string>
@@ -9,11 +9,13 @@
 
 #include <Windows.h>
 
-#include "kke/appearance/resource/texture/RawTextureData.hh"
+#include "kke/appearance/Text.hh"
 #include "kke/appearance/resource/brush/impl/SolidColorBrush.hh"
 #include "kke/appearance/resource/font/FontWeight.hh"
-#include "kke/appearance/Text.hh"
+#include "kke/appearance/resource/texture/RawTextureData.hh"
 #include "kke/engine/d2d/context/D2dContext.hh"
+#include "kke/engine/d2d/renderer/effect/renderers/PositionIndependentEffectCache.hh"
+#include "kke/geometry/shapes/Rect.hh"
 #include "renderer_test/BlurStressRendererTest.hh"
 #include "renderer_test/CanvasRendererTest.hh"
 #include "renderer_test/FrameEffectRendererTest.hh"
@@ -21,14 +23,11 @@
 #include "renderer_test/ShadowStressRendererTest.hh"
 #include "renderer_test/ShapeEffectRendererTest.hh"
 #include "renderer_test/TextEffectRendererTest.hh"
-#include "renderer_test/TransformRendererTest.hh"
 #include "renderer_test/TextureRendererTest.hh"
-#include "kke/engine/d2d/renderer/effect/renderers/PositionIndependentEffectCache.hh"
-#include "kke/geometry/shapes/Rect.hh"
+#include "renderer_test/TransformRendererTest.hh"
 #include "resources/resources.h"
 
-application::Renderer::Renderer(application::D2D1& d2d1)
-	: d2d1(d2d1) {
+application::Renderer::Renderer(application::D2D1& d2d1) : d2d1(d2d1) {
 	auto [fontData, fontDataSize] = loadResource(FONT_SPACE_GROTESK);
 	std::shared_ptr<kke::Font> font = engine.uploadFont(fontData, fontDataSize);
 	if (font) {
@@ -85,12 +84,9 @@ void application::Renderer::ensureTexturesUploaded() {
 			rawTexturePixels = createRawTexturePixels(rawTextureWidth, rawTextureHeight);
 		}
 
-		rawTexture = engine.uploadTexture({
-			rawTexturePixels.data(),
-			rawTextureWidth,
-			rawTextureHeight,
-			rawTextureWidth * 4
-		});
+		rawTexture = engine.uploadTexture(
+			{rawTexturePixels.data(), rawTextureWidth, rawTextureHeight, rawTextureWidth * 4}
+		);
 	}
 }
 
@@ -130,11 +126,9 @@ void application::Renderer::renderTestSelectorOverlay() {
 	float panelHeight = panelPadding * 2.0f + titleHeight + rendererTests.size() * lineHeight;
 
 	engine.fill(
-		kke::Rect{
-			{panelLeft, panelTop},
-			{panelLeft + panelWidth, panelTop + panelHeight}
-		},
-		panelFill);
+		kke::Rect{{panelLeft, panelTop}, {panelLeft + panelWidth, panelTop + panelHeight}},
+		panelFill
+	);
 
 	engine.fill(
 		kke::Text{
@@ -142,7 +136,8 @@ void application::Renderer::renderTestSelectorOverlay() {
 			{panelLeft + panelPadding, panelTop + panelPadding},
 			{"Space Grotesk", 24.0f, kke::FontWeight::BOLD}
 		},
-		titleBrush);
+		titleBrush
+	);
 
 	for (size_t index = 0; index < rendererTests.size(); ++index) {
 		RendererTestEntry const& entry = rendererTests[index];
@@ -154,13 +149,14 @@ void application::Renderer::renderTestSelectorOverlay() {
 		engine.fill(
 			kke::Text{
 				line,
-				{
-					panelLeft + panelPadding,
-					panelTop + panelPadding + titleHeight + index * lineHeight
-				},
-				{"Space Grotesk", 16.0f, index == activeRendererTestIndex ? kke::FontWeight::BOLD : kke::FontWeight::MEDIUM}
+				{panelLeft + panelPadding,
+				 panelTop + panelPadding + titleHeight + index * lineHeight},
+				{"Space Grotesk",
+				 16.0f,
+				 index == activeRendererTestIndex ? kke::FontWeight::BOLD : kke::FontWeight::MEDIUM}
 			},
-			index == activeRendererTestIndex ? activeBrush : inactiveBrush);
+			index == activeRendererTestIndex ? activeBrush : inactiveBrush
+		);
 	}
 }
 
@@ -173,11 +169,7 @@ void application::Renderer::renderFpsOverlay() {
 	std::string fpsString = stream.str();
 	std::wstring fpsTextString(fpsString.begin(), fpsString.end());
 
-	kke::Text fpsText{
-		fpsTextString,
-		{0.0f, 0.0f},
-		{"Space Grotesk", 18.0f, kke::FontWeight::BOLD}
-	};
+	kke::Text fpsText{fpsTextString, {0.0f, 0.0f}, {"Space Grotesk", 18.0f, kke::FontWeight::BOLD}};
 
 	kke::Scale viewportSize = engine.getViewportSize();
 	kke::Scale textSize = engine.measureTextSize(fpsText);
@@ -194,17 +186,9 @@ void application::Renderer::renderFpsOverlay() {
 	kke::Brush panelFill = kke::SolidColorBrush({0.04f, 0.05f, 0.08f, 0.82f});
 	kke::Brush textBrush = kke::SolidColorBrush({0.98f, 0.99f, 1.0f, 1.0f});
 
-	engine.fill(
-		kke::Rect{
-			{panelLeft, panelTop},
-			{panelRight, panelBottom}
-		},
-		panelFill);
+	engine.fill(kke::Rect{{panelLeft, panelTop}, {panelRight, panelBottom}}, panelFill);
 
-	fpsText.position = {
-		panelLeft + panelInsetX,
-		panelTop + panelInsetY - 2.0f
-	};
+	fpsText.position = {panelLeft + panelInsetX, panelTop + panelInsetY - 2.0f};
 
 	engine.fill(fpsText, textBrush);
 }
@@ -219,24 +203,50 @@ void application::Renderer::logFps() {
 	}
 
 	lastFpsLogTime = now;
-	kke::PositionIndependentEffectCache::StatsSnapshot cacheStats = kke::PositionIndependentEffectCache::consumeStats();
+	kke::PositionIndependentEffectCache::StatsSnapshot cacheStats =
+		kke::PositionIndependentEffectCache::consumeStats();
 	std::printf(
 		"fps: %.2f, cache hits: %llu, cache misses: %llu\n",
 		fpsCounter.fps(),
 		static_cast<unsigned long long>(cacheStats.hits),
-		static_cast<unsigned long long>(cacheStats.misses));
+		static_cast<unsigned long long>(cacheStats.misses)
+	);
 }
 
 void application::Renderer::initializeRendererTests() {
-	addRendererTest('1', "Blur Stress", std::make_unique<renderer_test::BlurStressRendererTest>(*this));
-	addRendererTest('2', "Shadow Stress", std::make_unique<renderer_test::ShadowStressRendererTest>(*this));
-	addRendererTest('3', "Shape Effect", std::make_unique<renderer_test::ShapeEffectRendererTest>(*this));
-	addRendererTest('4', "Text Effect", std::make_unique<renderer_test::TextEffectRendererTest>(*this));
-	addRendererTest('5', "Frame Effect", std::make_unique<renderer_test::FrameEffectRendererTest>(*this));
+	addRendererTest(
+		'1',
+		"Blur Stress",
+		std::make_unique<renderer_test::BlurStressRendererTest>(*this)
+	);
+	addRendererTest(
+		'2',
+		"Shadow Stress",
+		std::make_unique<renderer_test::ShadowStressRendererTest>(*this)
+	);
+	addRendererTest(
+		'3',
+		"Shape Effect",
+		std::make_unique<renderer_test::ShapeEffectRendererTest>(*this)
+	);
+	addRendererTest(
+		'4',
+		"Text Effect",
+		std::make_unique<renderer_test::TextEffectRendererTest>(*this)
+	);
+	addRendererTest(
+		'5',
+		"Frame Effect",
+		std::make_unique<renderer_test::FrameEffectRendererTest>(*this)
+	);
 	addRendererTest('6', "Canvas", std::make_unique<renderer_test::CanvasRendererTest>(*this));
 	addRendererTest('7', "Layer", std::make_unique<renderer_test::LayerRendererTest>(*this));
 	addRendererTest('8', "Texture", std::make_unique<renderer_test::TextureRendererTest>(*this));
-	addRendererTest('9', "Transform", std::make_unique<renderer_test::TransformRendererTest>(*this));
+	addRendererTest(
+		'9',
+		"Transform",
+		std::make_unique<renderer_test::TransformRendererTest>(*this)
+	);
 
 	switchRendererTest(0);
 }
@@ -244,12 +254,11 @@ void application::Renderer::initializeRendererTests() {
 void application::Renderer::addRendererTest(
 	uint32_t virtualKey,
 	std::string title,
-	std::unique_ptr<renderer_test::RendererTest> rendererTest) {
-	rendererTests.emplace_back(RendererTestEntry{
-		virtualKey,
-		std::move(title),
-		std::move(rendererTest)
-	});
+	std::unique_ptr<renderer_test::RendererTest> rendererTest
+) {
+	rendererTests.emplace_back(
+		RendererTestEntry{virtualKey, std::move(title), std::move(rendererTest)}
+	);
 }
 
 void application::Renderer::switchRendererTest(size_t index) {
@@ -268,10 +277,12 @@ void application::Renderer::switchRendererTest(size_t index) {
 	std::printf(
 		"renderer test switched: [%c] %s\n",
 		static_cast<int>(activeTest.virtualKey),
-		activeTest.title.c_str());
+		activeTest.title.c_str()
+	);
 }
 
-std::vector<uint8_t> application::Renderer::createRawTexturePixels(uint32_t width, uint32_t height) {
+std::vector<uint8_t>
+application::Renderer::createRawTexturePixels(uint32_t width, uint32_t height) {
 	std::vector<uint8_t> pixels(static_cast<size_t>(width) * height * 4);
 
 	for (uint32_t y = 0; y < height; ++y) {

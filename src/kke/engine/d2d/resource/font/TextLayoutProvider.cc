@@ -10,7 +10,8 @@ ComPtr<IDWriteTextLayout> TextLayoutProvider::get(
 	IDWriteFactory5* writeFactory,
 	IDWriteFontCollection1* fontCollection,
 	TextFormatProvider& textFormatProvider,
-	Text const& text) {
+	Text const& text
+) {
 	uint64_t key = FontHasher::hash(text);
 
 	ComPtr<IDWriteTextLayout> cachedLayout = storage.get(key);
@@ -18,12 +19,14 @@ ComPtr<IDWriteTextLayout> TextLayoutProvider::get(
 		return cachedLayout;
 	}
 
-	ComPtr<IDWriteTextFormat> textFormat = textFormatProvider.get(writeFactory, fontCollection, text.fontAppearance);
+	ComPtr<IDWriteTextFormat> textFormat =
+		textFormatProvider.get(writeFactory, fontCollection, text.fontAppearance);
 	if (!textFormat) {
 		return nullptr;
 	}
 
-	ComPtr<IDWriteTextLayout> createdLayout = FontFactory::createTextLayout(writeFactory, textFormat.Get(), text);
+	ComPtr<IDWriteTextLayout> createdLayout =
+		FontFactory::createTextLayout(writeFactory, textFormat.Get(), text);
 	if (!createdLayout) {
 		return nullptr;
 	}

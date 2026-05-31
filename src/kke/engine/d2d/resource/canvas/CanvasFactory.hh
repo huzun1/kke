@@ -7,7 +7,7 @@
 
 namespace kke {
 class CanvasFactory {
-public:
+  public:
 	static std::shared_ptr<D2dCanvas> createCanvas(const D2dEngineContext& context);
 };
-};	// namespace kke
+}; // namespace kke

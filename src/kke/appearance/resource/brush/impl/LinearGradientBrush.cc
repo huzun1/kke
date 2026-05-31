@@ -2,8 +2,12 @@
 
 using namespace kke;
 
-LinearGradientBrush::LinearGradientBrush(std::vector<kke::Color> const& colors,
-											 kke::Point const& startPoint, kke::Point const& endPoint, float angle)
+LinearGradientBrush::LinearGradientBrush(
+	std::vector<kke::Color> const& colors,
+	kke::Point const& startPoint,
+	kke::Point const& endPoint,
+	float angle
+)
 	: colors(colors), startPoint(startPoint), endPoint(endPoint), angle(angle) {
 }
 

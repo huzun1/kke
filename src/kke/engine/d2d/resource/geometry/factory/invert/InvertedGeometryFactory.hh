@@ -6,16 +6,25 @@
 
 namespace kke {
 class InvertedGeometryFactory {
-public:
+  public:
 	static Microsoft::WRL::ComPtr<ID2D1Geometry> createInvertedGeometry(
-		D2dContext const& context, GeometryProvider& geometryProvider,
-		Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry, Geometry const& geometry);
+		D2dContext const& context,
+		GeometryProvider& geometryProvider,
+		Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
+		Geometry const& geometry
+	);
 
 	static Microsoft::WRL::ComPtr<ID2D1Geometry> createInvertedGeometry(
-		D2dContext const& context, GeometryProvider& geometryProvider, 
-        Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry, GeometryCompose const& compose);
+		D2dContext const& context,
+		GeometryProvider& geometryProvider,
+		Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
+		GeometryCompose const& compose
+	);
 
 	static Microsoft::WRL::ComPtr<ID2D1Geometry> createInvertedGeometry(
-		D2dContext const& context, Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry, ID2D1Geometry* maskGeometry);
+		D2dContext const& context,
+		Microsoft::WRL::ComPtr<ID2D1RectangleGeometry> viewportGeometry,
+		ID2D1Geometry* maskGeometry
+	);
 };
-};	// namespace kke
+}; // namespace kke

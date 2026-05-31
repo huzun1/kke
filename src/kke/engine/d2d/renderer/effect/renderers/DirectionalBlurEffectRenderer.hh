@@ -5,15 +5,16 @@
 
 namespace kke {
 class DirectionalBlurEffectRenderer {
-public:
+  public:
 	Microsoft::WRL::ComPtr<ID2D1Image> render(
 		D2dEngineContext& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
-		DirectionalBlurEffect const& effect) const;
+		DirectionalBlurEffect const& effect
+	) const;
 
-private:
+  private:
 	static D2D1_BORDER_MODE mapBorderMode(BlurBorderMode mode);
 
 	static D2D1_DIRECTIONALBLUR_OPTIMIZATION mapOptimization(BlurOptimization optimization);
 };
-}	// namespace kke
+} // namespace kke

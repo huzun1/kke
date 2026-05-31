@@ -1,9 +1,21 @@
-BasedOnStyle: Google
-UseTab: Always
+BasedOnStyle: LLVM
 IndentWidth: 4
 TabWidth: 4
-ColumnLimit: 0
-AccessModifierOffset: -4
-LambdaBodyIndentation: OuterScope
-InsertNewlineAtEOF: true
-AllowShortFunctionsOnASingleLine: false
+UseTab: Always
+ColumnLimit: 100
+PointerAlignment: Left
+
+BinPackArguments: false
+BinPackParameters: false
+AllowAllArgumentsOnNextLine: false
+
+AlignAfterOpenBracket: BlockIndent
+ContinuationIndentWidth: 4
+
+Cpp11BracedListStyle: true
+
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
+
+SpaceBeforeCpp11BracedList: false

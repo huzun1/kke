@@ -82,4 +82,4 @@ Scale& operator/=(Scale& lhs, float rhs);
  * @brief Divides `lhs` by `rhs` component-wise.
  */
 Scale& operator/=(Scale& lhs, Scale const& rhs);
-}	// namespace kke
+} // namespace kke

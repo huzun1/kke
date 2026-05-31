@@ -33,18 +33,19 @@ void CanvasRendererTest::render() {
 
 	engine().fill(
 		kke::RoundedRect{kke::Rect{{920.0f, 420.0f}, {1140.0f, 610.0f}}, 24.0f},
-		normalLayerFill);
+		normalLayerFill
+	);
 
-	engine().fill(
-		kke::Rect{{955.0f, 455.0f}, {1105.0f, 520.0f}},
-		accentFill);
+	engine().fill(kke::Rect{{955.0f, 455.0f}, {1105.0f, 520.0f}}, accentFill);
 
-	engine().fill(
-		kke::Ellipse{{1030.0f, 540.0f}, 54.0f},
-		coolFill);
+	engine().fill(kke::Ellipse{{1030.0f, 540.0f}, 54.0f}, coolFill);
 
 	engine().draw(kke::Ellipse{{1030.0f, 540.0f}, 54.0f}, outline, {4.0f});
-	engine().draw(kke::RoundedRect{kke::Rect{{920.0f, 420.0f}, {1140.0f, 610.0f}}, 24.0f}, outline, {3.0f});
+	engine().draw(
+		kke::RoundedRect{kke::Rect{{920.0f, 420.0f}, {1140.0f, 610.0f}}, 24.0f},
+		outline,
+		{3.0f}
+	);
 	engine().popCanvas();
 
 	kke::EffectSourceAppearance shadowAppearance;
@@ -52,7 +53,13 @@ void CanvasRendererTest::render() {
 	engine().renderEffect(
 		canvas,
 		shadowAppearance,
-		kke::ShadowEffect{{16.0f, 18.0f}, 16.0f, {0.0f, 0.0f, 0.0f, 0.28f}, kke::ShadowMode::OuterShadowOnly});
+		kke::ShadowEffect{
+			{16.0f, 18.0f},
+			16.0f,
+			{0.0f, 0.0f, 0.0f, 0.28f},
+			kke::ShadowMode::OuterShadowOnly
+		}
+	);
 
 	engine().pushTransform(kke::Translation({-460.0f, -220.0f}));
 	engine().draw(canvas);
@@ -64,11 +71,17 @@ void CanvasRendererTest::render() {
 	engine().renderEffect(
 		canvas,
 		blurAppearance,
-		kke::BlurEffect{{12.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED, kke::BlurMode::Normal}});
+		kke::BlurEffect{
+			{12.0f,
+			 kke::BlurBorderMode::SOFT,
+			 kke::BlurOptimization::BALANCED,
+			 kke::BlurMode::Normal}
+		}
+	);
 
 	engine().pushTransform(kke::Translation({-210.0f, -40.0f}));
 	engine().draw(canvas, 0.95f);
 	engine().popTransform();
 }
-}
-}
+} // namespace renderer_test
+} // namespace application

@@ -8,18 +8,18 @@
 
 namespace kke {
 class FontFactory {
-public:
+  public:
 	static Microsoft::WRL::ComPtr<IDWriteTextFormat> createTextFormat(
 		IDWriteFactory5* writeFactory,
 		IDWriteFontCollection1* fontCollection,
-		FontAppearance const& appearance);
+		FontAppearance const& appearance
+	);
 
 	static Microsoft::WRL::ComPtr<IDWriteTextLayout> createTextLayout(
-		IDWriteFactory5* writeFactory,
-		IDWriteTextFormat* textFormat,
-		Text const& text);
+		IDWriteFactory5* writeFactory, IDWriteTextFormat* textFormat, Text const& text
+	);
 
-private:
+  private:
 	static DWRITE_FONT_WEIGHT toDWriteWeight(FontWeight weight);
 };
-}	// namespace kke
+} // namespace kke

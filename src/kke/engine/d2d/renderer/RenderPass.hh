@@ -9,7 +9,7 @@ namespace kke {
 class RenderPass {
 	ID2D1Bitmap* lastRenderTarget = nullptr;
 
-public:
+  public:
 	void beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget);
 
 	void endDraw(D2dEngineContext& context);
@@ -18,7 +18,8 @@ public:
 
 	Microsoft::WRL::ComPtr<ID2D1Image> cycleTargetCommandList(D2dEngineContext& context);
 
-private:
-	static Microsoft::WRL::ComPtr<ID2D1Bitmap> createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* source);
+  private:
+	static Microsoft::WRL::ComPtr<ID2D1Bitmap>
+	createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* source);
 };
-};	// namespace kke
+}; // namespace kke

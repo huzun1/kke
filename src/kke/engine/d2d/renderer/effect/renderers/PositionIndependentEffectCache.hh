@@ -11,13 +11,13 @@
 
 namespace kke {
 class PositionIndependentEffectCache {
-public:
+  public:
 	struct StatsSnapshot {
 		uint64_t hits;
 		uint64_t misses;
 	};
 
-private:
+  private:
 	struct CachedEffectResult {
 		Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmap;
 		Point relativeDrawOffset;
@@ -31,15 +31,14 @@ private:
 	EffectSourceRenderer sourceRenderer;
 	std::unordered_map<uint64_t, CachedEffectResult> cache;
 
-public:
+  public:
 	struct RenderResult {
 		Microsoft::WRL::ComPtr<ID2D1Image> image;
 		Point targetOffset;
 	};
 
-	using EffectImageRenderer = std::function<Microsoft::WRL::ComPtr<ID2D1Image>(
-		D2dEngineContext&,
-		Microsoft::WRL::ComPtr<ID2D1Image>)>;
+	using EffectImageRenderer = std::function<
+		Microsoft::WRL::ComPtr<ID2D1Image>(D2dEngineContext&, Microsoft::WRL::ComPtr<ID2D1Image>)>;
 
 	bool supports(EffectSource const& source) const;
 
@@ -51,32 +50,36 @@ public:
 		EffectSourceAppearance const& sourceAppearance,
 		uint64_t effectHash,
 		std::optional<EffectClipSource> const& clip,
-		EffectImageRenderer const& effectRenderer);
+		EffectImageRenderer const& effectRenderer
+	);
 
-private:
+  private:
 	CachedEffectResult renderToBitmap(
 		D2dEngineContext& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
-		EffectImageRenderer const& effectRenderer);
+		EffectImageRenderer const& effectRenderer
+	);
 
 	uint64_t createCacheKey(
 		EffectSource const& source,
 		EffectSourceAppearance const& sourceAppearance,
-		uint64_t effectHash) const;
+		uint64_t effectHash
+	) const;
 
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> createEffectBitmap(
 		D2dEngineContext& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> outputImage,
-		D2D1_RECT_F const& imageBounds);
+		D2D1_RECT_F const& imageBounds
+	);
 
 	SavedDeviceContextState saveDeviceContextState(D2dEngineContext const& context) const;
 
 	void restoreDeviceContextState(
-		D2dEngineContext const& context,
-		SavedDeviceContextState const& state) const;
+		D2dEngineContext const& context, SavedDeviceContextState const& state
+	) const;
 
 	static void recordHit();
 
 	static void recordMiss();
 };
-}	// namespace kke
+} // namespace kke

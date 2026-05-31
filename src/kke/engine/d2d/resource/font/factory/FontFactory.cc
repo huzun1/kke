@@ -10,7 +10,8 @@ using Microsoft::WRL::ComPtr;
 ComPtr<IDWriteTextFormat> FontFactory::createTextFormat(
 	IDWriteFactory5* writeFactory,
 	IDWriteFontCollection1* fontCollection,
-	FontAppearance const& appearance) {
+	FontAppearance const& appearance
+) {
 	if (!writeFactory) {
 		return nullptr;
 	}
@@ -25,9 +26,13 @@ ComPtr<IDWriteTextFormat> FontFactory::createTextFormat(
 		DWRITE_FONT_STRETCH_NORMAL,
 		appearance.fontSize,
 		L"",
-		&textFormat);
+		&textFormat
+	);
 	if (FAILED(result)) {
-		std::printf("[kke][FontFactory] CreateTextFormat failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][FontFactory] CreateTextFormat failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
@@ -35,9 +40,8 @@ ComPtr<IDWriteTextFormat> FontFactory::createTextFormat(
 }
 
 ComPtr<IDWriteTextLayout> FontFactory::createTextLayout(
-	IDWriteFactory5* writeFactory,
-	IDWriteTextFormat* textFormat,
-	Text const& text) {
+	IDWriteFactory5* writeFactory, IDWriteTextFormat* textFormat, Text const& text
+) {
 	if (!writeFactory || !textFormat) {
 		return nullptr;
 	}
@@ -50,9 +54,13 @@ ComPtr<IDWriteTextLayout> FontFactory::createTextLayout(
 		textFormat,
 		100000.0f,
 		100000.0f,
-		&textLayout);
+		&textLayout
+	);
 	if (FAILED(result)) {
-		std::printf("[kke][FontFactory] CreateTextLayout failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][FontFactory] CreateTextLayout failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
@@ -61,17 +69,17 @@ ComPtr<IDWriteTextLayout> FontFactory::createTextLayout(
 
 DWRITE_FONT_WEIGHT FontFactory::toDWriteWeight(FontWeight weight) {
 	switch (weight) {
-		case FontWeight::LIGHT:
-			return DWRITE_FONT_WEIGHT_LIGHT;
-		case FontWeight::NORMAL:
-			return DWRITE_FONT_WEIGHT_NORMAL;
-		case FontWeight::MEDIUM:
-			return DWRITE_FONT_WEIGHT_MEDIUM;
-		case FontWeight::SEMI_BOLD:
-			return DWRITE_FONT_WEIGHT_SEMI_BOLD;
-		case FontWeight::BOLD:
-			return DWRITE_FONT_WEIGHT_BOLD;
-		default:
-			return DWRITE_FONT_WEIGHT_NORMAL;
+	case FontWeight::LIGHT:
+		return DWRITE_FONT_WEIGHT_LIGHT;
+	case FontWeight::NORMAL:
+		return DWRITE_FONT_WEIGHT_NORMAL;
+	case FontWeight::MEDIUM:
+		return DWRITE_FONT_WEIGHT_MEDIUM;
+	case FontWeight::SEMI_BOLD:
+		return DWRITE_FONT_WEIGHT_SEMI_BOLD;
+	case FontWeight::BOLD:
+		return DWRITE_FONT_WEIGHT_BOLD;
+	default:
+		return DWRITE_FONT_WEIGHT_NORMAL;
 	}
 }

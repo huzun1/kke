@@ -26,14 +26,17 @@ uint64_t FontHasher::hash(Text const& text) {
 }
 
 std::wstring FontHasher::getTextString(Text const& text) {
-	return std::visit([](auto const& value) -> std::wstring {
-		using Value = std::decay_t<decltype(value)>;
-		if constexpr (std::is_same_v<Value, std::wstring>) {
-			return value;
-		} else {
-			return toWideString(value);
-		}
-	}, text.text);
+	return std::visit(
+		[](auto const& value) -> std::wstring {
+			using Value = std::decay_t<decltype(value)>;
+			if constexpr (std::is_same_v<Value, std::wstring>) {
+				return value;
+			} else {
+				return toWideString(value);
+			}
+		},
+		text.text
+	);
 }
 
 std::wstring FontHasher::toWideString(std::string const& text) {

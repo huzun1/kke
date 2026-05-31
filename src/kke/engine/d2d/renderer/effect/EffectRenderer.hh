@@ -20,20 +20,22 @@ class EffectRenderer {
 	ColorMatrixEffectRenderer colorMatrixEffectRenderer;
 	ShadowEffectRenderer shadowEffectRenderer;
 
-public:
+  public:
 	void render(
 		D2dEngineContext& context,
 		RenderPass& renderPass,
 		Effect const& effect,
 		std::optional<EffectClipSource> clip,
-		ViewLayerController& viewLayerController);
+		ViewLayerController& viewLayerController
+	);
 
 	void render(
 		D2dEngineContext& context,
 		RenderPass& renderPass,
 		EffectCompose const& effectCompose,
 		std::optional<EffectClipSource> clip,
-		ViewLayerController& viewLayerController);
+		ViewLayerController& viewLayerController
+	);
 
 	void render(
 		D2dEngineContext& context,
@@ -41,7 +43,8 @@ public:
 		EffectSourceAppearance const& sourceAppearance,
 		Effect const& effect,
 		std::optional<EffectClipSource> clip,
-		ViewLayerController& viewLayerController);
+		ViewLayerController& viewLayerController
+	);
 
 	void render(
 		D2dEngineContext& context,
@@ -49,30 +52,35 @@ public:
 		EffectSourceAppearance const& sourceAppearance,
 		EffectCompose const& effectCompose,
 		std::optional<EffectClipSource> clip,
-		ViewLayerController& viewLayerController);
+		ViewLayerController& viewLayerController
+	);
 
-private:
+  private:
 	Microsoft::WRL::ComPtr<ID2D1Image> apply(
 		D2dEngineContext& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
-		Effect const& effect);
+		Effect const& effect
+	);
 
 	Microsoft::WRL::ComPtr<ID2D1Image> apply(
 		D2dEngineContext& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
-		EffectCompose const& effectCompose);
+		EffectCompose const& effectCompose
+	);
 
 	void drawImage(
 		D2dEngineContext const& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> image,
 		std::optional<EffectClipSource> const& clip,
-		ViewLayerController& viewLayerController);
+		ViewLayerController& viewLayerController
+	);
 
 	void drawImage(
 		D2dEngineContext const& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> image,
 		Point const& targetOffset,
 		std::optional<EffectClipSource> const& clip,
-		ViewLayerController& viewLayerController);
+		ViewLayerController& viewLayerController
+	);
 };
-}	// namespace kke
+} // namespace kke

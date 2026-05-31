@@ -10,12 +10,7 @@ struct ColorMatrix {
 	/**
 	 * @brief Matrix coefficients laid out as 20 consecutive floats.
 	 */
-	std::array<float, 20> values {
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f,
-		0.0f, 0.0f, 0.0f, 0.0f
-	};
+	std::array<float, 20> values{1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+								 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f};
 };
-}	// namespace kke
+} // namespace kke

@@ -2,28 +2,28 @@
 
 #include <memory>
 
-#include "kke/engine/d2d/context/D2dResourceProviders.hh"
 #include "kke/engine/d2d/context/D2dContext.hh"
+#include "kke/engine/d2d/context/D2dResourceProviders.hh"
 
 namespace kke {
 class D2dEngineContext {
 	std::unique_ptr<D2dContext> d2dContext;
-    std::unique_ptr<D2dResourceProviders> resourceProviders;
+	std::unique_ptr<D2dResourceProviders> resourceProviders;
 	D2D1_SIZE_F viewportSize = {};
 
-public:
+  public:
 	void update(D2D1_SIZE_F viewportSize);
 
-    void setD2dContext(std::unique_ptr<D2dContext> context);
+	void setD2dContext(std::unique_ptr<D2dContext> context);
 
-    D2dContext* getD2dContext() const;
+	D2dContext* getD2dContext() const;
 
-    void releaseD2dContext();
+	void releaseD2dContext();
 
-    void setResourceProviders(std::unique_ptr<D2dResourceProviders> resourceProviders);
+	void setResourceProviders(std::unique_ptr<D2dResourceProviders> resourceProviders);
 
-    D2dResourceProviders* getResourceProviders() const;
+	D2dResourceProviders* getResourceProviders() const;
 
 	D2D1_SIZE_F getViewportSize() const;
 };
-};	// namespace kke
+}; // namespace kke

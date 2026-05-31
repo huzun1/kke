@@ -88,4 +88,4 @@ Point& operator/=(Point& lhs, Point const& rhs) {
 	lhs.y /= rhs.y;
 	return lhs;
 }
-}	// namespace kke
+} // namespace kke

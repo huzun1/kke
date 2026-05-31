@@ -10,4 +10,4 @@ struct StrokeAppearance {
 	 */
 	float width;
 };
-}	// namespace kke
+} // namespace kke

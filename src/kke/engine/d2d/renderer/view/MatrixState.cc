@@ -3,9 +3,7 @@
 using namespace kke;
 
 void MatrixState::pushTransform(D2dEngineContext const& context, TransformSource const& transform) {
-	std::visit([&](auto&& arg) {
-		pushTransform(context, arg);
-	}, transform);
+	std::visit([&](auto&& arg) { pushTransform(context, arg); }, transform);
 }
 
 void MatrixState::popTransform(D2dEngineContext const& context) {

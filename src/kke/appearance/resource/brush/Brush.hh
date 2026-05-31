@@ -10,4 +10,4 @@ namespace kke {
  * @brief Brush variant accepted by fill, stroke, and effect-source APIs.
  */
 using Brush = std::variant<SolidColorBrush, LinearGradientBrush>;
-}	// namespace kke
+} // namespace kke

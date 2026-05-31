@@ -5,10 +5,10 @@ namespace kke {
  * @brief Backend-owned uploaded texture resource.
  */
 class Texture {
-public:
+  public:
 	/**
 	 * @brief Destroys the backend texture resource.
 	 */
 	virtual ~Texture() = default;
 };
-}	// namespace kke
+} // namespace kke

@@ -17,7 +17,7 @@ void application::D2D1::init(D3D11& context) {
 }
 
 ID2D1Factory* application::D2D1::getFactory() {
-    return d2d1Factory;
+	return d2d1Factory;
 }
 
 ID2D1DeviceContext* application::D2D1::getDeviceContext() {
@@ -31,8 +31,11 @@ ID2D1Bitmap1* application::D2D1::getRenderTarget() {
 void application::D2D1::createFactory(ID2D1Factory3** factoryOut) {
 	D2D1_FACTORY_OPTIONS factoryOptions = {D2D1_DEBUG_LEVEL_NONE};
 	if (FAILED(D2D1CreateFactory(
-			D2D1_FACTORY_TYPE_SINGLE_THREADED, __uuidof(ID2D1Factory3),
-			&factoryOptions, (void**)factoryOut))) {
+			D2D1_FACTORY_TYPE_SINGLE_THREADED,
+			__uuidof(ID2D1Factory3),
+			&factoryOptions,
+			(void**)factoryOut
+		))) {
 		return;
 	}
 }
@@ -55,7 +58,9 @@ void application::D2D1::createDeviceContext(ID2D1DeviceContext** deviceContextOu
 	}
 }
 
-void application::D2D1::createAndSetRenderTarget(IDXGISwapChain1* swapChain, ID2D1DeviceContext* deviceContext, ID2D1Bitmap1** renderTargetOut) {
+void application::D2D1::createAndSetRenderTarget(
+	IDXGISwapChain1* swapChain, ID2D1DeviceContext* deviceContext, ID2D1Bitmap1** renderTargetOut
+) {
 	IDXGISurface2* surface;
 	if (FAILED(swapChain->GetBuffer(0, IID_PPV_ARGS(&surface)))) {
 		return;
@@ -63,7 +68,10 @@ void application::D2D1::createAndSetRenderTarget(IDXGISwapChain1* swapChain, ID2
 
 	D2D1_BITMAP_PROPERTIES1 props = ::D2D1::BitmapProperties1(
 		D2D1_BITMAP_OPTIONS_TARGET | D2D1_BITMAP_OPTIONS_CANNOT_DRAW,
-		::D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED), 96.0, 96.0);
+		::D2D1::PixelFormat(DXGI_FORMAT_UNKNOWN, D2D1_ALPHA_MODE_PREMULTIPLIED),
+		96.0,
+		96.0
+	);
 	if (FAILED(deviceContext->CreateBitmapFromDxgiSurface(surface, props, renderTargetOut))) {
 		return;
 	}

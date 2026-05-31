@@ -31,4 +31,4 @@ struct Text {
 	 */
 	FontAppearance fontAppearance;
 };
-}	// namespace kke
+} // namespace kke

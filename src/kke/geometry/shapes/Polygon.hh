@@ -10,15 +10,15 @@ namespace kke {
 class Polygon : public Boundable {
 	std::vector<Point> points;
 
-public:
-    ~Polygon() = default;
+  public:
+	~Polygon() = default;
 
 	Polygon(std::vector<Point> points);
 
-    void addPoint(Point point);
+	void addPoint(Point point);
 
-    std::vector<Point> const& getPoints() const;
+	std::vector<Point> const& getPoints() const;
 
-    Boundary getBounding() const override; 
+	Boundary getBounding() const override;
 };
-};	// namespace kke
+}; // namespace kke

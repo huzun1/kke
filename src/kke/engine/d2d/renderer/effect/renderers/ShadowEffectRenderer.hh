@@ -14,35 +14,38 @@ class ShadowEffectRenderer {
 	EffectSourceRenderer sourceRenderer;
 	PositionIndependentEffectCache cache;
 
-public:
+  public:
 	PositionIndependentEffectCache::RenderResult render(
 		D2dEngineContext& context,
 		EffectSource const& source,
 		EffectSourceAppearance const& sourceAppearance,
 		ShadowEffect const& effect,
-		std::optional<EffectClipSource> const& clip);
+		std::optional<EffectClipSource> const& clip
+	);
 
 	Microsoft::WRL::ComPtr<ID2D1Image> render(
 		D2dEngineContext& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
-		ShadowEffect const& effect) const;
+		ShadowEffect const& effect
+	) const;
 
-private:
+  private:
 	Microsoft::WRL::ComPtr<ID2D1Effect> createShadowEffect(
 		ID2D1DeviceContext* deviceContext,
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
-		ShadowEffect const& effect) const;
+		ShadowEffect const& effect
+	) const;
 
 	Microsoft::WRL::ComPtr<ID2D1Effect> createOffsetEffect(
-		ID2D1DeviceContext* deviceContext,
-		ID2D1Effect* shadowEffect,
-		ShadowEffect const& effect) const;
+		ID2D1DeviceContext* deviceContext, ID2D1Effect* shadowEffect, ShadowEffect const& effect
+	) const;
 
 	Microsoft::WRL::ComPtr<ID2D1Image> createOuterShadowImage(
 		ID2D1DeviceContext* deviceContext,
 		ID2D1Effect* offsetEffect,
-		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage) const;
+		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage
+	) const;
 
 	static uint64_t hashEffect(ShadowEffect const& effect);
 };
-}	// namespace kke
+} // namespace kke

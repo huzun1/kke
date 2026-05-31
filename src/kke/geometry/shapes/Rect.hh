@@ -29,4 +29,4 @@ struct Rect : public Boundable {
 
 #include "RectOperators.hh"
 
-};	// namespace kke
+}; // namespace kke

@@ -15,4 +15,4 @@ enum class TextureInterpolation {
 	 */
 	Linear,
 };
-}	// namespace kke
+} // namespace kke

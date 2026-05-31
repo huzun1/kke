@@ -5,10 +5,8 @@
 
 namespace kke {
 class GeometryInverter {
-public:
-	static Microsoft::WRL::ComPtr<ID2D1Geometry> create(
-		D2dContext const& context,
-		ID2D1Geometry* viewportGeometry,
-		ID2D1Geometry* maskGeometry);
+  public:
+	static Microsoft::WRL::ComPtr<ID2D1Geometry>
+	create(D2dContext const& context, ID2D1Geometry* viewportGeometry, ID2D1Geometry* maskGeometry);
 };
-}  // namespace kke
+} // namespace kke

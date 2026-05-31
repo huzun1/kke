@@ -9,26 +9,14 @@
 
 namespace kke {
 class FaceRenderer {
-public:
-	void fill(
-		D2dEngineContext const& context,
-		FillSource const& source,
-		Brush const& brush);
+  public:
+	void fill(D2dEngineContext const& context, FillSource const& source, Brush const& brush);
 
-private:
-	void fill(
-		D2dEngineContext const& context,
-		Geometry const& geometry,
-		ID2D1Brush* brush);
+  private:
+	void fill(D2dEngineContext const& context, Geometry const& geometry, ID2D1Brush* brush);
 
-	void fill(
-		D2dEngineContext const& context,
-		GeometryCompose const& compose,
-		ID2D1Brush* brush);
+	void fill(D2dEngineContext const& context, GeometryCompose const& compose, ID2D1Brush* brush);
 
-	void fill(
-		D2dEngineContext const& context,
-		Text const& text,
-		ID2D1Brush* brush);
+	void fill(D2dEngineContext const& context, Text const& text, ID2D1Brush* brush);
 };
-}	// namespace kke
+} // namespace kke

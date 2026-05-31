@@ -27,6 +27,6 @@ struct Scale {
 	 */
 	Scale(float x, float y);
 };
-}	// namespace kke
+} // namespace kke
 
 #include "ScaleOperators.hh"

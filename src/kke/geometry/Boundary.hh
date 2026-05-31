@@ -1,17 +1,17 @@
 #pragma once
 
 struct Boundary {
-    float top, left, right, bottom;
+	float top, left, right, bottom;
 
-    Boundary();
+	Boundary();
 
-    Boundary(float top, float left, float right, float bottom);
+	Boundary(float top, float left, float right, float bottom);
 
-    float width() const;
+	float width() const;
 
-    float height() const;
+	float height() const;
 
-    Boundary shrink(float amount);
+	Boundary shrink(float amount);
 
-    Boundary expand(float amount);
+	Boundary expand(float amount);
 };

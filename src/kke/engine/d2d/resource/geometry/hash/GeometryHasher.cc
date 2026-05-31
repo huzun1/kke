@@ -9,9 +9,7 @@
 using namespace kke;
 
 uint64_t GeometryHasher::hash(Geometry const& geometry, GeometryHashMode mode) {
-	return std::visit([&](auto const& geo) {
-		return hash(geo, mode);
-	}, geometry);
+	return std::visit([&](auto const& geo) { return hash(geo, mode); }, geometry);
 }
 
 uint64_t GeometryHasher::hash(GeometryCompose const& compose, GeometryHashMode mode) {

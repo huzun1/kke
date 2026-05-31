@@ -17,7 +17,7 @@ class D2D1 {
 	static inline ID2D1DeviceContext* d2d1DeviceContext = nullptr;
 	static inline ID2D1Bitmap1* renderTarget = nullptr;
 
-public:
+  public:
 	void init(D3D11& context);
 
 	ID2D1Factory* getFactory();
@@ -26,13 +26,17 @@ public:
 
 	ID2D1Bitmap1* getRenderTarget();
 
-private:
+  private:
 	static void createFactory(ID2D1Factory3** factoryOut);
 
 	static void createDevice(ID3D11Device1* d11Device, ID2D1Device** deviceOut);
 
 	static void createDeviceContext(ID2D1DeviceContext** deviceContextOut);
 
-	static void createAndSetRenderTarget(IDXGISwapChain1* swapChain, ID2D1DeviceContext* deviceContext, ID2D1Bitmap1** renderTargetOut);
+	static void createAndSetRenderTarget(
+		IDXGISwapChain1* swapChain,
+		ID2D1DeviceContext* deviceContext,
+		ID2D1Bitmap1** renderTargetOut
+	);
 };
-}  // namespace application
+} // namespace application

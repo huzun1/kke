@@ -11,7 +11,7 @@ namespace kke {
 class EffectCompose {
 	std::vector<Effect> effects;
 
-public:
+  public:
 	/**
 	 * @brief Appends an effect to the composition.
 	 */
@@ -22,4 +22,4 @@ public:
 	 */
 	std::vector<Effect> const& getCompose() const;
 };
-}	// namespace kke
+} // namespace kke

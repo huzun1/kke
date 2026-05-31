@@ -10,7 +10,7 @@ struct BlurEffect {
 	/**
 	 * @brief Parameters controlling the blur result.
 	 */
-	BlurAppearance appearance {};
+	BlurAppearance appearance{};
 
 	/**
 	 * @brief Constructs a blur effect with the default appearance.
@@ -27,8 +27,7 @@ struct BlurEffect {
 	/**
 	 * @brief Constructs a blur effect from a fully specified appearance.
 	 */
-	BlurEffect(BlurAppearance const& appearance)
-		: appearance(appearance) {
+	BlurEffect(BlurAppearance const& appearance) : appearance(appearance) {
 	}
 };
-}	// namespace kke
+} // namespace kke

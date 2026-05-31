@@ -20,4 +20,4 @@ enum class BlurOptimization {
 	 */
 	QUALITY
 };
-}	// namespace kke
+} // namespace kke

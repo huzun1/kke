@@ -16,7 +16,7 @@ class D2dResourceProviders {
 	std::unique_ptr<InvertedGeometryProvider> invertedGeometryProvider;
 	std::unique_ptr<TextureProvider> textureProvider;
 
-public:
+  public:
 	D2dResourceProviders();
 
 	void update(D2dContext const& context, D2D1_SIZE_F viewportSize);
@@ -31,4 +31,4 @@ public:
 
 	TextureProvider* getTextureProvider();
 };
-}	// namespace kke
+} // namespace kke

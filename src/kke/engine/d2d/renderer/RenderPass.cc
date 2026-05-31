@@ -3,7 +3,6 @@
 
 #include "kke/engine/d2d/context/D2dContext.hh"
 
-
 using namespace kke;
 
 void RenderPass::beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget) {
@@ -54,7 +53,8 @@ void RenderPass::clear(D2dEngineContext& context) {
 
 Microsoft::WRL::ComPtr<ID2D1Image> RenderPass::cycleTargetCommandList(D2dEngineContext& context) {
 	D2dContext* d2dContext = context.getD2dContext();
-	Microsoft::WRL::ComPtr<ID2D1CommandList> currentTargetCommandList = d2dContext->getTargetCommandList();
+	Microsoft::WRL::ComPtr<ID2D1CommandList> currentTargetCommandList =
+		d2dContext->getTargetCommandList();
 	if (!currentTargetCommandList) {
 		return nullptr;
 	}
@@ -77,30 +77,22 @@ Microsoft::WRL::ComPtr<ID2D1Image> RenderPass::cycleTargetCommandList(D2dEngineC
 	return currentTargetCommandList;
 }
 
-Microsoft::WRL::ComPtr<ID2D1Bitmap> RenderPass::createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* source) {
+Microsoft::WRL::ComPtr<ID2D1Bitmap>
+RenderPass::createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* source) {
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmapCopy;
 
 	float dpiX, dpiY;
 	source->GetDpi(&dpiX, &dpiY);
 
 	D2D1_SIZE_U pixelSize = source->GetPixelSize();
-	D2D1_BITMAP_PROPERTIES1 properties = D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_NONE,
-											  source->GetPixelFormat(), dpiX, dpiY);							
+	D2D1_BITMAP_PROPERTIES1 properties =
+		D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_NONE, source->GetPixelFormat(), dpiX, dpiY);
 
-	deviceContext->CreateBitmap(
-		pixelSize,
-		nullptr,
-		0.0f,
-		properties,
-		&bitmapCopy);
+	deviceContext->CreateBitmap(pixelSize, nullptr, 0.0f, properties, &bitmapCopy);
 
 	D2D1_POINT_2U origin = D2D1::Point2U(0, 0);
 	D2D1_RECT_U sourceRect = D2D1::RectU(0, 0, pixelSize.width, pixelSize.height);
-	bitmapCopy->CopyFromBitmap(
-		&origin,
-		source,
-		&sourceRect
-	);
+	bitmapCopy->CopyFromBitmap(&origin, source, &sourceRect);
 
 	return bitmapCopy;
 }

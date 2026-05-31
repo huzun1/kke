@@ -15,4 +15,4 @@ enum class LayerMode {
 	 */
 	Inverted
 };
-}	// namespace kke
+} // namespace kke

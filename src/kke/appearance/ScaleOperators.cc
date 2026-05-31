@@ -88,4 +88,4 @@ Scale& operator/=(Scale& lhs, Scale const& rhs) {
 	lhs.y /= rhs.y;
 	return lhs;
 }
-}
+} // namespace kke

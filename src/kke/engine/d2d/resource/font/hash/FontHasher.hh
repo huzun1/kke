@@ -8,14 +8,14 @@
 
 namespace kke {
 class FontHasher {
-public:
+  public:
 	static uint64_t hash(FontAppearance const& appearance);
 
 	static uint64_t hash(Text const& text);
 
 	static std::wstring getTextString(Text const& text);
 
-private:
+  private:
 	static std::wstring toWideString(std::string const& text);
 };
-}	// namespace kke
+} // namespace kke

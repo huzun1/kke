@@ -22,7 +22,7 @@ class FontProvider {
 	TextFormatProvider textFormatProvider;
 	TextLayoutProvider textLayoutProvider;
 
-public:
+  public:
 	FontProvider();
 
 	~FontProvider();
@@ -35,11 +35,11 @@ public:
 
 	std::vector<std::shared_ptr<D2dFont>> const& getFonts() const;
 
-private:
+  private:
 	void initialize();
 
 	void rebuildFontCollection();
 
 	void clearTextCaches();
 };
-}	// namespace kke
+} // namespace kke

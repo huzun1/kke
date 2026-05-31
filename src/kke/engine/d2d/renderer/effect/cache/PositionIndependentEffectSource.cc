@@ -13,9 +13,8 @@
 
 using namespace kke;
 
-EffectSource PositionIndependentEffectSource::normalize(
-	EffectSource const& source,
-	Point const& origin) {
+EffectSource
+PositionIndependentEffectSource::normalize(EffectSource const& source, Point const& origin) {
 	if (Line const* line = std::get_if<Line>(&source)) {
 		return Line{line->start - origin, line->end - origin, line->thickness};
 	}
@@ -36,9 +35,8 @@ EffectSource PositionIndependentEffectSource::normalize(
 	return Text{text.text, text.position - origin, text.fontAppearance};
 }
 
-EffectClipSource PositionIndependentEffectSource::normalizeClip(
-	EffectClipSource const& clip,
-	Point const& origin) {
+EffectClipSource
+PositionIndependentEffectSource::normalizeClip(EffectClipSource const& clip, Point const& origin) {
 	if (Geometry const* geometry = std::get_if<Geometry>(&clip)) {
 		return normalize(*geometry, origin);
 	}
@@ -52,10 +50,7 @@ EffectClipSource PositionIndependentEffectSource::normalizeClip(
 
 Point PositionIndependentEffectSource::getOrigin(EffectSource const& source) {
 	if (Line const* line = std::get_if<Line>(&source)) {
-		return {
-			std::min(line->start.x, line->end.x),
-			std::min(line->start.y, line->end.y)
-		};
+		return {std::min(line->start.x, line->end.x), std::min(line->start.y, line->end.y)};
 	}
 
 	if (Geometry const* geometry = std::get_if<Geometry>(&source)) {
@@ -104,41 +99,31 @@ uint64_t PositionIndependentEffectSource::hash(EffectSource const& source) {
 	return FontHasher::hash(std::get<Text>(source));
 }
 
-Geometry PositionIndependentEffectSource::normalize(
-	Geometry const& geometry,
-	Point const& origin) {
-	return std::visit([&](auto const& geometryVariant) -> Geometry {
-		return normalize(geometryVariant, origin);
-	}, geometry);
+Geometry PositionIndependentEffectSource::normalize(Geometry const& geometry, Point const& origin) {
+	return std::visit(
+		[&](auto const& geometryVariant) -> Geometry { return normalize(geometryVariant, origin); },
+		geometry
+	);
 }
 
-Triangle PositionIndependentEffectSource::normalize(
-	Triangle const& triangle,
-	Point const& origin) {
+Triangle PositionIndependentEffectSource::normalize(Triangle const& triangle, Point const& origin) {
 	return triangle - origin;
 }
 
-Rect PositionIndependentEffectSource::normalize(
-	Rect const& rect,
-	Point const& origin) {
+Rect PositionIndependentEffectSource::normalize(Rect const& rect, Point const& origin) {
 	return rect - origin;
 }
 
-RoundedRect PositionIndependentEffectSource::normalize(
-	RoundedRect const& roundedRect,
-	Point const& origin) {
+RoundedRect
+PositionIndependentEffectSource::normalize(RoundedRect const& roundedRect, Point const& origin) {
 	return {Rect{roundedRect} - origin, roundedRect.rounding};
 }
 
-Ellipse PositionIndependentEffectSource::normalize(
-	Ellipse const& ellipse,
-	Point const& origin) {
+Ellipse PositionIndependentEffectSource::normalize(Ellipse const& ellipse, Point const& origin) {
 	return ellipse - origin;
 }
 
-Polygon PositionIndependentEffectSource::normalize(
-	Polygon const& polygon,
-	Point const& origin) {
+Polygon PositionIndependentEffectSource::normalize(Polygon const& polygon, Point const& origin) {
 	std::vector<Point> normalizedPoints;
 	for (Point const& point : polygon.getPoints()) {
 		normalizedPoints.push_back(point - origin);
@@ -147,9 +132,10 @@ Polygon PositionIndependentEffectSource::normalize(
 }
 
 Point PositionIndependentEffectSource::getOrigin(Geometry const& geometry) {
-	return std::visit([](auto const& geometryVariant) -> Point {
-		return getOrigin(geometryVariant);
-	}, geometry);
+	return std::visit(
+		[](auto const& geometryVariant) -> Point { return getOrigin(geometryVariant); },
+		geometry
+	);
 }
 
 Point PositionIndependentEffectSource::getOrigin(Triangle const& triangle) {
@@ -191,10 +177,7 @@ Point PositionIndependentEffectSource::getOrigin(Polygon const& polygon) {
 
 uint64_t PositionIndependentEffectSource::hash(Line const& line) {
 	Hasher hasher;
-	Point base{
-		std::min(line.start.x, line.end.x),
-		std::min(line.start.y, line.end.y)
-	};
+	Point base{std::min(line.start.x, line.end.x), std::min(line.start.y, line.end.y)};
 	hasher.combine((line.start - base).x);
 	hasher.combine((line.start - base).y);
 	hasher.combine((line.end - base).x);

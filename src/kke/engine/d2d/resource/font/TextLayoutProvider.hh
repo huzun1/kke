@@ -9,13 +9,13 @@ namespace kke {
 class TextLayoutProvider {
 	KeyCacheStorage<IDWriteTextLayout> storage;
 
-public:
-	Microsoft::WRL::ComPtr<IDWriteTextLayout> get(
-		IDWriteFactory5* writeFactory,
+  public:
+	Microsoft::WRL::ComPtr<IDWriteTextLayout>
+	get(IDWriteFactory5* writeFactory,
 		IDWriteFontCollection1* fontCollection,
 		TextFormatProvider& textFormatProvider,
 		Text const& text);
 
 	void clear();
 };
-}	// namespace kke
+} // namespace kke

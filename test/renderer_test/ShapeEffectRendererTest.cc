@@ -41,62 +41,89 @@ void ShapeEffectRendererTest::render() {
 	engine().renderEffect(
 		kke::Ellipse{{320.0f, 240.0f}, 78.0f},
 		glowAppearance,
-		kke::BlurEffect{{18.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED}});
+		kke::BlurEffect{{18.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED}}
+	);
 
-	engine().fill(
-		kke::Ellipse{{320.0f, 240.0f}, 78.0f},
-		normalLayerFill);
+	engine().fill(kke::Ellipse{{320.0f, 240.0f}, 78.0f}, normalLayerFill);
 
 	engine().renderEffect(
 		kke::Rect{{890.0f, 430.0f}, {1160.0f, 500.0f}},
 		glowAppearance,
-		kke::DirectionalBlurEffect{10.0f, 18.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED});
+		kke::DirectionalBlurEffect{
+			10.0f,
+			18.0f,
+			kke::BlurBorderMode::SOFT,
+			kke::BlurOptimization::BALANCED
+		}
+	);
 
-	engine().fill(
-		kke::Rect{{890.0f, 430.0f}, {1160.0f, 500.0f}},
-		normalLayerFill);
+	engine().fill(kke::Rect{{890.0f, 430.0f}, {1160.0f, 500.0f}}, normalLayerFill);
 
 	engine().renderEffect(
 		kke::RoundedRect{kke::Rect{{120.0f, 420.0f}, {350.0f, 590.0f}}, 28.0f},
 		accentAppearance,
-		kke::ShadowEffect{{18.0f, 20.0f}, 14.0f, {0.0f, 0.0f, 0.0f, 0.56f}, kke::ShadowMode::OuterShadowOnly});
+		kke::ShadowEffect{
+			{18.0f, 20.0f},
+			14.0f,
+			{0.0f, 0.0f, 0.0f, 0.56f},
+			kke::ShadowMode::OuterShadowOnly
+		}
+	);
 
 	engine().fill(
 		kke::RoundedRect{kke::Rect{{120.0f, 420.0f}, {350.0f, 590.0f}}, 28.0f},
-		accentFill);
+		accentFill
+	);
 
 	engine().renderEffect(
 		kke::Ellipse{{700.0f, 220.0f}, 64.0f},
 		glowAppearance,
-		kke::BlurEffect{{14.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED, kke::BlurMode::OuterOnly}},
-		kke::Ellipse{{700.0f, 220.0f}, 64.0f});
+		kke::BlurEffect{
+			{14.0f,
+			 kke::BlurBorderMode::SOFT,
+			 kke::BlurOptimization::BALANCED,
+			 kke::BlurMode::OuterOnly}
+		},
+		kke::Ellipse{{700.0f, 220.0f}, 64.0f}
+	);
 
 	engine().fill(
 		kke::Ellipse{{700.0f, 220.0f}, 64.0f},
-		kke::SolidColorBrush({0.93f, 0.95f, 0.98f, 1.0f}));
+		kke::SolidColorBrush({0.93f, 0.95f, 0.98f, 1.0f})
+	);
 
-	engine().fill(
-		kke::Triangle{{520.0f, 470.0f}, {600.0f, 610.0f}, {430.0f, 610.0f}},
-		coolFill);
+	engine().fill(kke::Triangle{{520.0f, 470.0f}, {600.0f, 610.0f}, {430.0f, 610.0f}}, coolFill);
 
 	engine().renderEffect(
 		kke::Triangle{{520.0f, 470.0f}, {600.0f, 610.0f}, {430.0f, 610.0f}},
 		coolAppearance,
-		kke::BlurEffect{{10.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED, kke::BlurMode::OuterOnly}});
+		kke::BlurEffect{
+			{10.0f,
+			 kke::BlurBorderMode::SOFT,
+			 kke::BlurOptimization::BALANCED,
+			 kke::BlurMode::OuterOnly}
+		}
+	);
 
-	kke::Polygon polygon({
-		{900.0f, 170.0f},
-		{1030.0f, 150.0f},
-		{1100.0f, 250.0f},
-		{1040.0f, 350.0f},
-		{910.0f, 320.0f},
-		{860.0f, 230.0f}
-	});
+	kke::Polygon polygon(
+		{{900.0f, 170.0f},
+		 {1030.0f, 150.0f},
+		 {1100.0f, 250.0f},
+		 {1040.0f, 350.0f},
+		 {910.0f, 320.0f},
+		 {860.0f, 230.0f}}
+	);
 
 	engine().renderEffect(
 		kke::Geometry{polygon},
 		coolAppearance,
-		kke::ShadowEffect{{10.0f, 14.0f}, 10.0f, {0.0f, 0.0f, 0.0f, 0.52f}, kke::ShadowMode::ShadowWithSource});
+		kke::ShadowEffect{
+			{10.0f, 14.0f},
+			10.0f,
+			{0.0f, 0.0f, 0.0f, 0.52f},
+			kke::ShadowMode::ShadowWithSource
+		}
+	);
 
 	kke::EffectSourceAppearance panelShadowAppearance;
 	panelShadowAppearance.brush = outline;
@@ -105,13 +132,17 @@ void ShapeEffectRendererTest::render() {
 	engine().renderEffect(
 		kke::Rect{{560.0f, 380.0f}, {820.0f, 600.0f}},
 		panelShadowAppearance,
-		kke::ShadowEffect{{14.0f, 18.0f}, 12.0f, {0.0f, 0.0f, 0.0f, 0.65f}, kke::ShadowMode::OuterShadowOnly});
+		kke::ShadowEffect{
+			{14.0f, 18.0f},
+			12.0f,
+			{0.0f, 0.0f, 0.0f, 0.65f},
+			kke::ShadowMode::OuterShadowOnly
+		}
+	);
 
-	engine().fill(
-		kke::Rect{{560.0f, 380.0f}, {820.0f, 600.0f}},
-		panelFill);
+	engine().fill(kke::Rect{{560.0f, 380.0f}, {820.0f, 600.0f}}, panelFill);
 
 	engine().draw(kke::Geometry{polygon}, outline, {3.0f});
 }
-}
-}
+} // namespace renderer_test
+} // namespace application

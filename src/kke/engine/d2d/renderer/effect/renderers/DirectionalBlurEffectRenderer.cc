@@ -4,20 +4,31 @@ using namespace kke;
 using Microsoft::WRL::ComPtr;
 
 ComPtr<ID2D1Image> DirectionalBlurEffectRenderer::render(
-	D2dEngineContext& context,
-	ComPtr<ID2D1Image> sourceImage,
-	DirectionalBlurEffect const& effect) const {
+	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, DirectionalBlurEffect const& effect
+) const {
 	ComPtr<ID2D1Effect> directionalBlurEffect;
-	HRESULT result = context.getD2dContext()->getDeviceContext()->CreateEffect(CLSID_D2D1DirectionalBlur, &directionalBlurEffect);
+	HRESULT result = context.getD2dContext()->getDeviceContext()->CreateEffect(
+		CLSID_D2D1DirectionalBlur,
+		&directionalBlurEffect
+	);
 	if (FAILED(result) || !directionalBlurEffect) {
 		return nullptr;
 	}
 
 	directionalBlurEffect->SetInput(0, sourceImage.Get());
-	directionalBlurEffect->SetValue(D2D1_DIRECTIONALBLUR_PROP_STANDARD_DEVIATION, effect.standardDeviation);
+	directionalBlurEffect->SetValue(
+		D2D1_DIRECTIONALBLUR_PROP_STANDARD_DEVIATION,
+		effect.standardDeviation
+	);
 	directionalBlurEffect->SetValue(D2D1_DIRECTIONALBLUR_PROP_ANGLE, effect.angle);
-	directionalBlurEffect->SetValue(D2D1_DIRECTIONALBLUR_PROP_OPTIMIZATION, mapOptimization(effect.optimization));
-	directionalBlurEffect->SetValue(D2D1_DIRECTIONALBLUR_PROP_BORDER_MODE, mapBorderMode(effect.borderMode));
+	directionalBlurEffect->SetValue(
+		D2D1_DIRECTIONALBLUR_PROP_OPTIMIZATION,
+		mapOptimization(effect.optimization)
+	);
+	directionalBlurEffect->SetValue(
+		D2D1_DIRECTIONALBLUR_PROP_BORDER_MODE,
+		mapBorderMode(effect.borderMode)
+	);
 
 	ComPtr<ID2D1Image> outputImage;
 	directionalBlurEffect->GetOutput(&outputImage);
@@ -34,7 +45,8 @@ D2D1_BORDER_MODE DirectionalBlurEffectRenderer::mapBorderMode(BlurBorderMode mod
 	}
 }
 
-D2D1_DIRECTIONALBLUR_OPTIMIZATION DirectionalBlurEffectRenderer::mapOptimization(BlurOptimization optimization) {
+D2D1_DIRECTIONALBLUR_OPTIMIZATION
+DirectionalBlurEffectRenderer::mapOptimization(BlurOptimization optimization) {
 	switch (optimization) {
 	case BlurOptimization::SPEED:
 		return D2D1_DIRECTIONALBLUR_OPTIMIZATION_SPEED;

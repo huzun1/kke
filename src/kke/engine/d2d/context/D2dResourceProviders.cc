@@ -15,7 +15,7 @@ void D2dResourceProviders::update(D2dContext const& context, D2D1_SIZE_F viewpor
 }
 
 BrushProvider* D2dResourceProviders::getBrushProvider() {
-    return brushProvider.get();
+	return brushProvider.get();
 }
 
 FontProvider* D2dResourceProviders::getFontProvider() {

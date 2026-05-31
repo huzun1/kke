@@ -6,10 +6,8 @@ using namespace kke;
 using Microsoft::WRL::ComPtr;
 
 std::shared_ptr<D2dTexture> TextureFactory::create(
-	D2dContext const& context,
-	IWICImagingFactory2* imagingFactory,
-	void const* data,
-	size_t size) {
+	D2dContext const& context, IWICImagingFactory2* imagingFactory, void const* data, size_t size
+) {
 	ComPtr<ID2D1Bitmap1> bitmap = createEncodedBitmap(context, imagingFactory, data, size);
 	if (!bitmap) {
 		return nullptr;
@@ -18,9 +16,8 @@ std::shared_ptr<D2dTexture> TextureFactory::create(
 	return std::make_shared<D2dTexture>(bitmap);
 }
 
-std::shared_ptr<D2dTexture> TextureFactory::create(
-	D2dContext const& context,
-	RawTextureData const& data) {
+std::shared_ptr<D2dTexture>
+TextureFactory::create(D2dContext const& context, RawTextureData const& data) {
 	ComPtr<ID2D1Bitmap1> bitmap = createRawBitmap(context, data);
 	if (!bitmap) {
 		return nullptr;
@@ -30,10 +27,8 @@ std::shared_ptr<D2dTexture> TextureFactory::create(
 }
 
 ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
-	D2dContext const& context,
-	IWICImagingFactory2* imagingFactory,
-	void const* data,
-	size_t size) {
+	D2dContext const& context, IWICImagingFactory2* imagingFactory, void const* data, size_t size
+) {
 	if (!imagingFactory || !data || size == 0) {
 		return nullptr;
 	}
@@ -41,15 +36,22 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 	ComPtr<IWICStream> stream;
 	HRESULT result = imagingFactory->CreateStream(&stream);
 	if (FAILED(result)) {
-		std::printf("[kke][TextureFactory] CreateStream failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][TextureFactory] CreateStream failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
 	result = stream->InitializeFromMemory(
 		reinterpret_cast<BYTE*>(const_cast<void*>(data)),
-		static_cast<DWORD>(size));
+		static_cast<DWORD>(size)
+	);
 	if (FAILED(result)) {
-		std::printf("[kke][TextureFactory] InitializeFromMemory failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][TextureFactory] InitializeFromMemory failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
@@ -58,23 +60,33 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 		stream.Get(),
 		nullptr,
 		WICDecodeMetadataCacheOnLoad,
-		&decoder);
+		&decoder
+	);
 	if (FAILED(result)) {
-		std::printf("[kke][TextureFactory] CreateDecoderFromStream failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][TextureFactory] CreateDecoderFromStream failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
 	ComPtr<IWICBitmapFrameDecode> frame;
 	result = decoder->GetFrame(0, &frame);
 	if (FAILED(result)) {
-		std::printf("[kke][TextureFactory] GetFrame failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][TextureFactory] GetFrame failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
 	ComPtr<IWICFormatConverter> converter;
 	result = imagingFactory->CreateFormatConverter(&converter);
 	if (FAILED(result)) {
-		std::printf("[kke][TextureFactory] CreateFormatConverter failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][TextureFactory] CreateFormatConverter failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
@@ -84,29 +96,34 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 		WICBitmapDitherTypeNone,
 		nullptr,
 		0.0f,
-		WICBitmapPaletteTypeCustom);
+		WICBitmapPaletteTypeCustom
+	);
 	if (FAILED(result)) {
-		std::printf("[kke][TextureFactory] IWICFormatConverter::Initialize failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][TextureFactory] IWICFormatConverter::Initialize failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
 	ComPtr<ID2D1Bitmap1> bitmap;
-	result = context.getDeviceContext()->CreateBitmapFromWicBitmap(
-		converter.Get(),
-		nullptr,
-		&bitmap);
+	result =
+		context.getDeviceContext()->CreateBitmapFromWicBitmap(converter.Get(), nullptr, &bitmap);
 	if (FAILED(result)) {
-		std::printf("[kke][TextureFactory] CreateBitmapFromWicBitmap failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][TextureFactory] CreateBitmapFromWicBitmap failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 
 	return bitmap;
 }
 
-ComPtr<ID2D1Bitmap1> TextureFactory::createRawBitmap(
-	D2dContext const& context,
-	RawTextureData const& data) {
-	if (!data.pixels || data.width == 0 || data.height == 0 || data.stride < static_cast<size_t>(data.width) * 4) {
+ComPtr<ID2D1Bitmap1>
+TextureFactory::createRawBitmap(D2dContext const& context, RawTextureData const& data) {
+	if (!data.pixels || data.width == 0 || data.height == 0 ||
+		data.stride < static_cast<size_t>(data.width) * 4) {
 		return nullptr;
 	}
 
@@ -117,7 +134,8 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createRawBitmap(
 
 	D2D1_BITMAP_PROPERTIES1 properties = D2D1::BitmapProperties1(
 		D2D1_BITMAP_OPTIONS_NONE,
-		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED));
+		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+	);
 	D2D1_SIZE_U size = {data.width, data.height};
 
 	ComPtr<ID2D1Bitmap1> bitmap;
@@ -126,9 +144,13 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createRawBitmap(
 		convertedPixels.data(),
 		static_cast<UINT32>(data.width * 4),
 		&properties,
-		&bitmap);
+		&bitmap
+	);
 	if (FAILED(result)) {
-		std::printf("[kke][TextureFactory] CreateBitmap failed: 0x%08lx\n", static_cast<unsigned long>(result));
+		std::printf(
+			"[kke][TextureFactory] CreateBitmap failed: 0x%08lx\n",
+			static_cast<unsigned long>(result)
+		);
 		return nullptr;
 	}
 

@@ -11,7 +11,7 @@ struct ColorMatrixEffect {
 	/**
 	 * @brief Matrix coefficients used for the color transform.
 	 */
-	ColorMatrix colorMatrix {};
+	ColorMatrix colorMatrix{};
 
 	/**
 	 * @brief Alpha interpretation used while evaluating the matrix.
@@ -23,4 +23,4 @@ struct ColorMatrixEffect {
 	 */
 	bool clampOutput = false;
 };
-}	// namespace kke
+} // namespace kke

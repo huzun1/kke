@@ -8,13 +8,11 @@
 namespace kke {
 
 class Hasher {
-public:
-	explicit Hasher(uint64_t seed = 0)
-		: value(seed) {
+  public:
+	explicit Hasher(uint64_t seed = 0) : value(seed) {
 	}
 
-	template <typename T>
-	void combine(const T& v) {
+	template <typename T> void combine(const T& v) {
 		if constexpr (std::is_integral_v<T>) {
 			mix(static_cast<uint64_t>(v));
 		} else if constexpr (std::is_enum_v<T>) {
@@ -35,11 +33,11 @@ public:
 		return value;
 	}
 
-private:
+  private:
 	uint64_t value;
 
 	void mix(uint64_t hv) {
 		value ^= hv + 0x9e3779b97f4a7c15ULL + (value << 6) + (value >> 2);
 	}
 };
-}  // namespace kke
+} // namespace kke

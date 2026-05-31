@@ -12,11 +12,12 @@ namespace kke {
 class GeometryProvider {
 	KeyCacheStorage<ID2D1Geometry> storage;
 
-public:
+  public:
 	GeometryProvider(uint32_t limit = UINT32_MAX);
 
 	Microsoft::WRL::ComPtr<ID2D1Geometry> get(D2dContext const& context, Geometry const& geometry);
 
-	Microsoft::WRL::ComPtr<ID2D1Geometry> get(D2dContext const& context, GeometryCompose const& compose);
+	Microsoft::WRL::ComPtr<ID2D1Geometry>
+	get(D2dContext const& context, GeometryCompose const& compose);
 };
-}	// namespace kke
+} // namespace kke

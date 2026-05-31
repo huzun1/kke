@@ -45,7 +45,13 @@ void TextEffectRendererTest::render() {
 			{"Space Grotesk", 54.0f, kke::FontWeight::BOLD}
 		},
 		outlineAppearance,
-		kke::ShadowEffect{{10.0f, 12.0f}, 10.0f, {0.0f, 0.0f, 0.0f, 0.78f}, kke::ShadowMode::ShadowWithSource});
+		kke::ShadowEffect{
+			{10.0f, 12.0f},
+			10.0f,
+			{0.0f, 0.0f, 0.0f, 0.78f},
+			kke::ShadowMode::ShadowWithSource
+		}
+	);
 
 	engine().renderEffect(
 		kke::Text{
@@ -54,7 +60,13 @@ void TextEffectRendererTest::render() {
 			{"Space Grotesk", 32.0f, kke::FontWeight::MEDIUM}
 		},
 		accentAppearance,
-		kke::ShadowEffect{{6.0f, 8.0f}, 5.0f, {0.02f, 0.06f, 0.14f, 0.74f}, kke::ShadowMode::ShadowWithSource});
+		kke::ShadowEffect{
+			{6.0f, 8.0f},
+			5.0f,
+			{0.02f, 0.06f, 0.14f, 0.74f},
+			kke::ShadowMode::ShadowWithSource
+		}
+	);
 
 	engine().renderEffect(
 		kke::Text{
@@ -63,7 +75,13 @@ void TextEffectRendererTest::render() {
 			{"Space Grotesk", 40.0f, kke::FontWeight::BOLD}
 		},
 		warmAppearance,
-		kke::ShadowEffect{{0.0f, 0.0f}, 7.0f, {0.30f, 0.08f, 0.02f, 0.78f}, kke::ShadowMode::ShadowWithSource});
+		kke::ShadowEffect{
+			{0.0f, 0.0f},
+			7.0f,
+			{0.30f, 0.08f, 0.02f, 0.78f},
+			kke::ShadowMode::ShadowWithSource
+		}
+	);
 
 	engine().renderEffect(
 		kke::Text{
@@ -72,7 +90,13 @@ void TextEffectRendererTest::render() {
 			{"Space Grotesk", 24.0f, kke::FontWeight::MEDIUM}
 		},
 		outlineAppearance,
-		kke::ShadowEffect{{4.0f, 5.0f}, 4.0f, {0.0f, 0.0f, 0.0f, 0.72f}, kke::ShadowMode::ShadowWithSource});
+		kke::ShadowEffect{
+			{4.0f, 5.0f},
+			4.0f,
+			{0.0f, 0.0f, 0.0f, 0.72f},
+			kke::ShadowMode::ShadowWithSource
+		}
+	);
 }
-}
-}
+} // namespace renderer_test
+} // namespace application

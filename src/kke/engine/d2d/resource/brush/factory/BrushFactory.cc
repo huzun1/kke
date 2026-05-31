@@ -10,9 +10,10 @@ using namespace kke;
 using Microsoft::WRL::ComPtr;
 
 ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, Brush const& brush) {
-	return std::visit([&](auto const& brushVariant) {
-		return create(context, brushVariant);
-	}, brush);
+	return std::visit(
+		[&](auto const& brushVariant) { return create(context, brushVariant); },
+		brush
+	);
 }
 
 ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, SolidColorBrush const& brush) {
@@ -30,7 +31,8 @@ ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, SolidColorBru
 	return d2dBrush;
 }
 
-ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, LinearGradientBrush const& brush) {
+ComPtr<ID2D1Brush>
+BrushFactory::create(D2dContext const& context, LinearGradientBrush const& brush) {
 	std::vector<Color> const& colors = brush.getColors();
 	if (colors.empty()) {
 		return nullptr;
@@ -41,8 +43,8 @@ ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, LinearGradien
 	for (size_t index = 0; index < colors.size(); ++index) {
 		Color const& color = colors[index];
 		float position = colors.size() == 1
-			? 0.0f
-			: static_cast<float>(index) / static_cast<float>(colors.size() - 1);
+							 ? 0.0f
+							 : static_cast<float>(index) / static_cast<float>(colors.size() - 1);
 		gradientStops.push_back({position, {color.r, color.g, color.b, color.a}});
 	}
 
@@ -50,7 +52,8 @@ ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, LinearGradien
 	HRESULT result = context.getDeviceContext()->CreateGradientStopCollection(
 		gradientStops.data(),
 		static_cast<UINT32>(gradientStops.size()),
-		&stopCollection);
+		&stopCollection
+	);
 	if (FAILED(result)) {
 		return nullptr;
 	}
@@ -64,7 +67,8 @@ ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, LinearGradien
 	};
 
 	ComPtr<ID2D1LinearGradientBrush> linearBrush;
-	result = context.getDeviceContext()->CreateLinearGradientBrush(properties, stopCollection.Get(), &linearBrush);
+	result = context.getDeviceContext()
+				 ->CreateLinearGradientBrush(properties, stopCollection.Get(), &linearBrush);
 	if (FAILED(result)) {
 		return nullptr;
 	}

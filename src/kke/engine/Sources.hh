@@ -53,12 +53,6 @@ using FillSource = std::variant<Geometry, GeometryCompose, Text>;
  * Effects can be applied to various types of renderable inputs,
  * including geometry, text, and offscreen canvases.
  */
-using EffectSource = std::variant<
-	Line,
-	Geometry,
-	GeometryCompose,
-	Text,
-	std::shared_ptr<Canvas>
->;
+using EffectSource = std::variant<Line, Geometry, GeometryCompose, Text, std::shared_ptr<Canvas>>;
 
-};	// namespace kke
+}; // namespace kke

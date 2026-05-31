@@ -10,8 +10,7 @@
 using namespace kke;
 using namespace Microsoft::WRL;
 
-GeometryProvider::GeometryProvider(uint32_t limit)
-	: storage(limit) {
+GeometryProvider::GeometryProvider(uint32_t limit) : storage(limit) {
 }
 
 ComPtr<ID2D1Geometry> GeometryProvider::get(D2dContext const& context, Geometry const& geometry) {
@@ -31,7 +30,8 @@ ComPtr<ID2D1Geometry> GeometryProvider::get(D2dContext const& context, Geometry 
 	return createdGeometry;
 }
 
-ComPtr<ID2D1Geometry> GeometryProvider::get(D2dContext const& context, GeometryCompose const& compose) {
+ComPtr<ID2D1Geometry>
+GeometryProvider::get(D2dContext const& context, GeometryCompose const& compose) {
 	uint64_t key = GeometryHasher::hash(compose, GeometryHashMode::PositionDependent);
 
 	ComPtr<ID2D1Geometry> cachedGeometry = storage.get(key);

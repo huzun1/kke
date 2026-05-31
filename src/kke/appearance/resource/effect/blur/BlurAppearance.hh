@@ -29,4 +29,4 @@ struct BlurAppearance {
 	 */
 	BlurMode mode = BlurMode::Normal;
 };
-}	// namespace kke
+} // namespace kke

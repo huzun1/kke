@@ -6,14 +6,16 @@
 
 namespace kke {
 class BrushFactory {
-public:
+  public:
 	static Microsoft::WRL::ComPtr<ID2D1Brush> create(D2dContext const& context, Brush const& brush);
 
-private:
-	static Microsoft::WRL::ComPtr<ID2D1Brush> create(D2dContext const& context, SolidColorBrush const& brush);
+  private:
+	static Microsoft::WRL::ComPtr<ID2D1Brush>
+	create(D2dContext const& context, SolidColorBrush const& brush);
 
-	static Microsoft::WRL::ComPtr<ID2D1Brush> create(D2dContext const& context, LinearGradientBrush const& brush);
+	static Microsoft::WRL::ComPtr<ID2D1Brush>
+	create(D2dContext const& context, LinearGradientBrush const& brush);
 
 	static kke::Point rotatePoint(Point const& point, Point const& center, float angle);
 };
-}	// namespace kke
+} // namespace kke

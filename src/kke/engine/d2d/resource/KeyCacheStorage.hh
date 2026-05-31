@@ -9,8 +9,7 @@
 #include "kke/engine/d2d/d2d1_headers.hh"
 
 namespace kke {
-template <typename T>
-class KeyCacheStorage {
+template <typename T> class KeyCacheStorage {
 	using CacheKey = uint64_t;
 	using UsageCount = uint32_t;
 	using Ptr = Microsoft::WRL::ComPtr<T>;
@@ -23,13 +22,13 @@ class KeyCacheStorage {
 	uint32_t limit;
 	std::unordered_map<CacheKey, CachedPtr> storage;
 
-public:
-	KeyCacheStorage(uint32_t limit = UINT32_MAX)
-		: limit(limit) {
+  public:
+	KeyCacheStorage(uint32_t limit = UINT32_MAX) : limit(limit) {
 	}
 
 	/**
-	 * @brief Store instances in the cache, and if the limit is exceeded, remove them starting with the lowest hit rate.
+	 * @brief Store instances in the cache, and if the limit is exceeded, remove them starting with
+	 * the lowest hit rate.
 	 */
 	void put(CacheKey key, Ptr val) {
 		storage[key] = {0, val};
@@ -52,12 +51,12 @@ public:
 		storage.clear();
 	}
 
-private:
+  private:
 	void clean() {
 		if (storage.size() <= limit) {
 			return;
 		}
-		
+
 		auto usageList = getLessUsedKeys();
 
 		size_t requiredToRemove = storage.size() - limit;
@@ -73,12 +72,11 @@ private:
 			usageList.emplace_back(entry.first, entry.second.usageCount);
 		}
 
-		std::sort(usageList.begin(), usageList.end(),
-				  [](const auto& a, const auto& b) {
+		std::sort(usageList.begin(), usageList.end(), [](const auto& a, const auto& b) {
 			return a.second < b.second;
 		});
 
 		return usageList;
 	};
 };
-}  // namespace kke
+} // namespace kke
