@@ -1,9 +1,32 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(kke CXX)
 
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
+set(KKE_IS_TOP_LEVEL OFF)
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+    set(KKE_IS_TOP_LEVEL ON)
+endif()
+
+option(KKE_BUILD_TESTS "Build the kke test application" ${KKE_IS_TOP_LEVEL})
+
+set(KKE_PUBLIC_ENGINE_HEADERS
+    src/kke/engine/Engine.hh
+    src/kke/engine/Sources.hh
+)
+
+set(KKE_PUBLIC_D2D_HEADERS
+    src/kke/engine/d2d/D2dEngine.hh
+)
+
+set(KKE_PUBLIC_D2D_CONTEXT_HEADERS
+    src/kke/engine/d2d/context/D2dContext.hh
+)
 
 add_library(kke STATIC
     src/kke/appearance/Color.cc
@@ -74,20 +97,59 @@ add_library(kke STATIC
     src/kke/geometry/shapes/TriangleOperators.cc
 )
 
+add_library(kke::kke ALIAS kke)
+
 target_include_directories(kke PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
     $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(kke PUBLIC d2d1 dwrite windowscodecs)
+target_compile_features(kke PUBLIC cxx_std_20)
+
+target_link_libraries(kke PUBLIC d2d1 dwrite windowscodecs dxguid)
 
 install(TARGETS kke
     EXPORT kkeTargets
-    ARCHIVE DESTINATION lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/
-    DESTINATION include
+install(DIRECTORY
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/kke/appearance
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/kke/geometry
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kke
+    FILES_MATCHING
+    PATTERN "*.hh"
 )
 
-add_subdirectory(test)
+install(FILES ${KKE_PUBLIC_ENGINE_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kke/engine
+)
+
+install(FILES ${KKE_PUBLIC_D2D_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kke/engine/d2d
+)
+
+install(FILES ${KKE_PUBLIC_D2D_CONTEXT_HEADERS}
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/kke/engine/d2d/context
+)
+
+configure_package_config_file(
+    cmake/kkeConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/kkeConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kke
+)
+
+install(EXPORT kkeTargets
+    FILE kkeTargets.cmake
+    NAMESPACE kke::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kke
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/kkeConfig.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/kke
+)
+
+if(KKE_BUILD_TESTS)
+    add_subdirectory(test)
+endif()

@@ -82,6 +82,17 @@ cmake --build build --config Debug
 
 This produces the `kke` static library and the `kke_test` sample application.
 
+When `kke` is consumed as a subproject through `FetchContent` or `add_subdirectory`, the test application is not built by default.
+
+## CMake Package Usage
+
+After installing the library, consumers can use `find_package`:
+
+```cmake
+find_package(kke CONFIG REQUIRED)
+target_link_libraries(my_app PRIVATE kke::kke)
+```
+
 ## Usage Docs
 
 The docs are organized by usage domain instead of backend internals:

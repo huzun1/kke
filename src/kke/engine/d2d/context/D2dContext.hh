@@ -1,6 +1,11 @@
 #pragma once
 
-#include "kke/engine/d2d/d2d1_headers.hh"
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <d2d1.h>
+#include <d2d1_1.h>
+#include <unknwnbase.h>
+#include <wrl/client.h>
 
 namespace kke {
 class D2dContext {

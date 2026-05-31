@@ -1,44 +1,23 @@
 #pragma once
 
-#include "kke/appearance/Text.hh"
-#include "kke/appearance/painting/StrokeAppearance.hh"
-#include "kke/appearance/resource/effect/Effect.hh"
-#include "kke/appearance/resource/effect/EffectCompose.hh"
-#include "kke/appearance/resource/font/Font.hh"
-#include "kke/appearance/resource/texture/RawTextureData.hh"
-#include "kke/appearance/resource/texture/Texture.hh"
-#include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
 #include "kke/engine/Engine.hh"
-#include "kke/engine/d2d/context/D2dEngineContext.hh"
-#include "kke/engine/d2d/renderer/Measurer.hh"
-#include "kke/engine/d2d/renderer/RenderPass.hh"
-#include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
-#include "kke/engine/d2d/renderer/effect/EffectRenderer.hh"
-#include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
-#include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
-#include "kke/engine/d2d/renderer/painting/TextureRenderer.hh"
-#include "kke/engine/d2d/renderer/view/MatrixState.hh"
-#include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
-#include <cstddef>
+
 #include <memory>
 #include <optional>
 
-namespace kke {
-class D2dEngine : public Engine {
-	std::unique_ptr<D2dEngineContext> engineContext;
+struct ID2D1Bitmap;
 
-	RenderPass renderPass;
-	MatrixState matrixState;
-	ViewLayerController viewLayerController;
-	Measurer measurer;
-	CanvasService canvasService;
-	FaceRenderer faceRenderer;
-	StrokeRenderer strokeRenderer;
-	TextureRenderer textureRenderer;
-	EffectRenderer effectRenderer;
+namespace kke {
+class D2dContext;
+class D2dEngine : public Engine {
+	struct Impl;
+
+	std::unique_ptr<Impl> impl;
 
   public:
 	D2dEngine();
+
+	~D2dEngine() override;
 
 	/* =============== Render Statement ================ */
 	void beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget);
