@@ -21,9 +21,14 @@ void createConsole() {
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
+	HRESULT comResult = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+	bool isComInitialized = SUCCEEDED(comResult) || comResult == S_FALSE;
 	createConsole();
 	HWND hwnd = application::Window::createWindow(hInstance);
 	if (!hwnd) {
+		if (isComInitialized) {
+			CoUninitialize();
+		}
 		return -1;
 	}
 
@@ -63,6 +68,11 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int) {
 	}
 
 	delete renderer;
+	d2d1.shutdown();
+	d3d11.shutdown();
+	if (isComInitialized) {
+		CoUninitialize();
+	}
 
 	return 0;
 }

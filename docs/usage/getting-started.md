@@ -2,6 +2,23 @@
 
 This guide shows the basic flow for using the engine from application code.
 
+## COM Initialization
+
+The current Direct2D backend depends on DirectWrite and WIC, so the application must initialize COM before creating backend resources.
+
+```cpp
+HRESULT result = CoInitializeEx(nullptr, COINIT_APARTMENTTHREADED);
+bool isComInitialized = SUCCEEDED(result) || result == S_FALSE;
+
+// create window, device, swap chain, D2dEngine, etc.
+
+if (isComInitialized) {
+	CoUninitialize();
+}
+```
+
+This is intentionally an application responsibility rather than something `kke` does internally. The host application owns the COM apartment model and lifetime, and the library should not silently choose that policy on its behalf.
+
 ## Typical Frame Flow
 
 With the current backend, the normal flow is:

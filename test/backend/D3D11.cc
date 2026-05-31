@@ -12,6 +12,38 @@ void application::D3D11::init(HWND hwnd) {
 	createRenderTarget(d3d11Device, d3d11SwapChain, &d3d11FramebufferView);
 }
 
+void application::D3D11::shutdown() {
+	if (d3d11DeviceContext) {
+		d3d11DeviceContext->ClearState();
+		d3d11DeviceContext->Flush();
+	}
+
+	if (d3d11FramebufferView) {
+		d3d11FramebufferView->Release();
+		d3d11FramebufferView = nullptr;
+	}
+
+	if (d3d11SwapChain) {
+		d3d11SwapChain->Release();
+		d3d11SwapChain = nullptr;
+	}
+
+	if (dxgiFactory) {
+		dxgiFactory->Release();
+		dxgiFactory = nullptr;
+	}
+
+	if (d3d11DeviceContext) {
+		d3d11DeviceContext->Release();
+		d3d11DeviceContext = nullptr;
+	}
+
+	if (d3d11Device) {
+		d3d11Device->Release();
+		d3d11Device = nullptr;
+	}
+}
+
 ID3D11Device1* application::D3D11::getDevice() {
 	return d3d11Device;
 }

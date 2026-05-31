@@ -20,6 +20,8 @@ class D2D1 {
   public:
 	void init(D3D11& context);
 
+	void shutdown();
+
 	ID2D1Factory* getFactory();
 
 	ID2D1DeviceContext* getDeviceContext();

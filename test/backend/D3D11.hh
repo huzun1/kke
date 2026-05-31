@@ -12,16 +12,18 @@
 
 namespace application {
 class D3D11 {
-	ID3D11Device1* d3d11Device;
-	ID3D11DeviceContext1* d3d11DeviceContext;
+	ID3D11Device1* d3d11Device = nullptr;
+	ID3D11DeviceContext1* d3d11DeviceContext = nullptr;
 
-	IDXGIFactory2* dxgiFactory;
-	IDXGISwapChain1* d3d11SwapChain;
+	IDXGIFactory2* dxgiFactory = nullptr;
+	IDXGISwapChain1* d3d11SwapChain = nullptr;
 
-	ID3D11RenderTargetView* d3d11FramebufferView;
+	ID3D11RenderTargetView* d3d11FramebufferView = nullptr;
 
   public:
 	void init(HWND hwnd);
+
+	void shutdown();
 
 	ID3D11Device1* getDevice();
 

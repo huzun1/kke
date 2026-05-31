@@ -16,6 +16,29 @@ void application::D2D1::init(D3D11& context) {
 	createAndSetRenderTarget(swapChain, d2d1DeviceContext, &renderTarget);
 }
 
+void application::D2D1::shutdown() {
+	if (d2d1DeviceContext) {
+		d2d1DeviceContext->SetTarget(nullptr);
+		d2d1DeviceContext->Release();
+		d2d1DeviceContext = nullptr;
+	}
+
+	if (renderTarget) {
+		renderTarget->Release();
+		renderTarget = nullptr;
+	}
+
+	if (d2d1Device) {
+		d2d1Device->Release();
+		d2d1Device = nullptr;
+	}
+
+	if (d2d1Factory) {
+		d2d1Factory->Release();
+		d2d1Factory = nullptr;
+	}
+}
+
 ID2D1Factory* application::D2D1::getFactory() {
 	return d2d1Factory;
 }
