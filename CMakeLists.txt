@@ -14,6 +14,7 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
 endif()
 
 option(KKE_BUILD_TESTS "Build the kke test application" ${KKE_IS_TOP_LEVEL})
+option(KKE_DEBUG "Enable kke debug logging" ${KKE_IS_TOP_LEVEL})
 
 set(KKE_PUBLIC_ENGINE_HEADERS
     src/kke/engine/Engine.hh
@@ -105,6 +106,10 @@ target_include_directories(kke PUBLIC
 )
 
 target_compile_features(kke PUBLIC cxx_std_20)
+
+target_compile_definitions(kke PRIVATE
+    $<$<BOOL:${KKE_DEBUG}>:KKE_DEBUG=1>
+)
 
 target_link_libraries(kke PUBLIC d2d1 dwrite windowscodecs dxguid)
 

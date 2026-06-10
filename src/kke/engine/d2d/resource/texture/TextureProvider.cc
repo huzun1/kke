@@ -1,6 +1,6 @@
 #include "TextureProvider.hh"
 
-#include <cstdio>
+#include "kke/utils/DebugLog.hh"
 
 using namespace kke;
 
@@ -26,9 +26,9 @@ void TextureProvider::initialize() {
 		IID_PPV_ARGS(imagingFactory.ReleaseAndGetAddressOf())
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureProvider] CoCreateInstance failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureProvider] CoCreateInstance failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 	}
 }

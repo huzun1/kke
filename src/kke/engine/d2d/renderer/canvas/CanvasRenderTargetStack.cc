@@ -1,5 +1,7 @@
 #include "CanvasRenderTargetStack.hh"
 
+#include "kke/utils/DebugLog.hh"
+
 using namespace Microsoft::WRL;
 using namespace kke;
 
@@ -14,7 +16,7 @@ void CanvasRenderTargetStack::pushCanvas(
 
 void CanvasRenderTargetStack::popCanvas(D2dEngineContext const& context) {
 	if (renderTargetStack.empty()) {
-		// TODO: Log error
+		kke::debug::log("[kke][CanvasRenderTargetStack] popCanvas called with an empty stack");
 		return;
 	}
 

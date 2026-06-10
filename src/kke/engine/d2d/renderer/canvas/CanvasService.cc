@@ -2,6 +2,7 @@
 #include <memory>
 
 #include "kke/engine/d2d/resource/canvas/CanvasFactory.hh"
+#include "kke/utils/DebugLog.hh"
 
 using namespace kke;
 
@@ -12,7 +13,7 @@ std::shared_ptr<D2dCanvas> CanvasService::createCanvas(D2dEngineContext const& c
 void CanvasService::pushCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas) {
 	std::shared_ptr<D2dCanvas> d2dCanvas = std::dynamic_pointer_cast<D2dCanvas>(canvas);
 	if (!d2dCanvas) {
-		// TODO: Log error - invalid canvas type
+		kke::debug::log("[kke][CanvasService] pushCanvas received an invalid canvas type");
 		return;
 	}
 	renderTargetStack.pushCanvas(context, d2dCanvas);
@@ -27,12 +28,12 @@ void CanvasService::drawCanvas(
 ) {
 	std::shared_ptr<D2dCanvas> d2dCanvas = std::dynamic_pointer_cast<D2dCanvas>(canvas);
 	if (!d2dCanvas) {
-		// TODO: Log error - invalid canvas type
+		kke::debug::log("[kke][CanvasService] drawCanvas received an invalid canvas type");
 		return;
 	}
 
 	if (!d2dCanvas->close()) {
-		// TODO: Log error - failed to close canvas
+		kke::debug::log("[kke][CanvasService] failed to close canvas before drawing");
 		return;
 	}
 

@@ -1,10 +1,9 @@
 #include "InvertedGeometryProvider.hh"
 
-#include <cstdio>
-
 #include "kke/engine/d2d/resource/geometry/factory/invert/InvertedGeometryFactory.hh"
 #include "kke/engine/d2d/resource/geometry/hash/GeometryHashMode.hh"
 #include "kke/engine/d2d/resource/geometry/hash/GeometryHasher.hh"
+#include "kke/utils/DebugLog.hh"
 #include "kke/utils/Hasher.hh"
 
 using namespace kke;
@@ -15,8 +14,8 @@ void InvertedGeometryProvider::syncViewportSize(
 ) {
 	bool isViewportResized = this->isViewportResized(viewportSize);
 	if (isViewportResized) {
-		std::printf(
-			"[kke][InvertedGeometryProvider] viewport resized: %.2f x %.2f\n",
+		kke::debug::log(
+			"[kke][InvertedGeometryProvider] viewport resized: %.2f x %.2f",
 			viewportSize.width,
 			viewportSize.height
 		);
@@ -44,7 +43,7 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 		geometry
 	);
 	if (!invertedGeometry) {
-		std::printf("[kke][InvertedGeometryProvider] failed to create inverted geometry\n");
+		kke::debug::log("[kke][InvertedGeometryProvider] failed to create inverted geometry");
 		return nullptr;
 	}
 
@@ -69,7 +68,9 @@ ComPtr<ID2D1Geometry> InvertedGeometryProvider::get(
 		compose
 	);
 	if (!invertedGeometry) {
-		std::printf("[kke][InvertedGeometryProvider] failed to create inverted compose geometry\n");
+		kke::debug::log(
+			"[kke][InvertedGeometryProvider] failed to create inverted compose geometry"
+		);
 		return nullptr;
 	}
 

@@ -2,6 +2,7 @@
 #include <d2d1.h>
 
 #include "kke/engine/d2d/context/D2dContext.hh"
+#include "kke/utils/DebugLog.hh"
 
 using namespace kke;
 
@@ -27,7 +28,7 @@ void RenderPass::beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget)
 
 void RenderPass::endDraw(D2dEngineContext& context) {
 	if (!lastRenderTarget) {
-		// TODO: log error
+		kke::debug::log("[kke][RenderPass] endDraw called without a render target");
 		return;
 	}
 

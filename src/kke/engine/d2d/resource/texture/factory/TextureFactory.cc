@@ -1,6 +1,6 @@
 #include "TextureFactory.hh"
 
-#include <cstdio>
+#include "kke/utils/DebugLog.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
@@ -36,9 +36,9 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 	ComPtr<IWICStream> stream;
 	HRESULT result = imagingFactory->CreateStream(&stream);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureFactory] CreateStream failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureFactory] CreateStream failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}
@@ -48,9 +48,9 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 		static_cast<DWORD>(size)
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureFactory] InitializeFromMemory failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureFactory] InitializeFromMemory failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}
@@ -63,9 +63,9 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 		&decoder
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureFactory] CreateDecoderFromStream failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureFactory] CreateDecoderFromStream failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}
@@ -73,9 +73,9 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 	ComPtr<IWICBitmapFrameDecode> frame;
 	result = decoder->GetFrame(0, &frame);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureFactory] GetFrame failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureFactory] GetFrame failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}
@@ -83,9 +83,9 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 	ComPtr<IWICFormatConverter> converter;
 	result = imagingFactory->CreateFormatConverter(&converter);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureFactory] CreateFormatConverter failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureFactory] CreateFormatConverter failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}
@@ -99,9 +99,9 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 		WICBitmapPaletteTypeCustom
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureFactory] IWICFormatConverter::Initialize failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureFactory] IWICFormatConverter::Initialize failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}
@@ -110,9 +110,9 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 	result =
 		context.getDeviceContext()->CreateBitmapFromWicBitmap(converter.Get(), nullptr, &bitmap);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureFactory] CreateBitmapFromWicBitmap failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureFactory] CreateBitmapFromWicBitmap failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}
@@ -147,9 +147,9 @@ TextureFactory::createRawBitmap(D2dContext const& context, RawTextureData const&
 		&bitmap
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][TextureFactory] CreateBitmap failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][TextureFactory] CreateBitmap failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}

@@ -1,6 +1,6 @@
 #include "ViewportGeometryCache.hh"
 
-#include <cstdio>
+#include "kke/utils/DebugLog.hh"
 
 using namespace kke;
 using namespace Microsoft::WRL;
@@ -10,8 +10,8 @@ void ViewportGeometryCache::syncViewportSize(D2dContext const& context, D2D1_SIZ
 		return;
 	}
 
-	std::printf(
-		"[kke][ViewportGeometryCache] viewport resized: %.2f x %.2f\n",
+	kke::debug::log(
+		"[kke][ViewportGeometryCache] viewport resized: %.2f x %.2f",
 		viewportSize.width,
 		viewportSize.height
 	);
@@ -34,8 +34,8 @@ ComPtr<ID2D1RectangleGeometry> ViewportGeometryCache::createViewportGeometry(
 	D2dContext const& context, D2D1_SIZE_F viewportSize
 ) const {
 	if (viewportSize.width <= 0.0f || viewportSize.height <= 0.0f) {
-		std::printf(
-			"[kke][ViewportGeometryCache] invalid viewport size: %.2f x %.2f\n",
+		kke::debug::log(
+			"[kke][ViewportGeometryCache] invalid viewport size: %.2f x %.2f",
 			viewportSize.width,
 			viewportSize.height
 		);
@@ -46,9 +46,9 @@ ComPtr<ID2D1RectangleGeometry> ViewportGeometryCache::createViewportGeometry(
 	ComPtr<ID2D1RectangleGeometry> createdGeometry;
 	HRESULT result = context.getFactory()->CreateRectangleGeometry(viewportRect, &createdGeometry);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][ViewportGeometryCache] CreateRectangleGeometry failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][ViewportGeometryCache] CreateRectangleGeometry failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}

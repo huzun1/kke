@@ -1,9 +1,8 @@
 #include "InvertedGeometryFactory.hh"
 
-#include <cstdio>
-
 #include "GeometryInverter.hh"
 #include "kke/engine/d2d/resource/geometry/hash/GeometryHasher.hh"
+#include "kke/utils/DebugLog.hh"
 #include "kke/utils/Hasher.hh"
 
 using namespace kke;
@@ -17,7 +16,7 @@ ComPtr<ID2D1Geometry> InvertedGeometryFactory::createInvertedGeometry(
 ) {
 	ComPtr<ID2D1Geometry> maskGeometry = geometryProvider.get(context, geometry);
 	if (!maskGeometry) {
-		std::printf("[kke][InvertedGeometryFactory] mask geometry is null\n");
+		kke::debug::log("[kke][InvertedGeometryFactory] mask geometry is null");
 		return nullptr;
 	}
 
@@ -32,7 +31,7 @@ ComPtr<ID2D1Geometry> InvertedGeometryFactory::createInvertedGeometry(
 ) {
 	ComPtr<ID2D1Geometry> maskGeometry = geometryProvider.get(context, compose);
 	if (!maskGeometry) {
-		std::printf("[kke][InvertedGeometryFactory] mask compose geometry is null\n");
+		kke::debug::log("[kke][InvertedGeometryFactory] mask compose geometry is null");
 		return nullptr;
 	}
 
@@ -45,10 +44,10 @@ ComPtr<ID2D1Geometry> InvertedGeometryFactory::createInvertedGeometry(
 	ID2D1Geometry* maskGeometry
 ) {
 	if (!viewportGeometry) {
-		std::printf("[kke][InvertedGeometryFactory] viewport geometry is null\n");
+		kke::debug::log("[kke][InvertedGeometryFactory] viewport geometry is null");
 	}
 	if (!maskGeometry) {
-		std::printf("[kke][InvertedGeometryFactory] mask geometry pointer is null\n");
+		kke::debug::log("[kke][InvertedGeometryFactory] mask geometry pointer is null");
 	}
 
 	return GeometryInverter::create(context, viewportGeometry.Get(), maskGeometry);

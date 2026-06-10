@@ -3,6 +3,7 @@
 #include <variant>
 
 #include "kke/appearance/view/LayerMode.hh"
+#include "kke/utils/DebugLog.hh"
 
 using Microsoft::WRL::ComPtr;
 
@@ -11,7 +12,7 @@ void ViewLayerController::pushLayer(
 ) {
 	ComPtr<ID2D1Geometry> geometry = createGeometry(context, mask, mode);
 	if (!geometry) {
-		// TODO: Log error
+		kke::debug::log("[kke][ViewLayerController] failed to create layer geometry");
 		return;
 	}
 
@@ -53,7 +54,7 @@ ComPtr<ID2D1Geometry> ViewLayerController::createGeometry(
 			mask
 		);
 	default:
-		// TODO: Log error
+		kke::debug::log("[kke][ViewLayerController] unsupported layer mode");
 		return nullptr;
 	}
 }

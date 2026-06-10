@@ -1,6 +1,6 @@
 #include "FontProvider.hh"
 
-#include <cstdio>
+#include "kke/utils/DebugLog.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
@@ -32,9 +32,9 @@ std::shared_ptr<D2dFont> FontProvider::uploadFont(void const* data, size_t size)
 		&fontFile
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontProvider] CreateInMemoryFontFileReference failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontProvider] CreateInMemoryFontFileReference failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		fonts.pop_back();
 		return nullptr;
@@ -66,36 +66,36 @@ void FontProvider::initialize() {
 		reinterpret_cast<IUnknown**>(writeFactory.GetAddressOf())
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontProvider] DWriteCreateFactory failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontProvider] DWriteCreateFactory failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return;
 	}
 
 	result = writeFactory->CreateInMemoryFontFileLoader(&fontFileLoader);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontProvider] CreateInMemoryFontFileLoader failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontProvider] CreateInMemoryFontFileLoader failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return;
 	}
 
 	result = writeFactory->RegisterFontFileLoader(fontFileLoader.Get());
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontProvider] RegisterFontFileLoader failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontProvider] RegisterFontFileLoader failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return;
 	}
 
 	result = writeFactory->CreateFontSetBuilder(&fontSetBuilder);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontProvider] CreateFontSetBuilder failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontProvider] CreateFontSetBuilder failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 	}
 }
@@ -108,9 +108,9 @@ void FontProvider::rebuildFontCollection() {
 	ComPtr<IDWriteFontSetBuilder1> builder;
 	HRESULT result = writeFactory->CreateFontSetBuilder(&builder);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontProvider] CreateFontSetBuilder failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontProvider] CreateFontSetBuilder failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return;
 	}
@@ -118,9 +118,9 @@ void FontProvider::rebuildFontCollection() {
 	for (ComPtr<IDWriteFontFile> const& fontFile : fontFiles) {
 		result = builder->AddFontFile(fontFile.Get());
 		if (FAILED(result)) {
-			std::printf(
-				"[kke][FontProvider] AddFontFile failed: 0x%08lx\n",
-				static_cast<unsigned long>(result)
+			kke::debug::log(
+				"[kke][FontProvider] AddFontFile failed: 0x%08x",
+				static_cast<unsigned int>(result)
 			);
 			return;
 		}
@@ -129,18 +129,18 @@ void FontProvider::rebuildFontCollection() {
 	ComPtr<IDWriteFontSet> fontSet;
 	result = builder->CreateFontSet(&fontSet);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontProvider] CreateFontSet failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontProvider] CreateFontSet failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return;
 	}
 
 	result = writeFactory->CreateFontCollectionFromFontSet(fontSet.Get(), &fontCollection);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontProvider] CreateFontCollectionFromFontSet failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontProvider] CreateFontCollectionFromFontSet failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 	}
 }

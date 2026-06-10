@@ -1,8 +1,7 @@
 #include "FontFactory.hh"
 
-#include <cstdio>
-
 #include "kke/engine/d2d/resource/font/hash/FontHasher.hh"
+#include "kke/utils/DebugLog.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
@@ -29,9 +28,9 @@ ComPtr<IDWriteTextFormat> FontFactory::createTextFormat(
 		&textFormat
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontFactory] CreateTextFormat failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontFactory] CreateTextFormat failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}
@@ -57,9 +56,9 @@ ComPtr<IDWriteTextLayout> FontFactory::createTextLayout(
 		&textLayout
 	);
 	if (FAILED(result)) {
-		std::printf(
-			"[kke][FontFactory] CreateTextLayout failed: 0x%08lx\n",
-			static_cast<unsigned long>(result)
+		kke::debug::log(
+			"[kke][FontFactory] CreateTextLayout failed: 0x%08x",
+			static_cast<unsigned int>(result)
 		);
 		return nullptr;
 	}

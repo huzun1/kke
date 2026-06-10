@@ -3,6 +3,7 @@
 #include <memory>
 
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
+#include "kke/utils/DebugLog.hh"
 
 using namespace kke;
 using namespace Microsoft::WRL;
@@ -13,7 +14,10 @@ std::shared_ptr<D2dCanvas> CanvasFactory::createCanvas(D2dEngineContext const& c
 	ComPtr<ID2D1CommandList> commandList;
 	HRESULT commandListResult = d2dContext->getDeviceContext()->CreateCommandList(&commandList);
 	if (FAILED(commandListResult)) {
-		// TODO: Log error
+		kke::debug::log(
+			"[kke][CanvasFactory] CreateCommandList failed: 0x%08x",
+			static_cast<unsigned int>(commandListResult)
+		);
 		return nullptr;
 	}
 	return std::make_shared<D2dCanvas>(commandList);
