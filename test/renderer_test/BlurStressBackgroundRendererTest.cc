@@ -28,6 +28,7 @@ void BlurStressBackgroundRendererTest::render() {
 			engine().renderEffect(
 				kke::BlurEffect({
 					.radius = 30.0f,
+					.borderMode = kke::BlurBorderMode::HARD,
 					.optimization = kke::BlurOptimization::SPEED,
 				}),
 				blurRect

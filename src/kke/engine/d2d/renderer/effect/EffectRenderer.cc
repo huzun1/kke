@@ -284,7 +284,11 @@ void EffectRenderer::drawImage(
 	}
 
 	viewLayerController.pushLayer(context, clip.value(), LayerMode::Normal);
-	context.getD2dContext()->getDeviceContext()->DrawImage(image.Get());
+	context.getD2dContext()->getDeviceContext()->DrawImage(
+		image.Get(),
+		D2D1_INTERPOLATION_MODE_LINEAR,
+		D2D1_COMPOSITE_MODE_SOURCE_COPY
+	);
 	viewLayerController.popLayer(context);
 }
 
@@ -310,7 +314,9 @@ void EffectRenderer::drawImage(
 	viewLayerController.pushLayer(context, clip.value(), LayerMode::Normal);
 	context.getD2dContext()->getDeviceContext()->DrawImage(
 		image.Get(),
-		{targetOffset.x, targetOffset.y}
+		{targetOffset.x, targetOffset.y},
+		D2D1_INTERPOLATION_MODE_LINEAR,
+		D2D1_COMPOSITE_MODE_SOURCE_COPY
 	);
 	viewLayerController.popLayer(context);
 }
