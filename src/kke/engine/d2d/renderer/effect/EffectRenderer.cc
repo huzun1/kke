@@ -1,16 +1,11 @@
 #include "EffectRenderer.hh"
 
-#include <algorithm>
-
 #include "kke/appearance/resource/effect/EffectIdentifier.hh"
-#include "kke/engine/d2d/renderer/effect/EffectClipBoundsResolver.hh"
-#include "kke/engine/d2d/renderer/effect/EffectPaddingEstimator.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
 
 void EffectRenderer::beginDraw() {
-	commandListSnapshotter.beginFrame();
 }
 
 void EffectRenderer::render(
@@ -205,36 +200,6 @@ void EffectRenderer::renderClipEffect(
 	viewLayerController.popLayer(context);
 
 	drawImage(context, effectImage, clip, viewLayerController);
-}
-
-D2D1_RECT_F
-EffectRenderer::resolveEffectBounds(ID2D1Bitmap* renderTarget, Effect const& effect, EffectClipSource const& clip)
-	const {
-	D2D1_RECT_F effectBounds = EffectClipBoundsResolver::resolve(clip);
-	float padding = EffectPaddingEstimator::estimate(effect);
-	D2D1_SIZE_F targetSize = renderTarget->GetSize();
-
-	return D2D1::RectF(
-		std::max(0.0f, effectBounds.left - padding),
-		std::max(0.0f, effectBounds.top - padding),
-		std::min(targetSize.width, effectBounds.right + padding),
-		std::min(targetSize.height, effectBounds.bottom + padding)
-	);
-}
-
-D2D1_RECT_F EffectRenderer::resolveEffectBounds(
-	ID2D1Bitmap* renderTarget, EffectCompose const& effectCompose, EffectClipSource const& clip
-) const {
-	D2D1_RECT_F effectBounds = EffectClipBoundsResolver::resolve(clip);
-	float padding = EffectPaddingEstimator::estimate(effectCompose);
-	D2D1_SIZE_F targetSize = renderTarget->GetSize();
-
-	return D2D1::RectF(
-		std::max(0.0f, effectBounds.left - padding),
-		std::max(0.0f, effectBounds.top - padding),
-		std::min(targetSize.width, effectBounds.right + padding),
-		std::min(targetSize.height, effectBounds.bottom + padding)
-	);
 }
 
 void EffectRenderer::drawImage(
