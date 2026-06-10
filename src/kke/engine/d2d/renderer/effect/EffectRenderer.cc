@@ -21,7 +21,12 @@ void EffectRenderer::render(
 		drawImage(context, sourceImage, std::nullopt, viewLayerController);
 	}
 
-	drawImage(context, apply(context, sourceImage, effect), clip, viewLayerController);
+	ComPtr<ID2D1Image> effectSourceImage = sourceImage;
+	if (clip.has_value()) {
+		effectSourceImage = effectClipCropper.crop(context, sourceImage, effect, clip.value());
+	}
+
+	drawImage(context, apply(context, effectSourceImage, effect), clip, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -40,7 +45,13 @@ void EffectRenderer::render(
 		drawImage(context, sourceImage, std::nullopt, viewLayerController);
 	}
 
-	drawImage(context, apply(context, sourceImage, effectCompose), clip, viewLayerController);
+	ComPtr<ID2D1Image> effectSourceImage = sourceImage;
+	if (clip.has_value()) {
+		effectSourceImage =
+			effectClipCropper.crop(context, sourceImage, effectCompose, clip.value());
+	}
+
+	drawImage(context, apply(context, effectSourceImage, effectCompose), clip, viewLayerController);
 }
 
 void EffectRenderer::render(
