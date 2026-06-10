@@ -102,12 +102,6 @@ class EffectRenderer {
 		EffectClipSource const& clip
 	) const;
 
-	Point resolveImageDrawOffset(
-		D2dEngineContext& context,
-		Microsoft::WRL::ComPtr<ID2D1Image> image,
-		Point const& baseOffset
-	) const;
-
 	void drawImage(
 		D2dEngineContext const& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> image,
