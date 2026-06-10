@@ -1,11 +1,15 @@
 #include "EffectRenderer.hh"
 
+#include <algorithm>
+
 #include "kke/appearance/resource/effect/EffectIdentifier.hh"
+#include "kke/engine/d2d/renderer/effect/EffectClipBoundsResolver.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
 
 void EffectRenderer::beginDraw() {
+	commandListSnapshotter.beginFrame();
 }
 
 void EffectRenderer::render(
@@ -157,23 +161,64 @@ void EffectRenderer::renderClipEffect(
 	EffectClipSource const& clip,
 	ViewLayerController& viewLayerController
 ) {
+	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
+	if (!renderTarget) {
+		return;
+	}
+
 	ComPtr<ID2D1Bitmap1> sourceImage = renderPass.cycleTargetSnapshot(context);
 	if (!sourceImage) {
 		return;
 	}
 
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, effect);
+	D2D1_RECT_F effectBounds = resolveEffectBounds(renderTarget, effect, clip);
+	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
+		deviceContext,
+		sourceImage.Get(),
+		renderTarget,
+		effectBounds
+	);
+
+	ComPtr<ID2D1Image> effectImage =
+		localSourceImage ? apply(context, localSourceImage, effect) : apply(context, sourceImage, effect);
 	if (!effectImage) {
 		return;
 	}
 
-	deviceContext->Clear();
-	viewLayerController.pushLayer(context, clip, LayerMode::Inverted);
-	deviceContext->DrawImage(sourceImage.Get());
-	viewLayerController.popLayer(context);
+	ComPtr<ID2D1Bitmap1> compositeBitmap = acquireClipCompositeBitmap(deviceContext, renderTarget);
+	if (!compositeBitmap) {
+		return;
+	}
 
-	drawImage(context, effectImage, clip, viewLayerController);
+	ComPtr<ID2D1Image> previousTarget;
+	deviceContext->GetTarget(&previousTarget);
+
+	D2D1_MATRIX_3X2_F previousTransform;
+	deviceContext->GetTransform(&previousTransform);
+
+	deviceContext->SetTarget(compositeBitmap.Get());
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	deviceContext->Clear();
+	deviceContext->DrawImage(sourceImage.Get());
+	if (localSourceImage) {
+		drawImage(
+			context,
+			effectImage,
+			{effectBounds.left, effectBounds.top},
+			clip,
+			viewLayerController
+		);
+	} else {
+		drawImage(context, effectImage, clip, viewLayerController);
+	}
+
+	deviceContext->SetTransform(previousTransform);
+	deviceContext->SetTarget(previousTarget.Get());
+
+	deviceContext->Clear();
+	deviceContext->DrawBitmap(compositeBitmap.Get());
+	renderPass.setCachedTargetSnapshot(compositeBitmap);
 }
 
 void EffectRenderer::renderClipEffect(
@@ -183,23 +228,142 @@ void EffectRenderer::renderClipEffect(
 	EffectClipSource const& clip,
 	ViewLayerController& viewLayerController
 ) {
+	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
+	if (!renderTarget) {
+		return;
+	}
+
 	ComPtr<ID2D1Bitmap1> sourceImage = renderPass.cycleTargetSnapshot(context);
 	if (!sourceImage) {
 		return;
 	}
 
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, effectCompose);
+	D2D1_RECT_F effectBounds = resolveEffectBounds(renderTarget, effectCompose, clip);
+	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
+		deviceContext,
+		sourceImage.Get(),
+		renderTarget,
+		effectBounds
+	);
+
+	ComPtr<ID2D1Image> effectImage = localSourceImage ?
+		apply(context, localSourceImage, effectCompose) :
+		apply(context, sourceImage, effectCompose);
 	if (!effectImage) {
 		return;
 	}
 
-	deviceContext->Clear();
-	viewLayerController.pushLayer(context, clip, LayerMode::Inverted);
-	deviceContext->DrawImage(sourceImage.Get());
-	viewLayerController.popLayer(context);
+	ComPtr<ID2D1Bitmap1> compositeBitmap = acquireClipCompositeBitmap(deviceContext, renderTarget);
+	if (!compositeBitmap) {
+		return;
+	}
 
-	drawImage(context, effectImage, clip, viewLayerController);
+	ComPtr<ID2D1Image> previousTarget;
+	deviceContext->GetTarget(&previousTarget);
+
+	D2D1_MATRIX_3X2_F previousTransform;
+	deviceContext->GetTransform(&previousTransform);
+
+	deviceContext->SetTarget(compositeBitmap.Get());
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	deviceContext->Clear();
+	deviceContext->DrawImage(sourceImage.Get());
+	if (localSourceImage) {
+		drawImage(
+			context,
+			effectImage,
+			{effectBounds.left, effectBounds.top},
+			clip,
+			viewLayerController
+		);
+	} else {
+		drawImage(context, effectImage, clip, viewLayerController);
+	}
+
+	deviceContext->SetTransform(previousTransform);
+	deviceContext->SetTarget(previousTarget.Get());
+
+	deviceContext->Clear();
+	deviceContext->DrawBitmap(compositeBitmap.Get());
+	renderPass.setCachedTargetSnapshot(compositeBitmap);
+}
+
+D2D1_RECT_F
+EffectRenderer::resolveEffectBounds(ID2D1Bitmap* renderTarget, Effect const& effect, EffectClipSource const& clip)
+	const {
+	D2D1_RECT_F effectBounds = EffectClipBoundsResolver::resolve(clip);
+	float padding = EffectPaddingEstimator::estimate(effect);
+	D2D1_SIZE_F targetSize = renderTarget->GetSize();
+
+	return D2D1::RectF(
+		std::max(0.0f, effectBounds.left - padding),
+		std::max(0.0f, effectBounds.top - padding),
+		std::min(targetSize.width, effectBounds.right + padding),
+		std::min(targetSize.height, effectBounds.bottom + padding)
+	);
+}
+
+D2D1_RECT_F EffectRenderer::resolveEffectBounds(
+	ID2D1Bitmap* renderTarget, EffectCompose const& effectCompose, EffectClipSource const& clip
+) const {
+	D2D1_RECT_F effectBounds = EffectClipBoundsResolver::resolve(clip);
+	float padding = EffectPaddingEstimator::estimate(effectCompose);
+	D2D1_SIZE_F targetSize = renderTarget->GetSize();
+
+	return D2D1::RectF(
+		std::max(0.0f, effectBounds.left - padding),
+		std::max(0.0f, effectBounds.top - padding),
+		std::min(targetSize.width, effectBounds.right + padding),
+		std::min(targetSize.height, effectBounds.bottom + padding)
+	);
+}
+
+ComPtr<ID2D1Bitmap1> EffectRenderer::acquireClipCompositeBitmap(
+	ID2D1DeviceContext* deviceContext, ID2D1Bitmap* renderTarget
+) {
+	if (!deviceContext || !renderTarget) {
+		return nullptr;
+	}
+
+	float dpiX, dpiY;
+	renderTarget->GetDpi(&dpiX, &dpiY);
+
+	D2D1_SIZE_U pixelSize = renderTarget->GetPixelSize();
+	D2D1_PIXEL_FORMAT pixelFormat = renderTarget->GetPixelFormat();
+
+	constexpr size_t clipCompositeBitmapCacheCount = 2;
+	ClipCompositeBitmapCache& cacheEntry =
+		clipCompositeBitmapCaches[clipCompositeBitmapCacheIndex % clipCompositeBitmapCacheCount];
+	clipCompositeBitmapCacheIndex++;
+
+	if (
+		cacheEntry.bitmap &&
+		cacheEntry.pixelSize.width == pixelSize.width &&
+		cacheEntry.pixelSize.height == pixelSize.height &&
+		cacheEntry.pixelFormat.format == pixelFormat.format &&
+		cacheEntry.pixelFormat.alphaMode == pixelFormat.alphaMode &&
+		cacheEntry.dpiX == dpiX &&
+		cacheEntry.dpiY == dpiY
+	) {
+		return cacheEntry.bitmap;
+	}
+
+	D2D1_BITMAP_PROPERTIES1 properties =
+		D2D1::BitmapProperties1(D2D1_BITMAP_OPTIONS_TARGET, pixelFormat, dpiX, dpiY);
+
+	ComPtr<ID2D1Bitmap1> bitmap;
+	HRESULT createResult = deviceContext->CreateBitmap(pixelSize, nullptr, 0, properties, &bitmap);
+	if (FAILED(createResult) || !bitmap) {
+		return nullptr;
+	}
+
+	cacheEntry.bitmap = bitmap;
+	cacheEntry.pixelSize = pixelSize;
+	cacheEntry.pixelFormat = pixelFormat;
+	cacheEntry.dpiX = dpiX;
+	cacheEntry.dpiY = dpiY;
+	return bitmap;
 }
 
 void EffectRenderer::drawImage(

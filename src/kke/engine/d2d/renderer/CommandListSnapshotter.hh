@@ -12,6 +12,7 @@ class CommandListSnapshotter {
 		D2D1_PIXEL_FORMAT pixelFormat;
 		float dpiX;
 		float dpiY;
+		bool isInUseThisFrame = false;
 	};
 
 	Microsoft::WRL::ComPtr<ID2D1Device> snapshotDevice;
@@ -33,6 +34,13 @@ class CommandListSnapshotter {
 		ID2D1Image* source,
 		ID2D1Bitmap* referenceTarget,
 		D2D1_RECT_F const& sourceBounds
+	);
+
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotComposite(
+		ID2D1DeviceContext* deviceContext,
+		ID2D1Image* background,
+		ID2D1Image* foreground,
+		ID2D1Bitmap* referenceTarget
 	);
 
   private:

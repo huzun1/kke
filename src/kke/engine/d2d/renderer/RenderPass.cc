@@ -18,13 +18,12 @@ void RenderPass::beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget)
 	deviceContext->CreateCommandList(&targetCommandList);
 	deviceContext->SetTarget(targetCommandList.Get());
 
-	// render the original render target
-	Microsoft::WRL::ComPtr<ID2D1Bitmap> bitmapCopy = createBitmapCopy(deviceContext, renderTarget);
-	deviceContext->DrawBitmap(bitmapCopy.Get());
-
 	d2dContext->setTargetCommandList(targetCommandList);
 
 	lastRenderTarget = renderTarget;
+	preservedBaseBitmap.Reset();
+	cachedTargetSnapshot.Reset();
+	shouldPreserveRenderTarget = true;
 }
 
 void RenderPass::endDraw(D2dEngineContext& context) {
@@ -43,6 +42,12 @@ void RenderPass::endDraw(D2dEngineContext& context) {
 	// FIXME: make target command list abstract
 	ID2D1CommandList* targetCommandList = d2dContext->getTargetCommandList().Get();
 	targetCommandList->Close();
+	if (shouldPreserveRenderTarget) {
+		Microsoft::WRL::ComPtr<ID2D1Bitmap> baseBitmap = acquirePreservedBaseBitmap(deviceContext);
+		if (baseBitmap) {
+			deviceContext->DrawBitmap(baseBitmap.Get());
+		}
+	}
 	deviceContext->DrawImage(targetCommandList);
 
 	deviceContext->EndDraw();
@@ -52,6 +57,8 @@ void RenderPass::clear(D2dEngineContext& context) {
 	D2dContext* d2dContext = context.getD2dContext();
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
 	deviceContext->Clear();
+	shouldPreserveRenderTarget = false;
+	preservedBaseBitmap.Reset();
 }
 
 ID2D1Bitmap* RenderPass::getRenderTarget() const {
@@ -67,14 +74,30 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context) {
 		return nullptr;
 	}
 
+	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = cachedTargetSnapshot;
 	HRESULT closeResult = currentTargetCommandList->Close();
 	if (FAILED(closeResult)) {
 		return nullptr;
 	}
 
-	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
-	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap =
-		commandListSnapshotter.snapshot(deviceContext, currentTargetCommandList.Get(), lastRenderTarget);
+	if (!snapshotBitmap) {
+		if (shouldPreserveRenderTarget) {
+			Microsoft::WRL::ComPtr<ID2D1Bitmap> baseBitmap = acquirePreservedBaseBitmap(deviceContext);
+			snapshotBitmap = commandListSnapshotter.snapshotComposite(
+				deviceContext,
+				baseBitmap.Get(),
+				currentTargetCommandList.Get(),
+				lastRenderTarget
+			);
+		} else {
+			snapshotBitmap = commandListSnapshotter.snapshot(
+				deviceContext,
+				currentTargetCommandList.Get(),
+				lastRenderTarget
+			);
+		}
+	}
 	if (!snapshotBitmap) {
 		return nullptr;
 	}
@@ -88,7 +111,31 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context) {
 	deviceContext->SetTarget(nextTargetCommandList.Get());
 	deviceContext->DrawBitmap(snapshotBitmap.Get());
 	d2dContext->setTargetCommandList(nextTargetCommandList);
+	shouldPreserveRenderTarget = false;
+	preservedBaseBitmap.Reset();
+	cachedTargetSnapshot.Reset();
 	return snapshotBitmap;
+}
+
+void RenderPass::invalidateCachedTargetSnapshot() {
+	cachedTargetSnapshot.Reset();
+}
+
+void RenderPass::setCachedTargetSnapshot(Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap) {
+	cachedTargetSnapshot = snapshotBitmap;
+}
+
+Microsoft::WRL::ComPtr<ID2D1Bitmap>
+RenderPass::acquirePreservedBaseBitmap(ID2D1DeviceContext* deviceContext) {
+	if (!shouldPreserveRenderTarget || !deviceContext || !lastRenderTarget) {
+		return nullptr;
+	}
+
+	if (!preservedBaseBitmap) {
+		preservedBaseBitmap = createBitmapCopy(deviceContext, lastRenderTarget);
+	}
+
+	return preservedBaseBitmap;
 }
 
 Microsoft::WRL::ComPtr<ID2D1Bitmap>

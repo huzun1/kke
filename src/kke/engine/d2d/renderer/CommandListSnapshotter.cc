@@ -6,7 +6,9 @@
 using namespace kke;
 
 void CommandListSnapshotter::beginFrame() {
-	snapshotBitmapCacheIndex = 0;
+	for (SnapshotBitmapCacheEntry& cacheEntry : snapshotBitmapCache) {
+		cacheEntry.isInUseThisFrame = false;
+	}
 }
 
 Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshot(
@@ -120,6 +122,64 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotRegion(
 	return snapshotBitmap;
 }
 
+Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotComposite(
+	ID2D1DeviceContext* deviceContext,
+	ID2D1Image* background,
+	ID2D1Image* foreground,
+	ID2D1Bitmap* referenceTarget
+) {
+	if (!deviceContext || !referenceTarget || (!background && !foreground)) {
+		return nullptr;
+	}
+
+	ID2D1DeviceContext* snapshotContext = acquireSnapshotDeviceContext(deviceContext);
+	if (!snapshotContext) {
+		return nullptr;
+	}
+
+	float dpiX, dpiY;
+	referenceTarget->GetDpi(&dpiX, &dpiY);
+
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = acquireSnapshotBitmap(
+		snapshotContext,
+		referenceTarget->GetPixelSize(),
+		referenceTarget->GetPixelFormat(),
+		dpiX,
+		dpiY
+	);
+	if (!snapshotBitmap) {
+		return nullptr;
+	}
+
+	Microsoft::WRL::ComPtr<ID2D1Image> previousTarget;
+	snapshotContext->GetTarget(&previousTarget);
+
+	D2D1_MATRIX_3X2_F previousTransform;
+	snapshotContext->GetTransform(&previousTransform);
+
+	snapshotContext->BeginDraw();
+	snapshotContext->SetTarget(snapshotBitmap.Get());
+	snapshotContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	snapshotContext->Clear();
+	if (background) {
+		snapshotContext->DrawImage(background);
+	}
+	if (foreground) {
+		snapshotContext->DrawImage(foreground);
+	}
+
+	HRESULT drawResult = snapshotContext->EndDraw();
+
+	snapshotContext->SetTransform(previousTransform);
+	snapshotContext->SetTarget(previousTarget.Get());
+
+	if (FAILED(drawResult)) {
+		return nullptr;
+	}
+
+	return snapshotBitmap;
+}
+
 Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::acquireSnapshotBitmap(
 	ID2D1DeviceContext* deviceContext,
 	D2D1_SIZE_U pixelSize,
@@ -131,9 +191,9 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::acquireSnapshotBitm
 		return nullptr;
 	}
 
-	if (snapshotBitmapCacheIndex < snapshotBitmapCache.size()) {
-		SnapshotBitmapCacheEntry& cachedEntry = snapshotBitmapCache[snapshotBitmapCacheIndex];
+	for (SnapshotBitmapCacheEntry& cachedEntry : snapshotBitmapCache) {
 		if (
+			!cachedEntry.isInUseThisFrame &&
 			cachedEntry.bitmap &&
 			cachedEntry.pixelSize.width == pixelSize.width &&
 			cachedEntry.pixelSize.height == pixelSize.height &&
@@ -142,7 +202,7 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::acquireSnapshotBitm
 			cachedEntry.dpiX == dpiX &&
 			cachedEntry.dpiY == dpiY
 		) {
-			snapshotBitmapCacheIndex++;
+			cachedEntry.isInUseThisFrame = true;
 			return cachedEntry.bitmap;
 		}
 	}
@@ -157,14 +217,15 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::acquireSnapshotBitm
 		return nullptr;
 	}
 
-	SnapshotBitmapCacheEntry cacheEntry{snapshotBitmap, pixelSize, pixelFormat, dpiX, dpiY};
-	if (snapshotBitmapCacheIndex < snapshotBitmapCache.size()) {
-		snapshotBitmapCache[snapshotBitmapCacheIndex] = cacheEntry;
-	} else {
-		snapshotBitmapCache.push_back(cacheEntry);
-	}
-
-	snapshotBitmapCacheIndex++;
+	SnapshotBitmapCacheEntry cacheEntry{
+		snapshotBitmap,
+		pixelSize,
+		pixelFormat,
+		dpiX,
+		dpiY,
+		true
+	};
+	snapshotBitmapCache.push_back(cacheEntry);
 	return snapshotBitmap;
 }
 
@@ -186,7 +247,6 @@ ID2D1DeviceContext* CommandListSnapshotter::acquireSnapshotDeviceContext(
 	}
 
 	snapshotBitmapCache.clear();
-	snapshotBitmapCacheIndex = 0;
 	snapshotDevice = device;
 	snapshotDeviceContext.Reset();
 
