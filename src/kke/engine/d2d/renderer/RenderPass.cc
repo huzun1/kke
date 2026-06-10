@@ -36,6 +36,7 @@ void RenderPass::endDraw(D2dEngineContext& context) {
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
 
 	deviceContext->SetTarget(lastRenderTarget);
+	deviceContext->Clear();
 
 	// FIXME: make target command list abstract
 	ID2D1CommandList* targetCommandList = d2dContext->getTargetCommandList().Get();
