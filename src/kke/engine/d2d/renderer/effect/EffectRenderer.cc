@@ -162,38 +162,23 @@ void EffectRenderer::renderClipEffect(
 	EffectClipSource const& clip,
 	ViewLayerController& viewLayerController
 ) {
-	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
-	if (!renderTarget) {
-		return;
-	}
-
 	ComPtr<ID2D1Bitmap1> sourceImage = renderPass.cycleTargetSnapshot(context);
 	if (!sourceImage) {
 		return;
 	}
 
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	D2D1_RECT_F effectBounds = resolveEffectBounds(renderTarget, effect, clip);
-
-	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
-		deviceContext,
-		sourceImage.Get(),
-		renderTarget,
-		effectBounds
-	);
-	if (localSourceImage) {
-		drawImage(
-			context,
-			apply(context, localSourceImage, effect),
-			{effectBounds.left, effectBounds.top},
-			clip,
-			viewLayerController
-		);
+	ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, effect);
+	if (!effectImage) {
 		return;
 	}
 
-	ComPtr<ID2D1Image> effectSourceImage = effectClipCropper.crop(context, sourceImage, effect, clip);
-	drawImage(context, apply(context, effectSourceImage, effect), clip, viewLayerController);
+	deviceContext->Clear();
+	viewLayerController.pushLayer(context, clip, LayerMode::Inverted);
+	deviceContext->DrawImage(sourceImage.Get());
+	viewLayerController.popLayer(context);
+
+	drawImage(context, effectImage, clip, viewLayerController);
 }
 
 void EffectRenderer::renderClipEffect(
@@ -203,39 +188,23 @@ void EffectRenderer::renderClipEffect(
 	EffectClipSource const& clip,
 	ViewLayerController& viewLayerController
 ) {
-	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
-	if (!renderTarget) {
-		return;
-	}
-
 	ComPtr<ID2D1Bitmap1> sourceImage = renderPass.cycleTargetSnapshot(context);
 	if (!sourceImage) {
 		return;
 	}
 
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	D2D1_RECT_F effectBounds = resolveEffectBounds(renderTarget, effectCompose, clip);
-
-	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
-		deviceContext,
-		sourceImage.Get(),
-		renderTarget,
-		effectBounds
-	);
-	if (localSourceImage) {
-		drawImage(
-			context,
-			apply(context, localSourceImage, effectCompose),
-			{effectBounds.left, effectBounds.top},
-			clip,
-			viewLayerController
-		);
+	ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, effectCompose);
+	if (!effectImage) {
 		return;
 	}
 
-	ComPtr<ID2D1Image> effectSourceImage =
-		effectClipCropper.crop(context, sourceImage, effectCompose, clip);
-	drawImage(context, apply(context, effectSourceImage, effectCompose), clip, viewLayerController);
+	deviceContext->Clear();
+	viewLayerController.pushLayer(context, clip, LayerMode::Inverted);
+	deviceContext->DrawImage(sourceImage.Get());
+	viewLayerController.popLayer(context);
+
+	drawImage(context, effectImage, clip, viewLayerController);
 }
 
 D2D1_RECT_F
