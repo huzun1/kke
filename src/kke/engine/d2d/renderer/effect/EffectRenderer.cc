@@ -182,10 +182,11 @@ void EffectRenderer::renderClipEffect(
 		effectBounds
 	);
 	if (localSourceImage) {
+		ComPtr<ID2D1Image> effectImage = apply(context, localSourceImage, effect);
 		drawImage(
 			context,
-			apply(context, localSourceImage, effect),
-			{effectBounds.left, effectBounds.top},
+			effectImage,
+			resolveImageDrawOffset(context, effectImage, {effectBounds.left, effectBounds.top}),
 			clip,
 			viewLayerController
 		);
@@ -223,10 +224,11 @@ void EffectRenderer::renderClipEffect(
 		effectBounds
 	);
 	if (localSourceImage) {
+		ComPtr<ID2D1Image> effectImage = apply(context, localSourceImage, effectCompose);
 		drawImage(
 			context,
-			apply(context, localSourceImage, effectCompose),
-			{effectBounds.left, effectBounds.top},
+			effectImage,
+			resolveImageDrawOffset(context, effectImage, {effectBounds.left, effectBounds.top}),
 			clip,
 			viewLayerController
 		);
@@ -266,6 +268,23 @@ D2D1_RECT_F EffectRenderer::resolveEffectBounds(
 		std::min(targetSize.width, effectBounds.right + padding),
 		std::min(targetSize.height, effectBounds.bottom + padding)
 	);
+}
+
+Point EffectRenderer::resolveImageDrawOffset(
+	D2dEngineContext& context, ComPtr<ID2D1Image> image, Point const& baseOffset
+) const {
+	if (!image) {
+		return baseOffset;
+	}
+
+	D2D1_RECT_F imageBounds;
+	HRESULT boundsResult =
+		context.getD2dContext()->getDeviceContext()->GetImageLocalBounds(image.Get(), &imageBounds);
+	if (FAILED(boundsResult)) {
+		return baseOffset;
+	}
+
+	return {baseOffset.x + imageBounds.left, baseOffset.y + imageBounds.top};
 }
 
 void EffectRenderer::drawImage(
