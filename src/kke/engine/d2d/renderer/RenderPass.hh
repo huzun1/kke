@@ -18,11 +18,7 @@ class RenderPass {
 
 	ID2D1Bitmap* getRenderTarget() const;
 
-	Microsoft::WRL::ComPtr<ID2D1CommandList> cycleTargetCommandListReference(
-		D2dEngineContext& context
-	);
-
-	Microsoft::WRL::ComPtr<ID2D1Image> cycleTargetCommandList(D2dEngineContext& context);
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> cycleTargetSnapshot(D2dEngineContext& context);
 
   private:
 	static Microsoft::WRL::ComPtr<ID2D1Bitmap>

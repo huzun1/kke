@@ -16,11 +16,16 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshot(
 		return nullptr;
 	}
 
+	ID2D1DeviceContext* snapshotContext = acquireSnapshotDeviceContext(deviceContext);
+	if (!snapshotContext) {
+		return nullptr;
+	}
+
 	float dpiX, dpiY;
 	referenceTarget->GetDpi(&dpiX, &dpiY);
 
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = acquireSnapshotBitmap(
-		deviceContext,
+		snapshotContext,
 		referenceTarget->GetPixelSize(),
 		referenceTarget->GetPixelFormat(),
 		dpiX,
@@ -31,22 +36,23 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshot(
 	}
 
 	Microsoft::WRL::ComPtr<ID2D1Image> previousTarget;
-	deviceContext->GetTarget(&previousTarget);
+	snapshotContext->GetTarget(&previousTarget);
 
 	D2D1_MATRIX_3X2_F previousTransform;
-	deviceContext->GetTransform(&previousTransform);
+	snapshotContext->GetTransform(&previousTransform);
 
-	deviceContext->SetTarget(snapshotBitmap.Get());
-	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	deviceContext->Clear();
-	deviceContext->DrawImage(source);
+	snapshotContext->BeginDraw();
+	snapshotContext->SetTarget(snapshotBitmap.Get());
+	snapshotContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	snapshotContext->Clear();
+	snapshotContext->DrawImage(source);
 
-	HRESULT flushResult = deviceContext->Flush();
+	HRESULT drawResult = snapshotContext->EndDraw();
 
-	deviceContext->SetTransform(previousTransform);
-	deviceContext->SetTarget(previousTarget.Get());
+	snapshotContext->SetTransform(previousTransform);
+	snapshotContext->SetTarget(previousTarget.Get());
 
-	if (FAILED(flushResult)) {
+	if (FAILED(drawResult)) {
 		return nullptr;
 	}
 
@@ -63,6 +69,11 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotRegion(
 		return nullptr;
 	}
 
+	ID2D1DeviceContext* snapshotContext = acquireSnapshotDeviceContext(deviceContext);
+	if (!snapshotContext) {
+		return nullptr;
+	}
+
 	float width = std::max(1.0f, std::ceil(sourceBounds.right - sourceBounds.left));
 	float height = std::max(1.0f, std::ceil(sourceBounds.bottom - sourceBounds.top));
 
@@ -75,7 +86,7 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotRegion(
 	};
 
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = acquireSnapshotBitmap(
-		deviceContext,
+		snapshotContext,
 		pixelSize,
 		referenceTarget->GetPixelFormat(),
 		dpiX,
@@ -86,22 +97,23 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotRegion(
 	}
 
 	Microsoft::WRL::ComPtr<ID2D1Image> previousTarget;
-	deviceContext->GetTarget(&previousTarget);
+	snapshotContext->GetTarget(&previousTarget);
 
 	D2D1_MATRIX_3X2_F previousTransform;
-	deviceContext->GetTransform(&previousTransform);
+	snapshotContext->GetTransform(&previousTransform);
 
-	deviceContext->SetTarget(snapshotBitmap.Get());
-	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	deviceContext->Clear();
-	deviceContext->DrawImage(source, {-sourceBounds.left, -sourceBounds.top});
+	snapshotContext->BeginDraw();
+	snapshotContext->SetTarget(snapshotBitmap.Get());
+	snapshotContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	snapshotContext->Clear();
+	snapshotContext->DrawImage(source, {-sourceBounds.left, -sourceBounds.top});
 
-	HRESULT flushResult = deviceContext->Flush();
+	HRESULT drawResult = snapshotContext->EndDraw();
 
-	deviceContext->SetTransform(previousTransform);
-	deviceContext->SetTarget(previousTarget.Get());
+	snapshotContext->SetTransform(previousTransform);
+	snapshotContext->SetTarget(previousTarget.Get());
 
-	if (FAILED(flushResult)) {
+	if (FAILED(drawResult)) {
 		return nullptr;
 	}
 
@@ -154,4 +166,36 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::acquireSnapshotBitm
 
 	snapshotBitmapCacheIndex++;
 	return snapshotBitmap;
+}
+
+ID2D1DeviceContext* CommandListSnapshotter::acquireSnapshotDeviceContext(
+	ID2D1DeviceContext* deviceContext
+) {
+	if (!deviceContext) {
+		return nullptr;
+	}
+
+	Microsoft::WRL::ComPtr<ID2D1Device> device;
+	deviceContext->GetDevice(&device);
+	if (!device) {
+		return nullptr;
+	}
+
+	if (snapshotDeviceContext && snapshotDevice.Get() == device.Get()) {
+		return snapshotDeviceContext.Get();
+	}
+
+	snapshotBitmapCache.clear();
+	snapshotBitmapCacheIndex = 0;
+	snapshotDevice = device;
+	snapshotDeviceContext.Reset();
+
+	HRESULT createResult =
+		snapshotDevice->CreateDeviceContext(D2D1_DEVICE_CONTEXT_OPTIONS_NONE, &snapshotDeviceContext);
+	if (FAILED(createResult) || !snapshotDeviceContext) {
+		snapshotDevice.Reset();
+		return nullptr;
+	}
+
+	return snapshotDeviceContext.Get();
 }

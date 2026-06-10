@@ -14,6 +14,8 @@ class CommandListSnapshotter {
 		float dpiY;
 	};
 
+	Microsoft::WRL::ComPtr<ID2D1Device> snapshotDevice;
+	Microsoft::WRL::ComPtr<ID2D1DeviceContext> snapshotDeviceContext;
 	std::vector<SnapshotBitmapCacheEntry> snapshotBitmapCache;
 	size_t snapshotBitmapCacheIndex = 0;
 
@@ -41,5 +43,7 @@ class CommandListSnapshotter {
 		float dpiX,
 		float dpiY
 	);
+
+	ID2D1DeviceContext* acquireSnapshotDeviceContext(ID2D1DeviceContext* deviceContext);
 };
 }; // namespace kke

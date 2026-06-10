@@ -25,7 +25,7 @@ void EffectRenderer::render(
 		return;
 	}
 
-	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetCommandList(context);
+	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetSnapshot(context);
 	if (!sourceImage) {
 		return;
 	}
@@ -45,7 +45,7 @@ void EffectRenderer::render(
 		return;
 	}
 
-	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetCommandList(context);
+	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetSnapshot(context);
 	if (!sourceImage) {
 		return;
 	}
@@ -162,15 +162,13 @@ void EffectRenderer::renderClipEffect(
 	EffectClipSource const& clip,
 	ViewLayerController& viewLayerController
 ) {
-	ComPtr<ID2D1CommandList> sourceCommandList = renderPass.cycleTargetCommandListReference(context);
-	if (!sourceCommandList) {
+	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
+	if (!renderTarget) {
 		return;
 	}
 
-	drawImage(context, sourceCommandList, std::nullopt, viewLayerController);
-
-	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
-	if (!renderTarget) {
+	ComPtr<ID2D1Bitmap1> sourceImage = renderPass.cycleTargetSnapshot(context);
+	if (!sourceImage) {
 		return;
 	}
 
@@ -179,7 +177,7 @@ void EffectRenderer::renderClipEffect(
 
 	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
 		deviceContext,
-		sourceCommandList.Get(),
+		sourceImage.Get(),
 		renderTarget,
 		effectBounds
 	);
@@ -194,12 +192,6 @@ void EffectRenderer::renderClipEffect(
 		return;
 	}
 
-	ComPtr<ID2D1Bitmap1> sourceImage =
-		commandListSnapshotter.snapshot(deviceContext, sourceCommandList.Get(), renderTarget);
-	if (!sourceImage) {
-		return;
-	}
-
 	ComPtr<ID2D1Image> effectSourceImage = effectClipCropper.crop(context, sourceImage, effect, clip);
 	drawImage(context, apply(context, effectSourceImage, effect), clip, viewLayerController);
 }
@@ -211,15 +203,13 @@ void EffectRenderer::renderClipEffect(
 	EffectClipSource const& clip,
 	ViewLayerController& viewLayerController
 ) {
-	ComPtr<ID2D1CommandList> sourceCommandList = renderPass.cycleTargetCommandListReference(context);
-	if (!sourceCommandList) {
+	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
+	if (!renderTarget) {
 		return;
 	}
 
-	drawImage(context, sourceCommandList, std::nullopt, viewLayerController);
-
-	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
-	if (!renderTarget) {
+	ComPtr<ID2D1Bitmap1> sourceImage = renderPass.cycleTargetSnapshot(context);
+	if (!sourceImage) {
 		return;
 	}
 
@@ -228,7 +218,7 @@ void EffectRenderer::renderClipEffect(
 
 	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
 		deviceContext,
-		sourceCommandList.Get(),
+		sourceImage.Get(),
 		renderTarget,
 		effectBounds
 	);
@@ -240,12 +230,6 @@ void EffectRenderer::renderClipEffect(
 			clip,
 			viewLayerController
 		);
-		return;
-	}
-
-	ComPtr<ID2D1Bitmap1> sourceImage =
-		commandListSnapshotter.snapshot(deviceContext, sourceCommandList.Get(), renderTarget);
-	if (!sourceImage) {
 		return;
 	}
 

@@ -58,8 +58,8 @@ ID2D1Bitmap* RenderPass::getRenderTarget() const {
 	return lastRenderTarget;
 }
 
-Microsoft::WRL::ComPtr<ID2D1CommandList>
-RenderPass::cycleTargetCommandListReference(D2dEngineContext& context) {
+Microsoft::WRL::ComPtr<ID2D1Bitmap1>
+RenderPass::cycleTargetSnapshot(D2dEngineContext& context) {
 	D2dContext* d2dContext = context.getD2dContext();
 	Microsoft::WRL::ComPtr<ID2D1CommandList> currentTargetCommandList =
 		d2dContext->getTargetCommandList();
@@ -73,6 +73,11 @@ RenderPass::cycleTargetCommandListReference(D2dEngineContext& context) {
 	}
 
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap =
+		commandListSnapshotter.snapshot(deviceContext, currentTargetCommandList.Get(), lastRenderTarget);
+	if (!snapshotBitmap) {
+		return nullptr;
+	}
 
 	Microsoft::WRL::ComPtr<ID2D1CommandList> nextTargetCommandList;
 	HRESULT createResult = deviceContext->CreateCommandList(&nextTargetCommandList);
@@ -81,19 +86,9 @@ RenderPass::cycleTargetCommandListReference(D2dEngineContext& context) {
 	}
 
 	deviceContext->SetTarget(nextTargetCommandList.Get());
+	deviceContext->DrawBitmap(snapshotBitmap.Get());
 	d2dContext->setTargetCommandList(nextTargetCommandList);
-	return currentTargetCommandList;
-}
-
-Microsoft::WRL::ComPtr<ID2D1Image> RenderPass::cycleTargetCommandList(D2dEngineContext& context) {
-	Microsoft::WRL::ComPtr<ID2D1CommandList> currentTargetCommandList =
-		cycleTargetCommandListReference(context);
-	if (!currentTargetCommandList || !lastRenderTarget) {
-		return nullptr;
-	}
-
-	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	return commandListSnapshotter.snapshot(deviceContext, currentTargetCommandList.Get(), lastRenderTarget);
+	return snapshotBitmap;
 }
 
 Microsoft::WRL::ComPtr<ID2D1Bitmap>
