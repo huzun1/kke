@@ -1,0 +1,5 @@
+#include "@CMAKE_CURRENT_SOURCE_DIR@/resources/resources.h"
+
+TEXTURE_DYCONTRAST WAVE "@CMAKE_CURRENT_SOURCE_DIR@/resources/contents/dycontrast_1337.png"
+FONT_SPACE_GROTESK WAVE "@CMAKE_CURRENT_SOURCE_DIR@/resources/contents/SpaceGrotesk-VariableFont_wght.ttf"
+TEXTURE_MOUNTAIN WAVE "@CMAKE_CURRENT_SOURCE_DIR@/resources/contents/mountain.png"

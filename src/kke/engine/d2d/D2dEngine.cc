@@ -45,6 +45,7 @@ void D2dEngine::beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget) 
 	D2D1_SIZE_F viewportSize = renderTarget->GetSize();
 	impl->engineContext->update(viewportSize);
 
+	impl->effectRenderer.beginDraw();
 	impl->renderPass.beginDraw(*impl->engineContext, renderTarget);
 }
 

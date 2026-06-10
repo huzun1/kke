@@ -1,12 +1,19 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(kke_test CXX)
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.rc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/resources/resources.rc
+    @ONLY
+)
+
 add_executable(kke_test WIN32
     Main.cc
     Window.cc
     Renderer.cc
     renderer_test/RendererTest.cc
     renderer_test/BlurStressRendererTest.cc
+    renderer_test/BlurStressBackgroundRendererTest.cc
     renderer_test/LayerRendererTest.cc
     renderer_test/ShadowStressRendererTest.cc
     renderer_test/ShapeEffectRendererTest.cc
@@ -18,7 +25,7 @@ add_executable(kke_test WIN32
     backend/D2D1.cc
     backend/D3D11.cc
     resources/resources.h
-    resources/resources.rc
+    ${CMAKE_CURRENT_BINARY_DIR}/resources/resources.rc
  )
 target_link_libraries(kke_test kke)
 target_include_directories(kke_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

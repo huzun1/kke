@@ -4,6 +4,7 @@
 
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
+#include "kke/engine/d2d/renderer/CommandListSnapshotter.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
 #include "kke/engine/d2d/renderer/effect/EffectClipCropper.hh"
 #include "kke/engine/d2d/renderer/effect/EffectSourceRenderer.hh"
@@ -16,6 +17,7 @@
 namespace kke {
 class EffectRenderer {
 	EffectSourceRenderer sourceRenderer;
+	CommandListSnapshotter commandListSnapshotter;
 	EffectClipCropper effectClipCropper;
 	BlurEffectRenderer blurEffectRenderer;
 	DirectionalBlurEffectRenderer directionalBlurEffectRenderer;
@@ -23,6 +25,8 @@ class EffectRenderer {
 	ShadowEffectRenderer shadowEffectRenderer;
 
   public:
+	void beginDraw();
+
 	void render(
 		D2dEngineContext& context,
 		RenderPass& renderPass,
@@ -69,6 +73,34 @@ class EffectRenderer {
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
 		EffectCompose const& effectCompose
 	);
+
+	void renderClipEffect(
+		D2dEngineContext& context,
+		RenderPass& renderPass,
+		Effect const& effect,
+		EffectClipSource const& clip,
+		ViewLayerController& viewLayerController
+	);
+
+	void renderClipEffect(
+		D2dEngineContext& context,
+		RenderPass& renderPass,
+		EffectCompose const& effectCompose,
+		EffectClipSource const& clip,
+		ViewLayerController& viewLayerController
+	);
+
+	D2D1_RECT_F resolveEffectBounds(
+		ID2D1Bitmap* renderTarget,
+		Effect const& effect,
+		EffectClipSource const& clip
+	) const;
+
+	D2D1_RECT_F resolveEffectBounds(
+		ID2D1Bitmap* renderTarget,
+		EffectCompose const& effectCompose,
+		EffectClipSource const& clip
+	) const;
 
 	void drawImage(
 		D2dEngineContext const& context,

@@ -17,6 +17,7 @@
 #include "kke/engine/d2d/renderer/effect/renderers/PositionIndependentEffectCache.hh"
 #include "kke/geometry/shapes/Rect.hh"
 #include "renderer_test/BlurStressRendererTest.hh"
+#include "renderer_test/BlurStressBackgroundRendererTest.hh"
 #include "renderer_test/CanvasRendererTest.hh"
 #include "renderer_test/FrameEffectRendererTest.hh"
 #include "renderer_test/LayerRendererTest.hh"
@@ -74,6 +75,11 @@ void application::Renderer::ensureTexturesUploaded() {
 	if (!encodedTexture) {
 		auto [textureData, textureDataSize] = loadResource(TEXTURE_DYCONTRAST);
 		encodedTexture = engine.uploadTexture(textureData, textureDataSize);
+	}
+
+	if (!mountainTexture) {
+		auto [textureData, textureDataSize] = loadResource(TEXTURE_MOUNTAIN);
+		mountainTexture = engine.uploadTexture(textureData, textureDataSize);
 	}
 
 	if (!rawTexture) {
@@ -221,29 +227,34 @@ void application::Renderer::initializeRendererTests() {
 	);
 	addRendererTest(
 		'2',
+		"Blur Stress Background",
+		std::make_unique<renderer_test::BlurStressBackgroundRendererTest>(*this)
+	);
+	addRendererTest(
+		'3',
 		"Shadow Stress",
 		std::make_unique<renderer_test::ShadowStressRendererTest>(*this)
 	);
 	addRendererTest(
-		'3',
+		'4',
 		"Shape Effect",
 		std::make_unique<renderer_test::ShapeEffectRendererTest>(*this)
 	);
 	addRendererTest(
-		'4',
+		'5',
 		"Text Effect",
 		std::make_unique<renderer_test::TextEffectRendererTest>(*this)
 	);
 	addRendererTest(
-		'5',
+		'6',
 		"Frame Effect",
 		std::make_unique<renderer_test::FrameEffectRendererTest>(*this)
 	);
-	addRendererTest('6', "Canvas", std::make_unique<renderer_test::CanvasRendererTest>(*this));
-	addRendererTest('7', "Layer", std::make_unique<renderer_test::LayerRendererTest>(*this));
-	addRendererTest('8', "Texture", std::make_unique<renderer_test::TextureRendererTest>(*this));
+	addRendererTest('7', "Canvas", std::make_unique<renderer_test::CanvasRendererTest>(*this));
+	addRendererTest('8', "Layer", std::make_unique<renderer_test::LayerRendererTest>(*this));
+	addRendererTest('9', "Texture", std::make_unique<renderer_test::TextureRendererTest>(*this));
 	addRendererTest(
-		'9',
+		'0',
 		"Transform",
 		std::make_unique<renderer_test::TransformRendererTest>(*this)
 	);

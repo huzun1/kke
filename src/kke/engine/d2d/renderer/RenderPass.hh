@@ -1,12 +1,12 @@
 #pragma once
 
-#include <functional>
-
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
 #include "kke/engine/d2d/d2d1_headers.hh"
+#include "kke/engine/d2d/renderer/CommandListSnapshotter.hh"
 
 namespace kke {
 class RenderPass {
+	CommandListSnapshotter commandListSnapshotter;
 	ID2D1Bitmap* lastRenderTarget = nullptr;
 
   public:
@@ -15,6 +15,12 @@ class RenderPass {
 	void endDraw(D2dEngineContext& context);
 
 	void clear(D2dEngineContext& context);
+
+	ID2D1Bitmap* getRenderTarget() const;
+
+	Microsoft::WRL::ComPtr<ID2D1CommandList> cycleTargetCommandListReference(
+		D2dEngineContext& context
+	);
 
 	Microsoft::WRL::ComPtr<ID2D1Image> cycleTargetCommandList(D2dEngineContext& context);
 

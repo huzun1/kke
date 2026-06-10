@@ -1,9 +1,17 @@
 #include "EffectRenderer.hh"
 
+#include <algorithm>
+
 #include "kke/appearance/resource/effect/EffectIdentifier.hh"
+#include "kke/engine/d2d/renderer/effect/EffectClipBoundsResolver.hh"
+#include "kke/engine/d2d/renderer/effect/EffectPaddingEstimator.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
+
+void EffectRenderer::beginDraw() {
+	commandListSnapshotter.beginFrame();
+}
 
 void EffectRenderer::render(
 	D2dEngineContext& context,
@@ -12,21 +20,17 @@ void EffectRenderer::render(
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController
 ) {
+	if (clip.has_value()) {
+		renderClipEffect(context, renderPass, effect, clip.value(), viewLayerController);
+		return;
+	}
+
 	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetCommandList(context);
 	if (!sourceImage) {
 		return;
 	}
 
-	if (clip.has_value()) {
-		drawImage(context, sourceImage, std::nullopt, viewLayerController);
-	}
-
-	ComPtr<ID2D1Image> effectSourceImage = sourceImage;
-	if (clip.has_value()) {
-		effectSourceImage = effectClipCropper.crop(context, sourceImage, effect, clip.value());
-	}
-
-	drawImage(context, apply(context, effectSourceImage, effect), clip, viewLayerController);
+	drawImage(context, apply(context, sourceImage, effect), std::nullopt, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -36,22 +40,22 @@ void EffectRenderer::render(
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController
 ) {
+	if (clip.has_value()) {
+		renderClipEffect(context, renderPass, effectCompose, clip.value(), viewLayerController);
+		return;
+	}
+
 	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetCommandList(context);
 	if (!sourceImage) {
 		return;
 	}
 
-	if (clip.has_value()) {
-		drawImage(context, sourceImage, std::nullopt, viewLayerController);
-	}
-
-	ComPtr<ID2D1Image> effectSourceImage = sourceImage;
-	if (clip.has_value()) {
-		effectSourceImage =
-			effectClipCropper.crop(context, sourceImage, effectCompose, clip.value());
-	}
-
-	drawImage(context, apply(context, effectSourceImage, effectCompose), clip, viewLayerController);
+	drawImage(
+		context,
+		apply(context, sourceImage, effectCompose),
+		std::nullopt,
+		viewLayerController
+	);
 }
 
 void EffectRenderer::render(
@@ -149,6 +153,135 @@ ComPtr<ID2D1Image> EffectRenderer::apply(
 	}
 
 	return currentImage;
+}
+
+void EffectRenderer::renderClipEffect(
+	D2dEngineContext& context,
+	RenderPass& renderPass,
+	Effect const& effect,
+	EffectClipSource const& clip,
+	ViewLayerController& viewLayerController
+) {
+	ComPtr<ID2D1CommandList> sourceCommandList = renderPass.cycleTargetCommandListReference(context);
+	if (!sourceCommandList) {
+		return;
+	}
+
+	drawImage(context, sourceCommandList, std::nullopt, viewLayerController);
+
+	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
+	if (!renderTarget) {
+		return;
+	}
+
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	D2D1_RECT_F effectBounds = resolveEffectBounds(renderTarget, effect, clip);
+
+	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
+		deviceContext,
+		sourceCommandList.Get(),
+		renderTarget,
+		effectBounds
+	);
+	if (localSourceImage) {
+		drawImage(
+			context,
+			apply(context, localSourceImage, effect),
+			{effectBounds.left, effectBounds.top},
+			clip,
+			viewLayerController
+		);
+		return;
+	}
+
+	ComPtr<ID2D1Bitmap1> sourceImage =
+		commandListSnapshotter.snapshot(deviceContext, sourceCommandList.Get(), renderTarget);
+	if (!sourceImage) {
+		return;
+	}
+
+	ComPtr<ID2D1Image> effectSourceImage = effectClipCropper.crop(context, sourceImage, effect, clip);
+	drawImage(context, apply(context, effectSourceImage, effect), clip, viewLayerController);
+}
+
+void EffectRenderer::renderClipEffect(
+	D2dEngineContext& context,
+	RenderPass& renderPass,
+	EffectCompose const& effectCompose,
+	EffectClipSource const& clip,
+	ViewLayerController& viewLayerController
+) {
+	ComPtr<ID2D1CommandList> sourceCommandList = renderPass.cycleTargetCommandListReference(context);
+	if (!sourceCommandList) {
+		return;
+	}
+
+	drawImage(context, sourceCommandList, std::nullopt, viewLayerController);
+
+	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
+	if (!renderTarget) {
+		return;
+	}
+
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	D2D1_RECT_F effectBounds = resolveEffectBounds(renderTarget, effectCompose, clip);
+
+	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
+		deviceContext,
+		sourceCommandList.Get(),
+		renderTarget,
+		effectBounds
+	);
+	if (localSourceImage) {
+		drawImage(
+			context,
+			apply(context, localSourceImage, effectCompose),
+			{effectBounds.left, effectBounds.top},
+			clip,
+			viewLayerController
+		);
+		return;
+	}
+
+	ComPtr<ID2D1Bitmap1> sourceImage =
+		commandListSnapshotter.snapshot(deviceContext, sourceCommandList.Get(), renderTarget);
+	if (!sourceImage) {
+		return;
+	}
+
+	ComPtr<ID2D1Image> effectSourceImage =
+		effectClipCropper.crop(context, sourceImage, effectCompose, clip);
+	drawImage(context, apply(context, effectSourceImage, effectCompose), clip, viewLayerController);
+}
+
+D2D1_RECT_F
+EffectRenderer::resolveEffectBounds(ID2D1Bitmap* renderTarget, Effect const& effect, EffectClipSource const& clip)
+	const {
+	D2D1_RECT_F effectBounds = EffectClipBoundsResolver::resolve(clip);
+	float padding = EffectPaddingEstimator::estimate(effect);
+	D2D1_SIZE_F targetSize = renderTarget->GetSize();
+
+	return D2D1::RectF(
+		std::max(0.0f, effectBounds.left - padding),
+		std::max(0.0f, effectBounds.top - padding),
+		std::min(targetSize.width, effectBounds.right + padding),
+		std::min(targetSize.height, effectBounds.bottom + padding)
+	);
+}
+
+D2D1_RECT_F EffectRenderer::resolveEffectBounds(
+	ID2D1Bitmap* renderTarget, EffectCompose const& effectCompose, EffectClipSource const& clip
+) const {
+	D2D1_RECT_F effectBounds = EffectClipBoundsResolver::resolve(clip);
+	float padding = EffectPaddingEstimator::estimate(effectCompose);
+	D2D1_SIZE_F targetSize = renderTarget->GetSize();
+
+	return D2D1::RectF(
+		std::max(0.0f, effectBounds.left - padding),
+		std::max(0.0f, effectBounds.top - padding),
+		std::min(targetSize.width, effectBounds.right + padding),
+		std::min(targetSize.height, effectBounds.bottom + padding)
+	);
 }
 
 void EffectRenderer::drawImage(

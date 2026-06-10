@@ -28,6 +28,7 @@ class Renderer {
 	kke::D2dEngine engine;
 	FpsCounter fpsCounter;
 	std::shared_ptr<kke::Texture> encodedTexture;
+	std::shared_ptr<kke::Texture> mountainTexture;
 	std::shared_ptr<kke::Texture> rawTexture;
 	std::vector<uint8_t> rawTexturePixels;
 	std::vector<RendererTestEntry> rendererTests;
