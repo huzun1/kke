@@ -16,22 +16,12 @@
 
 namespace kke {
 class EffectRenderer {
-	struct ClipCompositeBitmapCache {
-		Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmap;
-		D2D1_SIZE_U pixelSize{};
-		D2D1_PIXEL_FORMAT pixelFormat{};
-		float dpiX = 0.0f;
-		float dpiY = 0.0f;
-	};
-
 	EffectSourceRenderer sourceRenderer;
 	CommandListSnapshotter commandListSnapshotter;
 	BlurEffectRenderer blurEffectRenderer;
 	DirectionalBlurEffectRenderer directionalBlurEffectRenderer;
 	ColorMatrixEffectRenderer colorMatrixEffectRenderer;
 	ShadowEffectRenderer shadowEffectRenderer;
-	ClipCompositeBitmapCache clipCompositeBitmapCaches[2];
-	size_t clipCompositeBitmapCacheIndex = 0;
 
   public:
 	void beginDraw();
@@ -111,9 +101,14 @@ class EffectRenderer {
 		EffectClipSource const& clip
 	) const;
 
-	Microsoft::WRL::ComPtr<ID2D1Bitmap1> acquireClipCompositeBitmap(
+	void updateClipEffectSnapshot(
+		D2dEngineContext const& context,
 		ID2D1DeviceContext* deviceContext,
-		ID2D1Bitmap* renderTarget
+		Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap,
+		Microsoft::WRL::ComPtr<ID2D1Image> effectImage,
+		Point const& targetOffset,
+		EffectClipSource const& clip,
+		ViewLayerController& viewLayerController
 	);
 
 	void drawImage(
