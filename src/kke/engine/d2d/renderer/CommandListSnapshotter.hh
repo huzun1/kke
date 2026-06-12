@@ -5,11 +5,6 @@
 #include "kke/engine/d2d/d2d1_headers.hh"
 
 namespace kke {
-enum class SnapshotOpacityMode {
-	PreserveAlpha,
-	FlattenToOpaqueBlack
-};
-
 class CommandListSnapshotter {
 	struct SnapshotBitmapCacheEntry {
 		Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmap;
@@ -31,16 +26,21 @@ class CommandListSnapshotter {
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshot(
 		ID2D1DeviceContext* deviceContext,
 		ID2D1Image* source,
+		ID2D1Bitmap* referenceTarget
+	);
+
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotRegion(
+		ID2D1DeviceContext* deviceContext,
+		ID2D1Image* source,
 		ID2D1Bitmap* referenceTarget,
-		SnapshotOpacityMode opacityMode = SnapshotOpacityMode::PreserveAlpha
+		D2D1_RECT_F const& sourceBounds
 	);
 
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotComposite(
 		ID2D1DeviceContext* deviceContext,
 		ID2D1Image* background,
 		ID2D1Image* foreground,
-		ID2D1Bitmap* referenceTarget,
-		SnapshotOpacityMode opacityMode = SnapshotOpacityMode::PreserveAlpha
+		ID2D1Bitmap* referenceTarget
 	);
 
   private:
@@ -53,10 +53,5 @@ class CommandListSnapshotter {
 	);
 
 	ID2D1DeviceContext* acquireSnapshotDeviceContext(ID2D1DeviceContext* deviceContext);
-
-	static void clearSnapshotTarget(
-		ID2D1DeviceContext* deviceContext,
-		SnapshotOpacityMode opacityMode
-	);
 };
 }; // namespace kke

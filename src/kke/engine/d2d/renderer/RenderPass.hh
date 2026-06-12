@@ -19,12 +19,13 @@ class RenderPass {
 
 	void clear(D2dEngineContext& context);
 
-	Microsoft::WRL::ComPtr<ID2D1Bitmap1> cycleTargetSnapshot(
-		D2dEngineContext& context,
-		SnapshotOpacityMode opacityMode = SnapshotOpacityMode::PreserveAlpha
-	);
+	ID2D1Bitmap* getRenderTarget() const;
+
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> cycleTargetSnapshot(D2dEngineContext& context);
 
 	void invalidateCachedTargetSnapshot();
+
+	void setCachedTargetSnapshot(Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap);
 
   private:
 	Microsoft::WRL::ComPtr<ID2D1Bitmap> acquirePreservedBaseBitmap(ID2D1DeviceContext* deviceContext);

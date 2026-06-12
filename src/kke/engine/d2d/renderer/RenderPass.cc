@@ -61,8 +61,12 @@ void RenderPass::clear(D2dEngineContext& context) {
 	preservedBaseBitmap.Reset();
 }
 
+ID2D1Bitmap* RenderPass::getRenderTarget() const {
+	return lastRenderTarget;
+}
+
 Microsoft::WRL::ComPtr<ID2D1Bitmap1>
-RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode opacityMode) {
+RenderPass::cycleTargetSnapshot(D2dEngineContext& context) {
 	D2dContext* d2dContext = context.getD2dContext();
 	Microsoft::WRL::ComPtr<ID2D1CommandList> currentTargetCommandList =
 		d2dContext->getTargetCommandList();
@@ -84,15 +88,13 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 				deviceContext,
 				baseBitmap.Get(),
 				currentTargetCommandList.Get(),
-				lastRenderTarget,
-				opacityMode
+				lastRenderTarget
 			);
 		} else {
 			snapshotBitmap = commandListSnapshotter.snapshot(
 				deviceContext,
 				currentTargetCommandList.Get(),
-				lastRenderTarget,
-				opacityMode
+				lastRenderTarget
 			);
 		}
 	}
@@ -117,6 +119,10 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 
 void RenderPass::invalidateCachedTargetSnapshot() {
 	cachedTargetSnapshot.Reset();
+}
+
+void RenderPass::setCachedTargetSnapshot(Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap) {
+	cachedTargetSnapshot = snapshotBitmap;
 }
 
 Microsoft::WRL::ComPtr<ID2D1Bitmap>

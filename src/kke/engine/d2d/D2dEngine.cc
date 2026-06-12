@@ -45,6 +45,7 @@ void D2dEngine::beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget) 
 	D2D1_SIZE_F viewportSize = renderTarget->GetSize();
 	impl->engineContext->update(viewportSize);
 
+	impl->effectRenderer.beginDraw();
 	impl->renderPass.beginDraw(*impl->engineContext, renderTarget);
 }
 
@@ -159,7 +160,9 @@ void D2dEngine::renderEffect(Effect const& effect, std::optional<EffectClipSourc
 	assertD2dContext();
 	impl->effectRenderer
 		.render(*impl->engineContext, impl->renderPass, effect, clip, impl->viewLayerController);
-	impl->renderPass.invalidateCachedTargetSnapshot();
+	if (!clip.has_value()) {
+		impl->renderPass.invalidateCachedTargetSnapshot();
+	}
 }
 
 void D2dEngine::renderEffect(
@@ -180,7 +183,9 @@ void D2dEngine::renderEffect(EffectCompose const& effect, std::optional<EffectCl
 	impl->effectRenderer.render(
 		*impl->engineContext, impl->renderPass, effect, clip, impl->viewLayerController
 	);
-	impl->renderPass.invalidateCachedTargetSnapshot();
+	if (!clip.has_value()) {
+		impl->renderPass.invalidateCachedTargetSnapshot();
+	}
 }
 
 void D2dEngine::renderEffect(

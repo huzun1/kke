@@ -1,5 +1,8 @@
 #include "CommandListSnapshotter.hh"
 
+#include <algorithm>
+#include <cmath>
+
 using namespace kke;
 
 void CommandListSnapshotter::beginFrame() {
@@ -9,10 +12,7 @@ void CommandListSnapshotter::beginFrame() {
 }
 
 Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshot(
-	ID2D1DeviceContext* deviceContext,
-	ID2D1Image* source,
-	ID2D1Bitmap* referenceTarget,
-	SnapshotOpacityMode opacityMode
+	ID2D1DeviceContext* deviceContext, ID2D1Image* source, ID2D1Bitmap* referenceTarget
 ) {
 	if (!deviceContext || !source || !referenceTarget) {
 		return nullptr;
@@ -46,8 +46,69 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshot(
 	snapshotContext->BeginDraw();
 	snapshotContext->SetTarget(snapshotBitmap.Get());
 	snapshotContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	clearSnapshotTarget(snapshotContext, opacityMode);
+	snapshotContext->Clear();
 	snapshotContext->DrawImage(source);
+
+	HRESULT drawResult = snapshotContext->EndDraw();
+
+	snapshotContext->SetTransform(previousTransform);
+	snapshotContext->SetTarget(previousTarget.Get());
+
+	if (FAILED(drawResult)) {
+		return nullptr;
+	}
+
+	return snapshotBitmap;
+}
+
+Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotRegion(
+	ID2D1DeviceContext* deviceContext,
+	ID2D1Image* source,
+	ID2D1Bitmap* referenceTarget,
+	D2D1_RECT_F const& sourceBounds
+) {
+	if (!deviceContext || !source || !referenceTarget) {
+		return nullptr;
+	}
+
+	ID2D1DeviceContext* snapshotContext = acquireSnapshotDeviceContext(deviceContext);
+	if (!snapshotContext) {
+		return nullptr;
+	}
+
+	float width = std::max(1.0f, std::ceil(sourceBounds.right - sourceBounds.left));
+	float height = std::max(1.0f, std::ceil(sourceBounds.bottom - sourceBounds.top));
+
+	float dpiX, dpiY;
+	referenceTarget->GetDpi(&dpiX, &dpiY);
+
+	D2D1_SIZE_U pixelSize{
+		static_cast<UINT32>(width),
+		static_cast<UINT32>(height)
+	};
+
+	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = acquireSnapshotBitmap(
+		snapshotContext,
+		pixelSize,
+		referenceTarget->GetPixelFormat(),
+		dpiX,
+		dpiY
+	);
+	if (!snapshotBitmap) {
+		return nullptr;
+	}
+
+	Microsoft::WRL::ComPtr<ID2D1Image> previousTarget;
+	snapshotContext->GetTarget(&previousTarget);
+
+	D2D1_MATRIX_3X2_F previousTransform;
+	snapshotContext->GetTransform(&previousTransform);
+
+	snapshotContext->BeginDraw();
+	snapshotContext->SetTarget(snapshotBitmap.Get());
+	snapshotContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	snapshotContext->Clear();
+	snapshotContext->DrawImage(source, {-sourceBounds.left, -sourceBounds.top});
 
 	HRESULT drawResult = snapshotContext->EndDraw();
 
@@ -65,8 +126,7 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotComposite(
 	ID2D1DeviceContext* deviceContext,
 	ID2D1Image* background,
 	ID2D1Image* foreground,
-	ID2D1Bitmap* referenceTarget,
-	SnapshotOpacityMode opacityMode
+	ID2D1Bitmap* referenceTarget
 ) {
 	if (!deviceContext || !referenceTarget || (!background && !foreground)) {
 		return nullptr;
@@ -100,7 +160,7 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotComposite(
 	snapshotContext->BeginDraw();
 	snapshotContext->SetTarget(snapshotBitmap.Get());
 	snapshotContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	clearSnapshotTarget(snapshotContext, opacityMode);
+	snapshotContext->Clear();
 	if (background) {
 		snapshotContext->DrawImage(background);
 	}
@@ -198,16 +258,4 @@ ID2D1DeviceContext* CommandListSnapshotter::acquireSnapshotDeviceContext(
 	}
 
 	return snapshotDeviceContext.Get();
-}
-
-void CommandListSnapshotter::clearSnapshotTarget(
-	ID2D1DeviceContext* deviceContext,
-	SnapshotOpacityMode opacityMode
-) {
-	if (opacityMode == SnapshotOpacityMode::FlattenToOpaqueBlack) {
-		deviceContext->Clear(D2D1::ColorF(0.0f, 0.0f, 0.0f, 1.0f));
-		return;
-	}
-
-	deviceContext->Clear();
 }
