@@ -18,10 +18,6 @@ void EffectRenderer::render(
 		return;
 	}
 
-	if (clip.has_value()) {
-		sourceImage = clipCropper.crop(context, sourceImage, effect, clip.value());
-	}
-
 	drawImage(context, apply(context, sourceImage, effect), clip, viewLayerController);
 }
 
@@ -36,10 +32,6 @@ void EffectRenderer::render(
 		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
 	if (!sourceImage) {
 		return;
-	}
-
-	if (clip.has_value()) {
-		sourceImage = clipCropper.crop(context, sourceImage, effectCompose, clip.value());
 	}
 
 	drawImage(
