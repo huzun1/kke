@@ -54,11 +54,6 @@ class CommandListSnapshotter {
 
 	ID2D1DeviceContext* acquireSnapshotDeviceContext(ID2D1DeviceContext* deviceContext);
 
-	static D2D1_PIXEL_FORMAT resolveSnapshotPixelFormat(
-		D2D1_PIXEL_FORMAT referencePixelFormat,
-		SnapshotOpacityMode opacityMode
-	);
-
 	static void clearSnapshotTarget(
 		ID2D1DeviceContext* deviceContext,
 		SnapshotOpacityMode opacityMode

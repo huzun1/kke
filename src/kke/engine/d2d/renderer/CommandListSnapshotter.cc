@@ -25,13 +25,11 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshot(
 
 	float dpiX, dpiY;
 	referenceTarget->GetDpi(&dpiX, &dpiY);
-	D2D1_PIXEL_FORMAT snapshotPixelFormat =
-		resolveSnapshotPixelFormat(referenceTarget->GetPixelFormat(), opacityMode);
 
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = acquireSnapshotBitmap(
 		snapshotContext,
 		referenceTarget->GetPixelSize(),
-		snapshotPixelFormat,
+		referenceTarget->GetPixelFormat(),
 		dpiX,
 		dpiY
 	);
@@ -81,13 +79,11 @@ Microsoft::WRL::ComPtr<ID2D1Bitmap1> CommandListSnapshotter::snapshotComposite(
 
 	float dpiX, dpiY;
 	referenceTarget->GetDpi(&dpiX, &dpiY);
-	D2D1_PIXEL_FORMAT snapshotPixelFormat =
-		resolveSnapshotPixelFormat(referenceTarget->GetPixelFormat(), opacityMode);
 
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = acquireSnapshotBitmap(
 		snapshotContext,
 		referenceTarget->GetPixelSize(),
-		snapshotPixelFormat,
+		referenceTarget->GetPixelFormat(),
 		dpiX,
 		dpiY
 	);
@@ -202,21 +198,6 @@ ID2D1DeviceContext* CommandListSnapshotter::acquireSnapshotDeviceContext(
 	}
 
 	return snapshotDeviceContext.Get();
-}
-
-D2D1_PIXEL_FORMAT CommandListSnapshotter::resolveSnapshotPixelFormat(
-	D2D1_PIXEL_FORMAT referencePixelFormat,
-	SnapshotOpacityMode opacityMode
-) {
-	if (opacityMode == SnapshotOpacityMode::FlattenToOpaqueBlack) {
-		return D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED);
-	}
-
-	if (referencePixelFormat.format == DXGI_FORMAT_UNKNOWN) {
-		return D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED);
-	}
-
-	return referencePixelFormat;
 }
 
 void CommandListSnapshotter::clearSnapshotTarget(
