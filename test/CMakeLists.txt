@@ -7,6 +7,21 @@ configure_file(
     @ONLY
 )
 
+set(KKE_TEST_RESOURCE_FILE ${CMAKE_CURRENT_BINARY_DIR}/resources/resources.res)
+
+add_custom_command(
+    OUTPUT ${KKE_TEST_RESOURCE_FILE}
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_CURRENT_BINARY_DIR}/resources
+    COMMAND ${CMAKE_RC_COMPILER} /nologo /fo ${KKE_TEST_RESOURCE_FILE} ${CMAKE_CURRENT_BINARY_DIR}/resources/resources.rc
+    DEPENDS
+        ${CMAKE_CURRENT_BINARY_DIR}/resources/resources.rc
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/resources.h
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/contents/dycontrast_1337.png
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/contents/SpaceGrotesk-VariableFont_wght.ttf
+        ${CMAKE_CURRENT_SOURCE_DIR}/resources/contents/mountain.png
+    VERBATIM
+)
+
 add_executable(kke_test WIN32
     Main.cc
     Window.cc
@@ -25,7 +40,12 @@ add_executable(kke_test WIN32
     backend/D2D1.cc
     backend/D3D11.cc
     resources/resources.h
-    ${CMAKE_CURRENT_BINARY_DIR}/resources/resources.rc
+    ${KKE_TEST_RESOURCE_FILE}
  )
+
+set_source_files_properties(${KKE_TEST_RESOURCE_FILE} PROPERTIES
+    EXTERNAL_OBJECT TRUE
+)
+
 target_link_libraries(kke_test kke)
 target_include_directories(kke_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

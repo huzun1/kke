@@ -1,16 +1,9 @@
 #include "EffectRenderer.hh"
 
-#include <algorithm>
-
 #include "kke/appearance/resource/effect/EffectIdentifier.hh"
-#include "kke/engine/d2d/renderer/effect/EffectClipBoundsResolver.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
-
-void EffectRenderer::beginDraw() {
-	commandListSnapshotter.beginFrame();
-}
 
 void EffectRenderer::render(
 	D2dEngineContext& context,
@@ -19,17 +12,17 @@ void EffectRenderer::render(
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController
 ) {
-	if (clip.has_value()) {
-		renderClipEffect(context, renderPass, effect, clip.value(), viewLayerController);
-		return;
-	}
-
-	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetSnapshot(context);
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
 	if (!sourceImage) {
 		return;
 	}
 
-	drawImage(context, apply(context, sourceImage, effect), std::nullopt, viewLayerController);
+	if (clip.has_value()) {
+		sourceImage = clipCropper.crop(context, sourceImage, effect, clip.value());
+	}
+
+	drawImage(context, apply(context, sourceImage, effect), clip, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -39,20 +32,20 @@ void EffectRenderer::render(
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController
 ) {
-	if (clip.has_value()) {
-		renderClipEffect(context, renderPass, effectCompose, clip.value(), viewLayerController);
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
+	if (!sourceImage) {
 		return;
 	}
 
-	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetSnapshot(context);
-	if (!sourceImage) {
-		return;
+	if (clip.has_value()) {
+		sourceImage = clipCropper.crop(context, sourceImage, effectCompose, clip.value());
 	}
 
 	drawImage(
 		context,
 		apply(context, sourceImage, effectCompose),
-		std::nullopt,
+		clip,
 		viewLayerController
 	);
 }
@@ -152,175 +145,6 @@ ComPtr<ID2D1Image> EffectRenderer::apply(
 	}
 
 	return currentImage;
-}
-
-void EffectRenderer::renderClipEffect(
-	D2dEngineContext& context,
-	RenderPass& renderPass,
-	Effect const& effect,
-	EffectClipSource const& clip,
-	ViewLayerController& viewLayerController
-) {
-	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
-	if (!renderTarget) {
-		return;
-	}
-
-	ComPtr<ID2D1Bitmap1> sourceImage = renderPass.cycleTargetSnapshot(context);
-	if (!sourceImage) {
-		return;
-	}
-
-	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	D2D1_RECT_F effectBounds = resolveEffectBounds(renderTarget, effect, clip);
-	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
-		deviceContext,
-		sourceImage.Get(),
-		renderTarget,
-		effectBounds
-	);
-
-	ComPtr<ID2D1Image> effectImage =
-		localSourceImage ? apply(context, localSourceImage, effect) : apply(context, sourceImage, effect);
-	if (!effectImage) {
-		return;
-	}
-
-	if (localSourceImage) {
-		drawImage(
-			context,
-			effectImage,
-			{effectBounds.left, effectBounds.top},
-			clip,
-			viewLayerController
-		);
-		updateClipEffectSnapshot(
-			context,
-			deviceContext,
-			sourceImage,
-			effectImage,
-			{effectBounds.left, effectBounds.top},
-			clip,
-			viewLayerController
-		);
-		renderPass.setCachedTargetSnapshot(sourceImage);
-		return;
-	}
-
-	drawImage(context, effectImage, clip, viewLayerController);
-}
-
-void EffectRenderer::renderClipEffect(
-	D2dEngineContext& context,
-	RenderPass& renderPass,
-	EffectCompose const& effectCompose,
-	EffectClipSource const& clip,
-	ViewLayerController& viewLayerController
-) {
-	ID2D1Bitmap* renderTarget = renderPass.getRenderTarget();
-	if (!renderTarget) {
-		return;
-	}
-
-	ComPtr<ID2D1Bitmap1> sourceImage = renderPass.cycleTargetSnapshot(context);
-	if (!sourceImage) {
-		return;
-	}
-
-	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	D2D1_RECT_F effectBounds = resolveEffectBounds(renderTarget, effectCompose, clip);
-	ComPtr<ID2D1Bitmap1> localSourceImage = commandListSnapshotter.snapshotRegion(
-		deviceContext,
-		sourceImage.Get(),
-		renderTarget,
-		effectBounds
-	);
-
-	ComPtr<ID2D1Image> effectImage = localSourceImage ?
-		apply(context, localSourceImage, effectCompose) :
-		apply(context, sourceImage, effectCompose);
-	if (!effectImage) {
-		return;
-	}
-
-	if (localSourceImage) {
-		drawImage(
-			context,
-			effectImage,
-			{effectBounds.left, effectBounds.top},
-			clip,
-			viewLayerController
-		);
-		updateClipEffectSnapshot(
-			context,
-			deviceContext,
-			sourceImage,
-			effectImage,
-			{effectBounds.left, effectBounds.top},
-			clip,
-			viewLayerController
-		);
-		renderPass.setCachedTargetSnapshot(sourceImage);
-		return;
-	}
-
-	drawImage(context, effectImage, clip, viewLayerController);
-}
-
-D2D1_RECT_F
-EffectRenderer::resolveEffectBounds(ID2D1Bitmap* renderTarget, Effect const& effect, EffectClipSource const& clip)
-	const {
-	D2D1_RECT_F effectBounds = EffectClipBoundsResolver::resolve(clip);
-	float padding = EffectPaddingEstimator::estimate(effect);
-	D2D1_SIZE_F targetSize = renderTarget->GetSize();
-
-	return D2D1::RectF(
-		std::max(0.0f, effectBounds.left - padding),
-		std::max(0.0f, effectBounds.top - padding),
-		std::min(targetSize.width, effectBounds.right + padding),
-		std::min(targetSize.height, effectBounds.bottom + padding)
-	);
-}
-
-D2D1_RECT_F EffectRenderer::resolveEffectBounds(
-	ID2D1Bitmap* renderTarget, EffectCompose const& effectCompose, EffectClipSource const& clip
-) const {
-	D2D1_RECT_F effectBounds = EffectClipBoundsResolver::resolve(clip);
-	float padding = EffectPaddingEstimator::estimate(effectCompose);
-	D2D1_SIZE_F targetSize = renderTarget->GetSize();
-
-	return D2D1::RectF(
-		std::max(0.0f, effectBounds.left - padding),
-		std::max(0.0f, effectBounds.top - padding),
-		std::min(targetSize.width, effectBounds.right + padding),
-		std::min(targetSize.height, effectBounds.bottom + padding)
-	);
-}
-
-void EffectRenderer::updateClipEffectSnapshot(
-	D2dEngineContext const& context,
-	ID2D1DeviceContext* deviceContext,
-	ComPtr<ID2D1Bitmap1> snapshotBitmap,
-	ComPtr<ID2D1Image> effectImage,
-	Point const& targetOffset,
-	EffectClipSource const& clip,
-	ViewLayerController& viewLayerController
-) {
-	if (!deviceContext || !snapshotBitmap || !effectImage) {
-		return;
-	}
-
-	ComPtr<ID2D1Image> previousTarget;
-	deviceContext->GetTarget(&previousTarget);
-
-	D2D1_MATRIX_3X2_F previousTransform;
-	deviceContext->GetTransform(&previousTransform);
-
-	deviceContext->SetTarget(snapshotBitmap.Get());
-	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	drawImage(context, effectImage, targetOffset, clip, viewLayerController);
-	deviceContext->SetTransform(previousTransform);
-	deviceContext->SetTarget(previousTarget.Get());
 }
 
 void EffectRenderer::drawImage(
