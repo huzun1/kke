@@ -1,6 +1,7 @@
 #include "BlurStressRendererTest.hh"
 
 #include <cstdio>
+#include <chrono>
 
 #include "kke/appearance/resource/brush/impl/SolidColorBrush.hh"
 #include "kke/appearance/resource/effect/EffectSourceAppearance.hh"
@@ -11,41 +12,25 @@
 namespace application {
 namespace renderer_test {
 void BlurStressRendererTest::render() {
-	static bool announced = false;
-	if (!announced) {
-		std::printf("blur stress benchmark: 300 blurs per frame\n");
-		announced = true;
-	}
+	kke::Brush fillBrush = kke::SolidColorBrush({0.12f, 0.78f, 0.45f, 0.85f});
 
-	kke::Brush panelFill = kke::SolidColorBrush({0.14f, 0.18f, 0.22f, 1.0f});
-	kke::Brush blurMask = kke::SolidColorBrush({0.94f, 0.96f, 0.98f, 1.0f});
+	std::chrono::milliseconds now = std::chrono::duration_cast<std::chrono::milliseconds>(
+		std::chrono::system_clock::now().time_since_epoch()
+	);
 
-	kke::EffectSourceAppearance blurAppearance;
-	blurAppearance.brush = blurMask;
-	blurAppearance.drawMode = kke::EffectSourceDrawMode::Fill;
-
-	kke::BlurEffect blurEffect{
-		{10.0f, kke::BlurBorderMode::SOFT, kke::BlurOptimization::BALANCED, kke::BlurMode::OuterOnly
-		}
-	};
-
-	constexpr int columns = 20;
-	constexpr int rows = 15;
-	constexpr float width = 44.0f;
-	constexpr float height = 28.0f;
-	constexpr float gapX = 14.0f;
-	constexpr float gapY = 14.0f;
-	constexpr float originX = 32.0f;
-	constexpr float originY = 28.0f;
-	constexpr float rounding = 8.0f;
-
-	for (int row = 0; row < rows; ++row) {
-		for (int column = 0; column < columns; ++column) {
-			float left = originX + column * (width + gapX);
-			float top = originY + row * (height + gapY);
-			kke::RoundedRect panel{kke::Rect{{left, top}, {left + width, top + height}}, rounding};
-
-			engine().renderEffect(kke::Geometry{panel}, blurAppearance, blurEffect);
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < 6; j++) {
+			kke::RoundedRect blurRect(
+				{{i * 400.0f, j * 400.0f}, {i * 400.0f + 300.0f, j * 400.0f + 300.0f}},
+				20.0f
+			);
+			engine().renderEffect(
+				kke::BlurEffect({
+					.radius = 30.0f,
+					.optimization = kke::BlurOptimization::SPEED,
+				}),
+				blurRect
+			);
 		}
 	}
 }

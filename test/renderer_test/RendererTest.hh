@@ -17,6 +17,8 @@ class RendererTest {
 
 	std::shared_ptr<kke::Texture> const& encodedTexture() const;
 
+	std::shared_ptr<kke::Texture> const& mountainTexture() const;
+
 	std::shared_ptr<kke::Texture> const& rawTexture() const;
 
   public:

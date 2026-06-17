@@ -5,6 +5,7 @@
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
+#include "kke/engine/d2d/renderer/effect/EffectClipCropper.hh"
 #include "kke/engine/d2d/renderer/effect/EffectSourceRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/BlurEffectRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/ColorMatrixEffectRenderer.hh"
@@ -15,6 +16,7 @@
 namespace kke {
 class EffectRenderer {
 	EffectSourceRenderer sourceRenderer;
+	EffectClipCropper clipCropper;
 	BlurEffectRenderer blurEffectRenderer;
 	DirectionalBlurEffectRenderer directionalBlurEffectRenderer;
 	ColorMatrixEffectRenderer colorMatrixEffectRenderer;

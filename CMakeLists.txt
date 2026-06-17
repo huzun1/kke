@@ -41,10 +41,14 @@ add_library(kke STATIC
     src/kke/engine/d2d/context/D2dContext.cc
     src/kke/engine/d2d/context/D2dEngineContext.cc
     src/kke/engine/d2d/context/D2dResourceProviders.cc
+    src/kke/engine/d2d/renderer/CommandListSnapshotter.cc
     src/kke/engine/d2d/renderer/Measurer.cc
     src/kke/engine/d2d/renderer/RenderPass.cc
     src/kke/engine/d2d/renderer/canvas/CanvasRenderTargetStack.cc
     src/kke/engine/d2d/renderer/canvas/CanvasService.cc
+    src/kke/engine/d2d/renderer/effect/EffectClipBoundsResolver.cc
+    src/kke/engine/d2d/renderer/effect/EffectClipCropper.cc
+    src/kke/engine/d2d/renderer/effect/EffectPaddingEstimator.cc
     src/kke/engine/d2d/renderer/effect/EffectRenderer.cc
     src/kke/engine/d2d/renderer/effect/EffectSourceRenderer.cc
     src/kke/engine/d2d/renderer/effect/cache/PositionIndependentBrush.cc

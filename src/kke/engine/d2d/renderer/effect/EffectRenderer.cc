@@ -12,13 +12,14 @@ void EffectRenderer::render(
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController
 ) {
-	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetCommandList(context);
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
 	if (!sourceImage) {
 		return;
 	}
 
 	if (clip.has_value()) {
-		drawImage(context, sourceImage, std::nullopt, viewLayerController);
+		sourceImage = clipCropper.crop(context, sourceImage, effect, clip.value());
 	}
 
 	drawImage(context, apply(context, sourceImage, effect), clip, viewLayerController);
@@ -31,16 +32,22 @@ void EffectRenderer::render(
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController
 ) {
-	ComPtr<ID2D1Image> sourceImage = renderPass.cycleTargetCommandList(context);
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
 	if (!sourceImage) {
 		return;
 	}
 
 	if (clip.has_value()) {
-		drawImage(context, sourceImage, std::nullopt, viewLayerController);
+		sourceImage = clipCropper.crop(context, sourceImage, effectCompose, clip.value());
 	}
 
-	drawImage(context, apply(context, sourceImage, effectCompose), clip, viewLayerController);
+	drawImage(
+		context,
+		apply(context, sourceImage, effectCompose),
+		clip,
+		viewLayerController
+	);
 }
 
 void EffectRenderer::render(
@@ -156,7 +163,11 @@ void EffectRenderer::drawImage(
 	}
 
 	viewLayerController.pushLayer(context, clip.value(), LayerMode::Normal);
-	context.getD2dContext()->getDeviceContext()->DrawImage(image.Get());
+	context.getD2dContext()->getDeviceContext()->DrawImage(
+		image.Get(),
+		D2D1_INTERPOLATION_MODE_LINEAR,
+		D2D1_COMPOSITE_MODE_SOURCE_COPY
+	);
 	viewLayerController.popLayer(context);
 }
 
@@ -182,7 +193,9 @@ void EffectRenderer::drawImage(
 	viewLayerController.pushLayer(context, clip.value(), LayerMode::Normal);
 	context.getD2dContext()->getDeviceContext()->DrawImage(
 		image.Get(),
-		{targetOffset.x, targetOffset.y}
+		{targetOffset.x, targetOffset.y},
+		D2D1_INTERPOLATION_MODE_LINEAR,
+		D2D1_COMPOSITE_MODE_SOURCE_COPY
 	);
 	viewLayerController.popLayer(context);
 }

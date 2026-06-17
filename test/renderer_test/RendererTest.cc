@@ -18,6 +18,10 @@ std::shared_ptr<kke::Texture> const& RendererTest::encodedTexture() const {
 	return renderer.encodedTexture;
 }
 
+std::shared_ptr<kke::Texture> const& RendererTest::mountainTexture() const {
+	return renderer.mountainTexture;
+}
+
 std::shared_ptr<kke::Texture> const& RendererTest::rawTexture() const {
 	return renderer.rawTexture;
 }
