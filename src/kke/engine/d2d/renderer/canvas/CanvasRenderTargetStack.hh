@@ -11,6 +11,7 @@ namespace kke {
 class CanvasRenderTargetStack {
 	struct RenderTargetState {
 		Microsoft::WRL::ComPtr<ID2D1Image> renderTarget;
+		D2D1_MATRIX_3X2_F transform;
 		std::shared_ptr<D2dCanvas> canvas;
 	};
 

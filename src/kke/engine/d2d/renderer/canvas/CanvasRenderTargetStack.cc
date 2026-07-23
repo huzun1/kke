@@ -12,6 +12,7 @@ void CanvasRenderTargetStack::pushCanvas(
 
 	pushCurrentRenderTarget(context, canvas);
 	d2dContext->getDeviceContext()->SetTarget(canvas->getCommandList().Get());
+	d2dContext->getDeviceContext()->SetTransform(D2D1::Matrix3x2F::Identity());
 }
 
 void CanvasRenderTargetStack::popCanvas(D2dEngineContext const& context) {
@@ -24,6 +25,7 @@ void CanvasRenderTargetStack::popCanvas(D2dEngineContext const& context) {
 
 	RenderTargetState state = renderTargetStack.top();
 	d2dContext->getDeviceContext()->SetTarget(state.renderTarget.Get());
+	d2dContext->getDeviceContext()->SetTransform(state.transform);
 	state.canvas->close();
 	renderTargetStack.pop();
 }
@@ -34,6 +36,8 @@ void CanvasRenderTargetStack::pushCurrentRenderTarget(
 	D2dContext* d2dContext = context.getD2dContext();
 
 	ComPtr<ID2D1Image> currentTarget;
+	D2D1_MATRIX_3X2_F currentTransform;
 	d2dContext->getDeviceContext()->GetTarget(&currentTarget);
-	renderTargetStack.push({currentTarget, canvas});
+	d2dContext->getDeviceContext()->GetTransform(&currentTransform);
+	renderTargetStack.push({currentTarget, currentTransform, canvas});
 }
