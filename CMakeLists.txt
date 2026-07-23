@@ -49,6 +49,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/renderer/canvas/CanvasService.cc
     src/kke/engine/d2d/renderer/effect/EffectClipBoundsResolver.cc
     src/kke/engine/d2d/renderer/effect/EffectClipCropper.cc
+    src/kke/engine/d2d/renderer/effect/EffectClipTransformer.cc
     src/kke/engine/d2d/renderer/effect/EffectPaddingEstimator.cc
     src/kke/engine/d2d/renderer/effect/EffectRenderer.cc
     src/kke/engine/d2d/renderer/effect/EffectSourceRenderer.cc

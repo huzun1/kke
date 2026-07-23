@@ -1,6 +1,7 @@
 #include "EffectRenderer.hh"
 
 #include "kke/appearance/resource/effect/EffectIdentifier.hh"
+#include "kke/engine/d2d/renderer/effect/EffectClipTransformer.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
@@ -12,17 +13,7 @@ void EffectRenderer::render(
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController
 ) {
-	ComPtr<ID2D1Image> sourceImage =
-		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
-	if (!sourceImage) {
-		return;
-	}
-
-	if (clip.has_value()) {
-		sourceImage = clipCropper.crop(context, sourceImage, effect, clip.value());
-	}
-
-	drawImage(context, apply(context, sourceImage, effect), clip, viewLayerController);
+	renderViewportAlignedEffect(context, renderPass, effect, clip, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -32,22 +23,7 @@ void EffectRenderer::render(
 	std::optional<EffectClipSource> clip,
 	ViewLayerController& viewLayerController
 ) {
-	ComPtr<ID2D1Image> sourceImage =
-		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
-	if (!sourceImage) {
-		return;
-	}
-
-	if (clip.has_value()) {
-		sourceImage = clipCropper.crop(context, sourceImage, effectCompose, clip.value());
-	}
-
-	drawImage(
-		context,
-		apply(context, sourceImage, effectCompose),
-		clip,
-		viewLayerController
-	);
+	renderViewportAlignedEffect(context, renderPass, effectCompose, clip, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -145,6 +121,68 @@ ComPtr<ID2D1Image> EffectRenderer::apply(
 	}
 
 	return currentImage;
+}
+
+void EffectRenderer::renderViewportAlignedEffect(
+	D2dEngineContext& context,
+	RenderPass& renderPass,
+	Effect const& effect,
+	std::optional<EffectClipSource> clip,
+	ViewLayerController& viewLayerController
+) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	D2D1_MATRIX_3X2_F activeTransform;
+	deviceContext->GetTransform(&activeTransform);
+
+	std::optional<EffectClipSource> viewportClip;
+	if (clip.has_value()) {
+		viewportClip = EffectClipTransformer::transform(*clip, activeTransform);
+	}
+
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
+	if (sourceImage) {
+		if (viewportClip.has_value()) {
+			sourceImage = clipCropper.crop(context, sourceImage, effect, viewportClip.value());
+		}
+		drawImage(context, apply(context, sourceImage, effect), viewportClip, viewLayerController);
+	}
+	deviceContext->SetTransform(activeTransform);
+}
+
+void EffectRenderer::renderViewportAlignedEffect(
+	D2dEngineContext& context,
+	RenderPass& renderPass,
+	EffectCompose const& effectCompose,
+	std::optional<EffectClipSource> clip,
+	ViewLayerController& viewLayerController
+) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	D2D1_MATRIX_3X2_F activeTransform;
+	deviceContext->GetTransform(&activeTransform);
+
+	std::optional<EffectClipSource> viewportClip;
+	if (clip.has_value()) {
+		viewportClip = EffectClipTransformer::transform(*clip, activeTransform);
+	}
+
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
+	if (sourceImage) {
+		if (viewportClip.has_value()) {
+			sourceImage =
+				clipCropper.crop(context, sourceImage, effectCompose, viewportClip.value());
+		}
+		drawImage(
+			context,
+			apply(context, sourceImage, effectCompose),
+			viewportClip,
+			viewLayerController
+		);
+	}
+	deviceContext->SetTransform(activeTransform);
 }
 
 void EffectRenderer::drawImage(

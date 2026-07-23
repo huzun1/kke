@@ -70,6 +70,22 @@ class EffectRenderer {
 		EffectCompose const& effectCompose
 	);
 
+	void renderViewportAlignedEffect(
+		D2dEngineContext& context,
+		RenderPass& renderPass,
+		Effect const& effect,
+		std::optional<EffectClipSource> clip,
+		ViewLayerController& viewLayerController
+	);
+
+	void renderViewportAlignedEffect(
+		D2dEngineContext& context,
+		RenderPass& renderPass,
+		EffectCompose const& effectCompose,
+		std::optional<EffectClipSource> clip,
+		ViewLayerController& viewLayerController
+	);
+
 	void drawImage(
 		D2dEngineContext const& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> image,
