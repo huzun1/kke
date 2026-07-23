@@ -4,6 +4,7 @@
 
 #include "BrushHashTag.hh"
 #include "kke/appearance/Color.hh"
+#include "kke/appearance/ColorQuantizer.hh"
 #include "kke/utils/Hasher.hh"
 
 using namespace kke;
@@ -17,10 +18,10 @@ uint64_t BrushHasher::hash(SolidColorBrush const& brush) {
 
 	Hasher hasher;
 	hasher.combine(BrushHashTag::SolidColor);
-	hasher.combine(color.r);
-	hasher.combine(color.g);
-	hasher.combine(color.b);
-	hasher.combine(color.a);
+	hasher.combine(ColorQuantizer::quantizeComponent(color.r));
+	hasher.combine(ColorQuantizer::quantizeComponent(color.g));
+	hasher.combine(ColorQuantizer::quantizeComponent(color.b));
+	hasher.combine(ColorQuantizer::quantizeComponent(color.a));
 	return hasher.get();
 }
 
@@ -29,10 +30,10 @@ uint64_t BrushHasher::hash(LinearGradientBrush const& brush) {
 	hasher.combine(BrushHashTag::LinearGradient);
 
 	for (Color const& color : brush.getColors()) {
-		hasher.combine(color.r);
-		hasher.combine(color.g);
-		hasher.combine(color.b);
-		hasher.combine(color.a);
+		hasher.combine(ColorQuantizer::quantizeComponent(color.r));
+		hasher.combine(ColorQuantizer::quantizeComponent(color.g));
+		hasher.combine(ColorQuantizer::quantizeComponent(color.b));
+		hasher.combine(ColorQuantizer::quantizeComponent(color.a));
 	}
 
 	hasher.combine(brush.getStartPoint().x);

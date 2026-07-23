@@ -5,6 +5,7 @@
 #include <vector>
 
 #include "kke/appearance/Color.hh"
+#include "kke/appearance/ColorQuantizer.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
@@ -17,7 +18,7 @@ ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, Brush const& 
 }
 
 ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, SolidColorBrush const& brush) {
-	Color const& color = brush.getColor();
+	Color color = ColorQuantizer::quantize(brush.getColor());
 	D2D1_COLOR_F d2dColor{color.r, color.g, color.b, color.a};
 
 	ComPtr<ID2D1SolidColorBrush> solidBrush;
@@ -41,7 +42,7 @@ BrushFactory::create(D2dContext const& context, LinearGradientBrush const& brush
 	std::vector<D2D1_GRADIENT_STOP> gradientStops;
 	gradientStops.reserve(colors.size());
 	for (size_t index = 0; index < colors.size(); ++index) {
-		Color const& color = colors[index];
+		Color color = ColorQuantizer::quantize(colors[index]);
 		float position = colors.size() == 1
 							 ? 0.0f
 							 : static_cast<float>(index) / static_cast<float>(colors.size() - 1);

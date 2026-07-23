@@ -31,6 +31,7 @@ set(KKE_PUBLIC_D2D_CONTEXT_HEADERS
 
 add_library(kke STATIC
     src/kke/appearance/Color.cc
+    src/kke/appearance/ColorQuantizer.cc
     src/kke/appearance/Scale.cc
     src/kke/appearance/resource/GeometryCompose.cc
     src/kke/appearance/resource/effect/EffectCompose.cc

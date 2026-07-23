@@ -1,5 +1,6 @@
 #include "ShadowEffectRenderer.hh"
 
+#include "kke/appearance/ColorQuantizer.hh"
 #include "kke/utils/Hasher.hh"
 
 using namespace kke;
@@ -88,10 +89,10 @@ uint64_t ShadowEffectRenderer::hashEffect(ShadowEffect const& effect) {
 	hasher.combine(effect.offset.x);
 	hasher.combine(effect.offset.y);
 	hasher.combine(effect.blurStandardDeviation);
-	hasher.combine(effect.color.r);
-	hasher.combine(effect.color.g);
-	hasher.combine(effect.color.b);
-	hasher.combine(effect.color.a);
+	hasher.combine(ColorQuantizer::quantizeComponent(effect.color.r));
+	hasher.combine(ColorQuantizer::quantizeComponent(effect.color.g));
+	hasher.combine(ColorQuantizer::quantizeComponent(effect.color.b));
+	hasher.combine(ColorQuantizer::quantizeComponent(effect.color.a));
 	hasher.combine(effect.mode);
 	return hasher.get();
 }
@@ -106,10 +107,11 @@ ComPtr<ID2D1Effect> ShadowEffectRenderer::createShadowEffect(
 	}
 
 	shadowEffect->SetInput(0, sourceImage.Get());
+	Color quantizedColor = ColorQuantizer::quantize(effect.color);
 	shadowEffect->SetValue(D2D1_SHADOW_PROP_BLUR_STANDARD_DEVIATION, effect.blurStandardDeviation);
 	shadowEffect->SetValue(
 		D2D1_SHADOW_PROP_COLOR,
-		D2D1::Vector4F(effect.color.r, effect.color.g, effect.color.b, effect.color.a)
+		D2D1::Vector4F(quantizedColor.r, quantizedColor.g, quantizedColor.b, quantizedColor.a)
 	);
 	return shadowEffect;
 }
