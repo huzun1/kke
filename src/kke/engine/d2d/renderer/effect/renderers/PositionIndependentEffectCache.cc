@@ -1,5 +1,6 @@
 #include "PositionIndependentEffectCache.hh"
 
+#include <algorithm>
 #include <atomic>
 
 #include "kke/engine/d2d/renderer/effect/cache/PositionIndependentBrush.hh"
@@ -13,6 +14,10 @@ namespace {
 std::atomic<uint64_t> cacheHits = 0;
 std::atomic<uint64_t> cacheMisses = 0;
 } // namespace
+
+PositionIndependentEffectCache::PositionIndependentEffectCache(size_t maxCachedBytes)
+	: maxCachedBytes(maxCachedBytes) {
+}
 
 bool PositionIndependentEffectCache::supports(EffectSource const& source) const {
 	return !std::holds_alternative<std::shared_ptr<Canvas>>(source);
@@ -58,9 +63,20 @@ PositionIndependentEffectCache::RenderResult PositionIndependentEffectCache::ren
 			return {nullptr, {0.0f, 0.0f}};
 		}
 
-		cached = cache.emplace(cacheKey, cachedBitmap).first;
+		if (!shouldCache(cachedBitmap)) {
+			Point drawOffset = sourceOrigin + cachedBitmap.relativeDrawOffset;
+			return {cachedBitmap.bitmap, drawOffset};
+		}
+
+		store(cacheKey, cachedBitmap);
+		cached = cache.find(cacheKey);
+		if (cached == cache.end()) {
+			Point drawOffset = sourceOrigin + cachedBitmap.relativeDrawOffset;
+			return {cachedBitmap.bitmap, drawOffset};
+		}
 	} else {
 		recordHit();
+		cached->second.lastUsed = nextUsageStamp();
 	}
 
 	Point drawOffset = sourceOrigin + cached->second.relativeDrawOffset;
@@ -89,7 +105,7 @@ PositionIndependentEffectCache::CachedEffectResult PositionIndependentEffectCach
 		return {nullptr, {0.0f, 0.0f}};
 	}
 
-	return {bitmap, {imageBounds.left, imageBounds.top}};
+	return {bitmap, {imageBounds.left, imageBounds.top}, estimateBitmapByteSize(bitmap.Get()), 0};
 }
 
 uint64_t PositionIndependentEffectCache::createCacheKey(
@@ -165,4 +181,54 @@ void PositionIndependentEffectCache::recordHit() {
 
 void PositionIndependentEffectCache::recordMiss() {
 	cacheMisses.fetch_add(1);
+}
+
+bool PositionIndependentEffectCache::shouldCache(CachedEffectResult const& result) const {
+	return result.bitmap && result.byteSize <= maxCachedBytes;
+}
+
+void PositionIndependentEffectCache::store(uint64_t key, CachedEffectResult result) {
+	result.lastUsed = nextUsageStamp();
+
+	auto existing = cache.find(key);
+	if (existing != cache.end()) {
+		cachedBytes -= existing->second.byteSize;
+		existing->second = result;
+		cachedBytes += result.byteSize;
+		trimCache();
+		return;
+	}
+
+	cachedBytes += result.byteSize;
+	cache.emplace(key, result);
+	trimCache();
+}
+
+void PositionIndependentEffectCache::trimCache() {
+	if (maxCachedBytes == 0) {
+		cache.clear();
+		cachedBytes = 0;
+		return;
+	}
+
+	while (cachedBytes > maxCachedBytes && !cache.empty()) {
+		auto oldest = std::min_element(cache.begin(), cache.end(), [](auto const& a, auto const& b) {
+			return a.second.lastUsed < b.second.lastUsed;
+		});
+		cachedBytes -= oldest->second.byteSize;
+		cache.erase(oldest);
+	}
+}
+
+uint64_t PositionIndependentEffectCache::nextUsageStamp() {
+	return ++usageClock;
+}
+
+size_t PositionIndependentEffectCache::estimateBitmapByteSize(ID2D1Bitmap1* bitmap) {
+	if (!bitmap) {
+		return 0;
+	}
+
+	D2D1_SIZE_U pixelSize = bitmap->GetPixelSize();
+	return static_cast<size_t>(pixelSize.width) * static_cast<size_t>(pixelSize.height) * 4;
 }

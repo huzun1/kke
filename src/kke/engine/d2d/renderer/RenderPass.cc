@@ -17,6 +17,7 @@ void RenderPass::beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget)
 
 	deviceContext->CreateCommandList(&targetCommandList);
 	deviceContext->SetTarget(targetCommandList.Get());
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 
 	d2dContext->setTargetCommandList(targetCommandList);
 
@@ -24,6 +25,7 @@ void RenderPass::beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget)
 	preservedBaseBitmap.Reset();
 	cachedTargetSnapshot.Reset();
 	shouldPreserveRenderTarget = true;
+	shouldFlattenNextTargetSnapshot = true;
 }
 
 void RenderPass::endDraw(D2dEngineContext& context) {
@@ -37,6 +39,7 @@ void RenderPass::endDraw(D2dEngineContext& context) {
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
 
 	deviceContext->SetTarget(lastRenderTarget);
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	deviceContext->Clear();
 
 	// FIXME: make target command list abstract
@@ -59,6 +62,7 @@ void RenderPass::clear(D2dEngineContext& context) {
 	deviceContext->Clear();
 	shouldPreserveRenderTarget = false;
 	preservedBaseBitmap.Reset();
+	shouldFlattenNextTargetSnapshot = true;
 }
 
 Microsoft::WRL::ComPtr<ID2D1Bitmap1>
@@ -71,6 +75,8 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 	}
 
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
+	D2D1_MATRIX_3X2_F activeTransform;
+	deviceContext->GetTransform(&activeTransform);
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = cachedTargetSnapshot;
 	HRESULT closeResult = currentTargetCommandList->Close();
 	if (FAILED(closeResult)) {
@@ -78,6 +84,13 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 	}
 
 	if (!snapshotBitmap) {
+		SnapshotOpacityMode effectiveOpacityMode = opacityMode;
+		if (shouldFlattenNextTargetSnapshot) {
+			effectiveOpacityMode = SnapshotOpacityMode::FlattenToOpaqueBlack;
+		} else if (effectiveOpacityMode == SnapshotOpacityMode::FlattenToOpaqueBlack) {
+			effectiveOpacityMode = SnapshotOpacityMode::PreserveAlpha;
+		}
+
 		if (shouldPreserveRenderTarget) {
 			Microsoft::WRL::ComPtr<ID2D1Bitmap> baseBitmap = acquirePreservedBaseBitmap(deviceContext);
 			snapshotBitmap = commandListSnapshotter.snapshotComposite(
@@ -85,14 +98,14 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 				baseBitmap.Get(),
 				currentTargetCommandList.Get(),
 				lastRenderTarget,
-				opacityMode
+				effectiveOpacityMode
 			);
 		} else {
 			snapshotBitmap = commandListSnapshotter.snapshot(
 				deviceContext,
 				currentTargetCommandList.Get(),
 				lastRenderTarget,
-				opacityMode
+				effectiveOpacityMode
 			);
 		}
 	}
@@ -107,11 +120,14 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 	}
 
 	deviceContext->SetTarget(nextTargetCommandList.Get());
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	deviceContext->DrawBitmap(snapshotBitmap.Get());
+	deviceContext->SetTransform(activeTransform);
 	d2dContext->setTargetCommandList(nextTargetCommandList);
 	shouldPreserveRenderTarget = false;
 	preservedBaseBitmap.Reset();
 	cachedTargetSnapshot.Reset();
+	shouldFlattenNextTargetSnapshot = false;
 	return snapshotBitmap;
 }
 

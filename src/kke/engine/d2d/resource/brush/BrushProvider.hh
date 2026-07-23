@@ -12,7 +12,7 @@ class BrushProvider {
 	KeyCacheStorage<ID2D1Brush> storage;
 
   public:
-	BrushProvider(uint32_t limit = UINT32_MAX);
+	BrushProvider(uint32_t limit = 2048);
 
 	Microsoft::WRL::ComPtr<ID2D1Brush> get(D2dContext const& context, Brush const& brush);
 };

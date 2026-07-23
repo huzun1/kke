@@ -11,6 +11,7 @@ class RenderPass {
 	Microsoft::WRL::ComPtr<ID2D1Bitmap1> cachedTargetSnapshot;
 	ID2D1Bitmap* lastRenderTarget = nullptr;
 	bool shouldPreserveRenderTarget = true;
+	bool shouldFlattenNextTargetSnapshot = true;
 
   public:
 	void beginDraw(D2dEngineContext& context, ID2D1Bitmap* renderTarget);

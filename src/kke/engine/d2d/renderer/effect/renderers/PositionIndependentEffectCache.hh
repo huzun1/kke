@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <cstdint>
 #include <functional>
 #include <optional>
 #include <unordered_map>
@@ -21,6 +23,8 @@ class PositionIndependentEffectCache {
 	struct CachedEffectResult {
 		Microsoft::WRL::ComPtr<ID2D1Bitmap1> bitmap;
 		Point relativeDrawOffset;
+		size_t byteSize = 0;
+		uint64_t lastUsed = 0;
 	};
 
 	struct SavedDeviceContextState {
@@ -30,6 +34,9 @@ class PositionIndependentEffectCache {
 
 	EffectSourceRenderer sourceRenderer;
 	std::unordered_map<uint64_t, CachedEffectResult> cache;
+	size_t maxCachedBytes;
+	size_t cachedBytes = 0;
+	uint64_t usageClock = 0;
 
   public:
 	struct RenderResult {
@@ -39,6 +46,8 @@ class PositionIndependentEffectCache {
 
 	using EffectImageRenderer = std::function<
 		Microsoft::WRL::ComPtr<ID2D1Image>(D2dEngineContext&, Microsoft::WRL::ComPtr<ID2D1Image>)>;
+
+	PositionIndependentEffectCache(size_t maxCachedBytes = 64 * 1024 * 1024);
 
 	bool supports(EffectSource const& source) const;
 
@@ -81,5 +90,15 @@ class PositionIndependentEffectCache {
 	static void recordHit();
 
 	static void recordMiss();
+
+	bool shouldCache(CachedEffectResult const& result) const;
+
+	void store(uint64_t key, CachedEffectResult result);
+
+	void trimCache();
+
+	uint64_t nextUsageStamp();
+
+	static size_t estimateBitmapByteSize(ID2D1Bitmap1* bitmap);
 };
 } // namespace kke
