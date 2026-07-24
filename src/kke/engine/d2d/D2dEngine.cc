@@ -168,10 +168,18 @@ void D2dEngine::draw(
 	impl->textureRenderer.draw(*impl->engineContext, texture, destRect, appearance);
 }
 
-void D2dEngine::renderEffect(Effect const& effect, std::optional<EffectClipSource> clip) {
+void D2dEngine::renderEffect(
+	Effect const& effect, std::optional<EffectClipSource> clip, float opacity
+) {
 	assertD2dContext();
-	impl->effectRenderer
-		.render(*impl->engineContext, impl->renderPass, effect, clip, impl->viewLayerController);
+	impl->effectRenderer.render(
+		*impl->engineContext,
+		impl->renderPass,
+		effect,
+		clip,
+		opacity,
+		impl->viewLayerController
+	);
 	impl->renderPass.invalidateCachedTargetSnapshot();
 }
 
@@ -184,15 +192,19 @@ void D2dEngine::renderEffect(
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
 	impl->effectRenderer.render(
-		*impl->engineContext, source, sourceAppearance, effect, clip, impl->viewLayerController
+		*impl->engineContext,
+		source,
+		sourceAppearance,
+		effect,
+		clip,
+		impl->viewLayerController
 	);
 }
 
 void D2dEngine::renderEffect(EffectCompose const& effect, std::optional<EffectClipSource> clip) {
 	assertD2dContext();
-	impl->effectRenderer.render(
-		*impl->engineContext, impl->renderPass, effect, clip, impl->viewLayerController
-	);
+	impl->effectRenderer
+		.render(*impl->engineContext, impl->renderPass, effect, clip, impl->viewLayerController);
 	impl->renderPass.invalidateCachedTargetSnapshot();
 }
 
@@ -205,7 +217,12 @@ void D2dEngine::renderEffect(
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
 	impl->effectRenderer.render(
-		*impl->engineContext, source, sourceAppearance, effect, clip, impl->viewLayerController
+		*impl->engineContext,
+		source,
+		sourceAppearance,
+		effect,
+		clip,
+		impl->viewLayerController
 	);
 }
 

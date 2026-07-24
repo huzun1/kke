@@ -11,9 +11,10 @@ void EffectRenderer::render(
 	RenderPass& renderPass,
 	Effect const& effect,
 	std::optional<EffectClipSource> clip,
+	float opacity,
 	ViewLayerController& viewLayerController
 ) {
-	renderViewportAlignedEffect(context, renderPass, effect, clip, viewLayerController);
+	renderViewportAlignedEffect(context, renderPass, effect, clip, opacity, viewLayerController);
 }
 
 void EffectRenderer::render(
@@ -123,13 +124,29 @@ ComPtr<ID2D1Image> EffectRenderer::apply(
 	return currentImage;
 }
 
+ComPtr<ID2D1Image> EffectRenderer::applyOpacity(
+	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, float opacity
+) {
+	ColorMatrixEffect opacityEffect;
+	opacityEffect.colorMatrix.values = {
+		opacity, 0.0f, 0.0f,	0.0f, 0.0f, 0.0f, opacity, 0.0f, 0.0f,	  0.0f,
+		0.0f,	 0.0f, opacity, 0.0f, 0.0f, 0.0f, 0.0f,	   0.0f, opacity, 0.0f,
+	};
+	return colorMatrixEffectRenderer.render(context, sourceImage, opacityEffect);
+}
+
 void EffectRenderer::renderViewportAlignedEffect(
 	D2dEngineContext& context,
 	RenderPass& renderPass,
 	Effect const& effect,
 	std::optional<EffectClipSource> clip,
+	float opacity,
 	ViewLayerController& viewLayerController
 ) {
+	if (opacity <= 0.0f) {
+		return;
+	}
+
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 	D2D1_MATRIX_3X2_F activeTransform;
 	deviceContext->GetTransform(&activeTransform);
@@ -146,7 +163,12 @@ void EffectRenderer::renderViewportAlignedEffect(
 		if (viewportClip.has_value()) {
 			sourceImage = clipCropper.crop(context, sourceImage, effect, viewportClip.value());
 		}
-		drawImage(context, apply(context, sourceImage, effect), viewportClip, viewLayerController);
+		ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, effect);
+		bool useSourceOver = opacity < 1.0f;
+		if (useSourceOver) {
+			effectImage = applyOpacity(context, effectImage, opacity);
+		}
+		drawImage(context, effectImage, viewportClip, viewLayerController, useSourceOver);
 	}
 	deviceContext->SetTransform(activeTransform);
 }
@@ -189,7 +211,8 @@ void EffectRenderer::drawImage(
 	D2dEngineContext const& context,
 	ComPtr<ID2D1Image> image,
 	std::optional<EffectClipSource> const& clip,
-	ViewLayerController& viewLayerController
+	ViewLayerController& viewLayerController,
+	bool useSourceOver
 ) {
 	if (!image) {
 		return;
@@ -204,7 +227,7 @@ void EffectRenderer::drawImage(
 	context.getD2dContext()->getDeviceContext()->DrawImage(
 		image.Get(),
 		D2D1_INTERPOLATION_MODE_LINEAR,
-		D2D1_COMPOSITE_MODE_SOURCE_COPY
+		useSourceOver ? D2D1_COMPOSITE_MODE_SOURCE_OVER : D2D1_COMPOSITE_MODE_SOURCE_COPY
 	);
 	viewLayerController.popLayer(context);
 }

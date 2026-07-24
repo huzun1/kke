@@ -28,6 +28,7 @@ class EffectRenderer {
 		RenderPass& renderPass,
 		Effect const& effect,
 		std::optional<EffectClipSource> clip,
+		float opacity,
 		ViewLayerController& viewLayerController
 	);
 
@@ -70,11 +71,16 @@ class EffectRenderer {
 		EffectCompose const& effectCompose
 	);
 
+	Microsoft::WRL::ComPtr<ID2D1Image> applyOpacity(
+		D2dEngineContext& context, Microsoft::WRL::ComPtr<ID2D1Image> sourceImage, float opacity
+	);
+
 	void renderViewportAlignedEffect(
 		D2dEngineContext& context,
 		RenderPass& renderPass,
 		Effect const& effect,
 		std::optional<EffectClipSource> clip,
+		float opacity,
 		ViewLayerController& viewLayerController
 	);
 
@@ -90,7 +96,8 @@ class EffectRenderer {
 		D2dEngineContext const& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> image,
 		std::optional<EffectClipSource> const& clip,
-		ViewLayerController& viewLayerController
+		ViewLayerController& viewLayerController,
+		bool useSourceOver = false
 	);
 
 	void drawImage(

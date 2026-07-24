@@ -76,8 +76,11 @@ class D2dEngine : public Engine {
 	) override;
 
 	/* ================= Effect Rendering ================== */
-	void renderEffect(Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt)
-		override;
+	void renderEffect(
+		Effect const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt,
+		float opacity = 1.0f
+	) override;
 
 	void renderEffect(
 		EffectSource const& source,

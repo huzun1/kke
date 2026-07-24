@@ -46,8 +46,10 @@ class Engine {
 
 	/**
 	 * @brief Pushes a new layer onto the layer stack.
-	 * @param mask The mask source applied to the layer.
+	 * @param mask The mask source
+	 * applied to the layer.
 	 * @param mode The blending mode of the layer (default: NORMAL).
+
 	 */
 	virtual void pushLayer(MaskSource const& mask, LayerMode mode = LayerMode::Normal) = 0;
 
@@ -162,8 +164,11 @@ class Engine {
 	 * @param source The effect source.
 	 * @param effect The effect to apply.
 	 */
-	virtual void
-	renderEffect(Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt) = 0;
+	virtual void renderEffect(
+		Effect const& effect,
+		std::optional<EffectClipSource> clip = std::nullopt,
+		float opacity = 1.0f
+	) = 0;
 
 	/**
 	 * @brief Renders an effect using a single effect definition.
