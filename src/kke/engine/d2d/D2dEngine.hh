@@ -36,6 +36,10 @@ class D2dEngine : public Engine {
 
 	void popLayer() override;
 
+	void pushAxisAlignedClip(Rect const& rect) override;
+
+	void popAxisAlignedClip() override;
+
 	/* ================= Canvas Control ================= */
 	std::shared_ptr<Canvas> createCanvas() override;
 

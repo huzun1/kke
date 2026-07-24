@@ -56,6 +56,10 @@ class Engine {
 	 */
 	virtual void popLayer() = 0;
 
+	virtual void pushAxisAlignedClip(Rect const& rect) = 0;
+
+	virtual void popAxisAlignedClip() = 0;
+
 	/* ================= Canvas Control ================= */
 
 	/**
