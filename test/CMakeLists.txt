@@ -49,3 +49,7 @@ set_source_files_properties(${KKE_TEST_RESOURCE_FILE} PROPERTIES
 
 target_link_libraries(kke_test kke)
 target_include_directories(kke_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+
+add_executable(kke_matrix_test MatrixTest.cc)
+target_link_libraries(kke_matrix_test PRIVATE kke)
+add_test(NAME kke_matrix_test COMMAND kke_matrix_test)

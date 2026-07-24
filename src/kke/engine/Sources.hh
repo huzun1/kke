@@ -6,6 +6,7 @@
 #include "kke/appearance/Text.hh"
 #include "kke/appearance/resource/Canvas.hh"
 #include "kke/appearance/resource/GeometryCompose.hh"
+#include "kke/appearance/transform/AffineTransform.hh"
 #include "kke/appearance/transform/Rotation.hh"
 #include "kke/appearance/transform/Scaling.hh"
 #include "kke/appearance/transform/Translation.hh"
@@ -20,7 +21,7 @@ namespace kke {
  * This variant encapsulates all supported transformation types
  * that can be applied during rendering.
  */
-using TransformSource = std::variant<Translation, Scaling, Rotation>;
+using TransformSource = std::variant<Translation, Scaling, Rotation, AffineTransform>;
 
 /**
  * @brief Represents a mask source for layer operations.

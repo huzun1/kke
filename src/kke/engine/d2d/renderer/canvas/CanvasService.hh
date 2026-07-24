@@ -12,12 +12,12 @@ class CanvasService {
   public:
 	std::shared_ptr<D2dCanvas> createCanvas(D2dEngineContext const& context);
 
-	void pushCanvas(
+	bool pushCanvas(
 		D2dEngineContext const& context,
 		std::shared_ptr<Canvas> /* std::shared_ptr<D2dCanvas> */ canvas
 	);
 
-	void popCanvas(D2dEngineContext const& context);
+	bool popCanvas(D2dEngineContext const& context);
 
 	void drawCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas, float opacity);
 };

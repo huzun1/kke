@@ -100,13 +100,17 @@ std::shared_ptr<Canvas> D2dEngine::createCanvas() {
 void D2dEngine::pushCanvas(std::shared_ptr<Canvas> canvas) {
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
-	impl->canvasService.pushCanvas(*impl->engineContext, canvas);
+	if (impl->canvasService.pushCanvas(*impl->engineContext, canvas)) {
+		impl->matrixState.pushCanvas(*impl->engineContext);
+	}
 }
 
 void D2dEngine::popCanvas() {
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
-	impl->canvasService.popCanvas(*impl->engineContext);
+	if (impl->canvasService.popCanvas(*impl->engineContext)) {
+		impl->matrixState.popCanvas(*impl->engineContext);
+	}
 }
 
 void D2dEngine::draw(std::shared_ptr<Canvas> canvas, float opacity) {

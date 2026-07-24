@@ -5,7 +5,7 @@
 using namespace Microsoft::WRL;
 using namespace kke;
 
-void CanvasRenderTargetStack::pushCanvas(
+bool CanvasRenderTargetStack::pushCanvas(
 	D2dEngineContext const& context, std::shared_ptr<D2dCanvas> canvas
 ) {
 	D2dContext* d2dContext = context.getD2dContext();
@@ -13,12 +13,13 @@ void CanvasRenderTargetStack::pushCanvas(
 	pushCurrentRenderTarget(context, canvas);
 	d2dContext->getDeviceContext()->SetTarget(canvas->getCommandList().Get());
 	d2dContext->getDeviceContext()->SetTransform(D2D1::Matrix3x2F::Identity());
+	return true;
 }
 
-void CanvasRenderTargetStack::popCanvas(D2dEngineContext const& context) {
+bool CanvasRenderTargetStack::popCanvas(D2dEngineContext const& context) {
 	if (renderTargetStack.empty()) {
 		kke::debug::log("[kke][CanvasRenderTargetStack] popCanvas called with an empty stack");
-		return;
+		return false;
 	}
 
 	D2dContext* d2dContext = context.getD2dContext();
@@ -28,6 +29,7 @@ void CanvasRenderTargetStack::popCanvas(D2dEngineContext const& context) {
 	d2dContext->getDeviceContext()->SetTransform(state.transform);
 	state.canvas->close();
 	renderTargetStack.pop();
+	return true;
 }
 
 void CanvasRenderTargetStack::pushCurrentRenderTarget(

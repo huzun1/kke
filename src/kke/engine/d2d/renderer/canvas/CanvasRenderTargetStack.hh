@@ -18,9 +18,9 @@ class CanvasRenderTargetStack {
 	std::stack<RenderTargetState> renderTargetStack;
 
   public:
-	void pushCanvas(D2dEngineContext const& context, std::shared_ptr<D2dCanvas> canvas);
+	bool pushCanvas(D2dEngineContext const& context, std::shared_ptr<D2dCanvas> canvas);
 
-	void popCanvas(D2dEngineContext const& context);
+	bool popCanvas(D2dEngineContext const& context);
 
   private:
 	void

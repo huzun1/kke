@@ -10,17 +10,17 @@ std::shared_ptr<D2dCanvas> CanvasService::createCanvas(D2dEngineContext const& c
 	return CanvasFactory::createCanvas(context);
 }
 
-void CanvasService::pushCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas) {
+bool CanvasService::pushCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas) {
 	std::shared_ptr<D2dCanvas> d2dCanvas = std::dynamic_pointer_cast<D2dCanvas>(canvas);
 	if (!d2dCanvas) {
 		kke::debug::log("[kke][CanvasService] pushCanvas received an invalid canvas type");
-		return;
+		return false;
 	}
-	renderTargetStack.pushCanvas(context, d2dCanvas);
+	return renderTargetStack.pushCanvas(context, d2dCanvas);
 }
 
-void CanvasService::popCanvas(D2dEngineContext const& context) {
-	renderTargetStack.popCanvas(context);
+bool CanvasService::popCanvas(D2dEngineContext const& context) {
+	return renderTargetStack.popCanvas(context);
 }
 
 void CanvasService::drawCanvas(
