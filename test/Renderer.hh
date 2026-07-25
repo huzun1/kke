@@ -10,6 +10,7 @@
 
 #include "FpsCounter.hh"
 #include "backend/D2D1.hh"
+#include "kke/appearance/resource/texture/RgbaBitmap.hh"
 #include "kke/appearance/resource/texture/Texture.hh"
 #include "kke/engine/d2d/D2dEngine.hh"
 
@@ -30,7 +31,7 @@ class Renderer {
 	std::shared_ptr<kke::Texture> encodedTexture;
 	std::shared_ptr<kke::Texture> mountainTexture;
 	std::shared_ptr<kke::Texture> rawTexture;
-	std::vector<uint8_t> rawTexturePixels;
+	kke::RgbaBitmap rawTextureBitmap;
 	std::vector<RendererTestEntry> rendererTests;
 	size_t activeRendererTestIndex = 0;
 	bool hasActiveRendererTest = false;
@@ -68,7 +69,7 @@ class Renderer {
 
 	void switchRendererTest(size_t index);
 
-	static std::vector<uint8_t> createRawTexturePixels(uint32_t width, uint32_t height);
+	static kke::RgbaBitmap createRawTextureBitmap(uint32_t width, uint32_t height);
 
 	static std::pair<void const*, size_t> loadResource(int resourceId);
 

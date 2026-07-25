@@ -12,12 +12,11 @@
 #include "kke/appearance/Text.hh"
 #include "kke/appearance/resource/brush/impl/SolidColorBrush.hh"
 #include "kke/appearance/resource/font/FontWeight.hh"
-#include "kke/appearance/resource/texture/RawTextureData.hh"
 #include "kke/engine/d2d/context/D2dContext.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/PositionIndependentEffectCache.hh"
 #include "kke/geometry/shapes/Rect.hh"
-#include "renderer_test/BlurStressRendererTest.hh"
 #include "renderer_test/BlurStressBackgroundRendererTest.hh"
+#include "renderer_test/BlurStressRendererTest.hh"
 #include "renderer_test/CanvasRendererTest.hh"
 #include "renderer_test/FrameEffectRendererTest.hh"
 #include "renderer_test/LayerRendererTest.hh"
@@ -86,13 +85,11 @@ void application::Renderer::ensureTexturesUploaded() {
 		constexpr uint32_t rawTextureWidth = 8;
 		constexpr uint32_t rawTextureHeight = 8;
 
-		if (rawTexturePixels.empty()) {
-			rawTexturePixels = createRawTexturePixels(rawTextureWidth, rawTextureHeight);
+		if (rawTextureBitmap.empty()) {
+			rawTextureBitmap = createRawTextureBitmap(rawTextureWidth, rawTextureHeight);
 		}
 
-		rawTexture = engine.uploadTexture(
-			{rawTexturePixels.data(), rawTextureWidth, rawTextureHeight, rawTextureWidth * 4}
-		);
+		rawTexture = engine.uploadTexture(rawTextureBitmap.rawTextureData());
 	}
 }
 
@@ -292,23 +289,24 @@ void application::Renderer::switchRendererTest(size_t index) {
 	);
 }
 
-std::vector<uint8_t>
-application::Renderer::createRawTexturePixels(uint32_t width, uint32_t height) {
-	std::vector<uint8_t> pixels(static_cast<size_t>(width) * height * 4);
+kke::RgbaBitmap application::Renderer::createRawTextureBitmap(uint32_t width, uint32_t height) {
+	kke::RgbaBitmap bitmap(width, height);
 
 	for (uint32_t y = 0; y < height; ++y) {
 		for (uint32_t x = 0; x < width; ++x) {
-			size_t pixelIndex = (static_cast<size_t>(y) * width + x) * 4;
 			bool isBrightCell = ((x / 2) + (y / 2)) % 2 == 0;
-
-			pixels[pixelIndex + 0] = isBrightCell ? 0xFF : 0x1F;
-			pixels[pixelIndex + 1] = isBrightCell ? 0xB3 : 0x92;
-			pixels[pixelIndex + 2] = isBrightCell ? 0x2D : 0xFF;
-			pixels[pixelIndex + 3] = (x == y || x + y == width - 1) ? 0xA8 : 0xFF;
+			bitmap.setPixel(
+				x,
+				y,
+				isBrightCell ? 0xFF : 0x1F,
+				isBrightCell ? 0xB3 : 0x92,
+				isBrightCell ? 0x2D : 0xFF,
+				(x == y || x + y == width - 1) ? 0xA8 : 0xFF
+			);
 		}
 	}
 
-	return pixels;
+	return bitmap;
 }
 
 std::pair<void const*, size_t> application::Renderer::loadResource(int resourceId) {
