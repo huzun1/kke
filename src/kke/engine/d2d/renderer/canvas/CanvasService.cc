@@ -23,6 +23,14 @@ bool CanvasService::popCanvas(D2dEngineContext const& context) {
 	return renderTargetStack.popCanvas(context);
 }
 
+bool CanvasService::suspendCanvas(D2dEngineContext const& context) {
+	return renderTargetStack.suspendCanvas(context);
+}
+
+bool CanvasService::resumeCanvas(D2dEngineContext const& context) {
+	return renderTargetStack.resumeCanvas(context);
+}
+
 void CanvasService::drawCanvas(
 	D2dEngineContext const& context, std::shared_ptr<Canvas> canvas, float opacity
 ) {

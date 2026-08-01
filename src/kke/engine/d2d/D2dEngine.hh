@@ -47,6 +47,10 @@ class D2dEngine : public Engine {
 
 	void popCanvas() override;
 
+	void suspendCanvas() override;
+
+	void resumeCanvas() override;
+
 	void draw(std::shared_ptr<Canvas> canvas, float opacity = 1.0f) override;
 
 	/* ================= Measurement =================== */
@@ -80,6 +84,10 @@ class D2dEngine : public Engine {
 		Effect const& effect,
 		std::optional<EffectClipSource> clip = std::nullopt,
 		float opacity = 1.0f
+	) override;
+
+	std::shared_ptr<Canvas> captureEffect(
+		Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt
 	) override;
 
 	void renderEffect(

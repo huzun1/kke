@@ -27,6 +27,52 @@ void EffectRenderer::render(
 	renderViewportAlignedEffect(context, renderPass, effectCompose, clip, viewLayerController);
 }
 
+std::shared_ptr<Canvas> EffectRenderer::capture(
+	D2dEngineContext& context,
+	RenderPass& renderPass,
+	Effect const& effect,
+	std::optional<EffectClipSource> clip,
+	ViewLayerController& viewLayerController
+) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	D2D1_MATRIX_3X2_F activeTransform;
+	deviceContext->GetTransform(&activeTransform);
+
+	std::optional<EffectClipSource> viewportClip;
+	if (clip.has_value()) {
+		viewportClip = EffectClipTransformer::transform(*clip, activeTransform);
+	}
+
+	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
+	if (!sourceImage) {
+		deviceContext->SetTransform(activeTransform);
+		return nullptr;
+	}
+	if (viewportClip.has_value()) {
+		sourceImage = clipCropper.crop(context, sourceImage, effect, *viewportClip);
+	}
+	ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, effect);
+	if (!effectImage) {
+		deviceContext->SetTransform(activeTransform);
+		return nullptr;
+	}
+
+	std::shared_ptr<D2dCanvas> canvas = canvasService.createCanvas(context);
+	if (!canvas || !canvasService.pushCanvas(context, canvas)) {
+		deviceContext->SetTransform(activeTransform);
+		return nullptr;
+	}
+	drawImage(context, effectImage, viewportClip, viewLayerController, true);
+	if (!canvasService.popCanvas(context)) {
+		deviceContext->SetTransform(activeTransform);
+		return nullptr;
+	}
+	deviceContext->SetTransform(activeTransform);
+	return canvas;
+}
+
 void EffectRenderer::render(
 	D2dEngineContext& context,
 	EffectSource const& source,

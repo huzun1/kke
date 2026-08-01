@@ -81,6 +81,10 @@ class Engine {
 	 */
 	virtual void popCanvas() = 0;
 
+	virtual void suspendCanvas() = 0;
+
+	virtual void resumeCanvas() = 0;
+
 	/**
 	 * @brief Draws a canvas onto the current render target.
 	 * @param canvas The canvas to draw.
@@ -169,6 +173,14 @@ class Engine {
 		std::optional<EffectClipSource> clip = std::nullopt,
 		float opacity = 1.0f
 	) = 0;
+
+	/**
+	 * @brief Captures the current target with an effect applied without replacing its
+	 * pixels.
+	 * @return The captured effect canvas, or null when capture fails.
+	 */
+	virtual std::shared_ptr<Canvas>
+	captureEffect(Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt) = 0;
 
 	/**
 	 * @brief Renders an effect using a single effect definition.

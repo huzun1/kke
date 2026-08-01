@@ -113,6 +113,22 @@ void D2dEngine::popCanvas() {
 	}
 }
 
+void D2dEngine::suspendCanvas() {
+	assertD2dContext();
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	if (impl->canvasService.suspendCanvas(*impl->engineContext)) {
+		impl->matrixState.popCanvas(*impl->engineContext);
+	}
+}
+
+void D2dEngine::resumeCanvas() {
+	assertD2dContext();
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	if (impl->canvasService.resumeCanvas(*impl->engineContext)) {
+		impl->matrixState.pushCanvas(*impl->engineContext);
+	}
+}
+
 void D2dEngine::draw(std::shared_ptr<Canvas> canvas, float opacity) {
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
@@ -185,6 +201,20 @@ void D2dEngine::renderEffect(
 		impl->viewLayerController
 	);
 	impl->renderPass.invalidateCachedTargetSnapshot();
+}
+
+std::shared_ptr<Canvas>
+D2dEngine::captureEffect(Effect const& effect, std::optional<EffectClipSource> clip) {
+	assertD2dContext();
+	std::shared_ptr<Canvas> canvas = impl->effectRenderer.capture(
+		*impl->engineContext,
+		impl->renderPass,
+		effect,
+		clip,
+		impl->viewLayerController
+	);
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	return canvas;
 }
 
 void D2dEngine::renderEffect(

@@ -32,6 +32,30 @@ bool CanvasRenderTargetStack::popCanvas(D2dEngineContext const& context) {
 	return true;
 }
 
+bool CanvasRenderTargetStack::suspendCanvas(D2dEngineContext const& context) {
+	if (renderTargetStack.empty()) {
+		return false;
+	}
+
+	RenderTargetState const& state = renderTargetStack.top();
+	D2dContext* d2dContext = context.getD2dContext();
+	d2dContext->getDeviceContext()->SetTarget(state.renderTarget.Get());
+	d2dContext->getDeviceContext()->SetTransform(state.transform);
+	return true;
+}
+
+bool CanvasRenderTargetStack::resumeCanvas(D2dEngineContext const& context) {
+	if (renderTargetStack.empty()) {
+		return false;
+	}
+
+	D2dContext* d2dContext = context.getD2dContext();
+	d2dContext->getDeviceContext()->SetTarget(renderTargetStack.top().canvas->getCommandList().Get()
+	);
+	d2dContext->getDeviceContext()->SetTransform(D2D1::Matrix3x2F::Identity());
+	return true;
+}
+
 void CanvasRenderTargetStack::pushCurrentRenderTarget(
 	D2dEngineContext const& context, std::shared_ptr<D2dCanvas> canvas
 ) {

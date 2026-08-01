@@ -5,6 +5,7 @@
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
+#include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
 #include "kke/engine/d2d/renderer/effect/EffectClipCropper.hh"
 #include "kke/engine/d2d/renderer/effect/EffectSourceRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/BlurEffectRenderer.hh"
@@ -15,6 +16,7 @@
 
 namespace kke {
 class EffectRenderer {
+	CanvasService canvasService;
 	EffectSourceRenderer sourceRenderer;
 	EffectClipCropper clipCropper;
 	BlurEffectRenderer blurEffectRenderer;
@@ -29,6 +31,14 @@ class EffectRenderer {
 		Effect const& effect,
 		std::optional<EffectClipSource> clip,
 		float opacity,
+		ViewLayerController& viewLayerController
+	);
+
+	std::shared_ptr<Canvas> capture(
+		D2dEngineContext& context,
+		RenderPass& renderPass,
+		Effect const& effect,
+		std::optional<EffectClipSource> clip,
 		ViewLayerController& viewLayerController
 	);
 

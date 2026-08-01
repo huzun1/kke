@@ -19,6 +19,10 @@ class CanvasService {
 
 	bool popCanvas(D2dEngineContext const& context);
 
+	bool suspendCanvas(D2dEngineContext const& context);
+
+	bool resumeCanvas(D2dEngineContext const& context);
+
 	void drawCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas, float opacity);
 };
 }; // namespace kke

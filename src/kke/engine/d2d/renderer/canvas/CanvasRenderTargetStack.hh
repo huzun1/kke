@@ -22,6 +22,10 @@ class CanvasRenderTargetStack {
 
 	bool popCanvas(D2dEngineContext const& context);
 
+	bool suspendCanvas(D2dEngineContext const& context);
+
+	bool resumeCanvas(D2dEngineContext const& context);
+
   private:
 	void
 	pushCurrentRenderTarget(D2dEngineContext const& context, std::shared_ptr<D2dCanvas> canvas);
