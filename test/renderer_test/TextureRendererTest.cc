@@ -45,7 +45,7 @@ void TextureRendererTest::render() {
 	engine().renderEffect(colorMatrixEffect, kke::Rect{{900.0f, 110.0f}, {1160.0f, 370.0f}});
 
 	std::shared_ptr<kke::Canvas> effectCanvas = engine().createCanvas();
-	engine().pushCanvas(effectCanvas);
+	engine().beginCanvas(effectCanvas);
 
 	if (encodedTexture()) {
 		engine().draw(
@@ -61,7 +61,8 @@ void TextureRendererTest::render() {
 		{0.88f, kke::TextureInterpolation::Nearest}
 	);
 
-	engine().popCanvas();
+	engine().endCanvas();
+	engine().finishCanvas(effectCanvas);
 
 	kke::EffectSourceAppearance canvasAppearance;
 

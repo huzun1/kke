@@ -97,36 +97,29 @@ std::shared_ptr<Canvas> D2dEngine::createCanvas() {
 	return impl->canvasService.createCanvas(*impl->engineContext);
 }
 
-void D2dEngine::pushCanvas(std::shared_ptr<Canvas> canvas) {
+bool D2dEngine::beginCanvas(std::shared_ptr<Canvas> canvas) {
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
-	if (impl->canvasService.pushCanvas(*impl->engineContext, canvas)) {
-		impl->matrixState.pushCanvas(*impl->engineContext);
+	if (!impl->canvasService.beginCanvas(*impl->engineContext, canvas)) {
+		return false;
 	}
+	impl->matrixState.beginCanvas(*impl->engineContext);
+	return true;
 }
 
-void D2dEngine::popCanvas() {
+bool D2dEngine::endCanvas() {
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
-	if (impl->canvasService.popCanvas(*impl->engineContext)) {
-		impl->matrixState.popCanvas(*impl->engineContext);
+	if (!impl->canvasService.endCanvas(*impl->engineContext)) {
+		return false;
 	}
+	impl->matrixState.endCanvas(*impl->engineContext);
+	return true;
 }
 
-void D2dEngine::suspendCanvas() {
+bool D2dEngine::finishCanvas(std::shared_ptr<Canvas> canvas) {
 	assertD2dContext();
-	impl->renderPass.invalidateCachedTargetSnapshot();
-	if (impl->canvasService.suspendCanvas(*impl->engineContext)) {
-		impl->matrixState.popCanvas(*impl->engineContext);
-	}
-}
-
-void D2dEngine::resumeCanvas() {
-	assertD2dContext();
-	impl->renderPass.invalidateCachedTargetSnapshot();
-	if (impl->canvasService.resumeCanvas(*impl->engineContext)) {
-		impl->matrixState.pushCanvas(*impl->engineContext);
-	}
+	return impl->canvasService.finishCanvas(canvas);
 }
 
 void D2dEngine::draw(std::shared_ptr<Canvas> canvas, float opacity) {

@@ -43,13 +43,11 @@ class D2dEngine : public Engine {
 	/* ================= Canvas Control ================= */
 	std::shared_ptr<Canvas> createCanvas() override;
 
-	void pushCanvas(std::shared_ptr<Canvas> canvas) override;
+	bool beginCanvas(std::shared_ptr<Canvas> canvas) override;
 
-	void popCanvas() override;
+	bool endCanvas() override;
 
-	void suspendCanvas() override;
-
-	void resumeCanvas() override;
+	bool finishCanvas(std::shared_ptr<Canvas> canvas) override;
 
 	void draw(std::shared_ptr<Canvas> canvas, float opacity = 1.0f) override;
 

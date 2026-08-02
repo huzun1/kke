@@ -58,7 +58,7 @@ engine().fill(title, kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
 - Text size measurement
 - Texture upload and rendering
 - Layer rendering: `pushLayer`
-- Offscreen canvas rendering: `pushCanvas`
+- Explicit offscreen canvas recording: `beginCanvas`, `endCanvas`, `finishCanvas`
 - Effect rendering: `renderEffect`
 - Included demos: blur, shadow, text, texture, canvas, layer, transform
 

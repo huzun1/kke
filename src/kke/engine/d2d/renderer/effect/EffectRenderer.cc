@@ -60,12 +60,12 @@ std::shared_ptr<Canvas> EffectRenderer::capture(
 	}
 
 	std::shared_ptr<D2dCanvas> canvas = canvasService.createCanvas(context);
-	if (!canvas || !canvasService.pushCanvas(context, canvas)) {
+	if (!canvas || !canvasService.beginCanvas(context, canvas)) {
 		deviceContext->SetTransform(activeTransform);
 		return nullptr;
 	}
 	drawImage(context, effectImage, viewportClip, viewLayerController, true);
-	if (!canvasService.popCanvas(context)) {
+	if (!canvasService.endCanvas(context) || !canvasService.finishCanvas(canvas)) {
 		deviceContext->SetTransform(activeTransform);
 		return nullptr;
 	}

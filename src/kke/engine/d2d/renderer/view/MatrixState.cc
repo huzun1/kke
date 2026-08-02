@@ -11,12 +11,12 @@ void MatrixState::popTransform(D2dEngineContext const& context) {
 	applyTransform(context);
 }
 
-void MatrixState::pushCanvas(D2dEngineContext const& context) {
+void MatrixState::beginCanvas(D2dEngineContext const& context) {
 	canvasBaseDepths.push_back(matrix.depth());
 	applyTransform(context);
 }
 
-void MatrixState::popCanvas(D2dEngineContext const& context) {
+void MatrixState::endCanvas(D2dEngineContext const& context) {
 	if (!canvasBaseDepths.empty()) {
 		canvasBaseDepths.pop_back();
 	}

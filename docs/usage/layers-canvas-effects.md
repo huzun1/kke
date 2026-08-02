@@ -36,12 +36,17 @@ Use canvas rendering when you want to build content once and reuse it later.
 ```cpp
 std::shared_ptr<kke::Canvas> canvas = engine.createCanvas();
 
-engine.pushCanvas(canvas);
+engine.beginCanvas(canvas);
 engine.fill(kke::RoundedRect{kke::Rect{{920.0f, 420.0f}, {1140.0f, 610.0f}}, 24.0f}, fillBrush);
-engine.popCanvas();
+engine.endCanvas();
+engine.finishCanvas(canvas);
 
 engine.draw(canvas, 1.0f);
 ```
+
+`endCanvas` only restores the previous render target. Call `finishCanvas` when recording is
+complete; only a finished canvas can be drawn or used as an effect source. An unfinished canvas
+can be passed to `beginCanvas` again to continue recording.
 
 Canvases can also be used as effect sources.
 

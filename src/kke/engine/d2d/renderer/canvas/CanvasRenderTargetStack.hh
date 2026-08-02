@@ -12,22 +12,16 @@ class CanvasRenderTargetStack {
 	struct RenderTargetState {
 		Microsoft::WRL::ComPtr<ID2D1Image> renderTarget;
 		D2D1_MATRIX_3X2_F transform;
-		std::shared_ptr<D2dCanvas> canvas;
 	};
 
 	std::stack<RenderTargetState> renderTargetStack;
 
   public:
-	bool pushCanvas(D2dEngineContext const& context, std::shared_ptr<D2dCanvas> canvas);
+	bool beginCanvas(D2dEngineContext const& context, std::shared_ptr<D2dCanvas> canvas);
 
-	bool popCanvas(D2dEngineContext const& context);
-
-	bool suspendCanvas(D2dEngineContext const& context);
-
-	bool resumeCanvas(D2dEngineContext const& context);
+	bool endCanvas(D2dEngineContext const& context);
 
   private:
-	void
-	pushCurrentRenderTarget(D2dEngineContext const& context, std::shared_ptr<D2dCanvas> canvas);
+	void pushCurrentRenderTarget(D2dEngineContext const& context);
 };
 }; // namespace kke

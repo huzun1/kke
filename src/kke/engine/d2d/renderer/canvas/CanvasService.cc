@@ -10,25 +10,34 @@ std::shared_ptr<D2dCanvas> CanvasService::createCanvas(D2dEngineContext const& c
 	return CanvasFactory::createCanvas(context);
 }
 
-bool CanvasService::pushCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas) {
+bool CanvasService::beginCanvas(D2dEngineContext const& context, std::shared_ptr<Canvas> canvas) {
 	std::shared_ptr<D2dCanvas> d2dCanvas = std::dynamic_pointer_cast<D2dCanvas>(canvas);
 	if (!d2dCanvas) {
-		kke::debug::log("[kke][CanvasService] pushCanvas received an invalid canvas type");
+		kke::debug::log("[kke][CanvasService] beginCanvas received an invalid canvas type");
 		return false;
 	}
-	return renderTargetStack.pushCanvas(context, d2dCanvas);
+	if (d2dCanvas->closed()) {
+		kke::debug::log("[kke][CanvasService] beginCanvas received a finalized canvas");
+		return false;
+	}
+	return renderTargetStack.beginCanvas(context, d2dCanvas);
 }
 
-bool CanvasService::popCanvas(D2dEngineContext const& context) {
-	return renderTargetStack.popCanvas(context);
+bool CanvasService::endCanvas(D2dEngineContext const& context) {
+	return renderTargetStack.endCanvas(context);
 }
 
-bool CanvasService::suspendCanvas(D2dEngineContext const& context) {
-	return renderTargetStack.suspendCanvas(context);
-}
-
-bool CanvasService::resumeCanvas(D2dEngineContext const& context) {
-	return renderTargetStack.resumeCanvas(context);
+bool CanvasService::finishCanvas(std::shared_ptr<Canvas> canvas) {
+	std::shared_ptr<D2dCanvas> d2dCanvas = std::dynamic_pointer_cast<D2dCanvas>(canvas);
+	if (!d2dCanvas) {
+		kke::debug::log("[kke][CanvasService] finishCanvas received an invalid canvas type");
+		return false;
+	}
+	if (!d2dCanvas->close()) {
+		kke::debug::log("[kke][CanvasService] failed to finalize canvas");
+		return false;
+	}
+	return true;
 }
 
 void CanvasService::drawCanvas(
@@ -40,8 +49,8 @@ void CanvasService::drawCanvas(
 		return;
 	}
 
-	if (!d2dCanvas->close()) {
-		kke::debug::log("[kke][CanvasService] failed to close canvas before drawing");
+	if (!d2dCanvas->closed()) {
+		kke::debug::log("[kke][CanvasService] drawCanvas received an unfinished canvas");
 		return;
 	}
 

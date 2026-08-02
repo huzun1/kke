@@ -17,9 +17,9 @@ class MatrixState {
 
 	void popTransform(D2dEngineContext const& context);
 
-	void pushCanvas(D2dEngineContext const& context);
+	void beginCanvas(D2dEngineContext const& context);
 
-	void popCanvas(D2dEngineContext const& context);
+	void endCanvas(D2dEngineContext const& context);
 
   private:
 	void pushTransform(D2dEngineContext const& context, Translation const& translation);

@@ -29,7 +29,7 @@ void CanvasRendererTest::render() {
 	engine().fill(kke::Rect{{56.0f, 76.0f}, {1224.0f, 656.0f}}, panelFill);
 
 	std::shared_ptr<kke::Canvas> canvas = engine().createCanvas();
-	engine().pushCanvas(canvas);
+	engine().beginCanvas(canvas);
 
 	engine().fill(
 		kke::RoundedRect{kke::Rect{{920.0f, 420.0f}, {1140.0f, 610.0f}}, 24.0f},
@@ -46,7 +46,8 @@ void CanvasRendererTest::render() {
 		outline,
 		{3.0f}
 	);
-	engine().popCanvas();
+	engine().endCanvas();
+	engine().finishCanvas(canvas);
 
 	kke::EffectSourceAppearance shadowAppearance;
 

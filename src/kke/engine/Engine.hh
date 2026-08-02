@@ -70,26 +70,16 @@ class Engine {
 	 */
 	virtual std::shared_ptr<Canvas> createCanvas() = 0;
 
-	/**
-	 * @brief Pushes a canvas onto the canvas stack as the current render target.
-	 * @param canvas The canvas to set as active.
-	 */
-	virtual void pushCanvas(std::shared_ptr<Canvas> canvas) = 0;
+	/** @brief Makes an unfinished canvas the current render target. */
+	virtual bool beginCanvas(std::shared_ptr<Canvas> canvas) = 0;
 
-	/**
-	 * @brief Pops the current canvas from the stack and restores the previous one.
-	 */
-	virtual void popCanvas() = 0;
+	/** @brief Restores the previous render target without finalizing the current canvas. */
+	virtual bool endCanvas() = 0;
 
-	virtual void suspendCanvas() = 0;
+	/** @brief Finalizes a canvas so it can be drawn or used as an effect source. */
+	virtual bool finishCanvas(std::shared_ptr<Canvas> canvas) = 0;
 
-	virtual void resumeCanvas() = 0;
-
-	/**
-	 * @brief Draws a canvas onto the current render target.
-	 * @param canvas The canvas to draw.
-	 * @param opacity The opacity value (default: 1.0).
-	 */
+	/** @brief Draws a finalized canvas onto the current render target. */
 	virtual void draw(std::shared_ptr<Canvas> canvas, float opacity = 1.0f) = 0;
 
 	/* ================= Measurement =================== */

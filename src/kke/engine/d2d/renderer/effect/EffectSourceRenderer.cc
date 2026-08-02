@@ -14,9 +14,13 @@ std::shared_ptr<D2dCanvas> EffectSourceRenderer::render(
 		return nullptr;
 	}
 
-	canvasService.pushCanvas(context, canvas);
+	if (!canvasService.beginCanvas(context, canvas)) {
+		return nullptr;
+	}
 	drawSource(context, source, sourceAppearance);
-	canvasService.popCanvas(context);
+	if (!canvasService.endCanvas(context) || !canvasService.finishCanvas(canvas)) {
+		return nullptr;
+	}
 	return canvas;
 }
 
@@ -100,7 +104,7 @@ void EffectSourceRenderer::drawSource(
 		return;
 	}
 
-	if (!d2dCanvas->close()) {
+	if (!d2dCanvas->closed()) {
 		return;
 	}
 
