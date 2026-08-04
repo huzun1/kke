@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "TextFormatProvider.hh"
 #include "kke/appearance/Text.hh"
 #include "kke/engine/d2d/d2d1_headers.hh"
@@ -10,6 +12,8 @@ class TextLayoutProvider {
 	KeyCacheStorage<IDWriteTextLayout> storage;
 
   public:
+	TextLayoutProvider(uint32_t limit = 2048);
+
 	Microsoft::WRL::ComPtr<IDWriteTextLayout>
 	get(IDWriteFactory5* writeFactory,
 		IDWriteFontCollection1* fontCollection,

@@ -13,7 +13,7 @@ class GeometryProvider {
 	KeyCacheStorage<ID2D1Geometry> storage;
 
   public:
-	GeometryProvider(uint32_t limit = UINT32_MAX);
+	GeometryProvider(uint32_t limit = 2048);
 
 	Microsoft::WRL::ComPtr<ID2D1Geometry> get(D2dContext const& context, Geometry const& geometry);
 

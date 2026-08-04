@@ -9,6 +9,9 @@
 using namespace kke;
 using namespace Microsoft::WRL;
 
+InvertedGeometryProvider::InvertedGeometryProvider(uint32_t limit) : geometries(limit) {
+}
+
 void InvertedGeometryProvider::syncViewportSize(
 	D2dContext const& context, D2D1_SIZE_F viewportSize
 ) {

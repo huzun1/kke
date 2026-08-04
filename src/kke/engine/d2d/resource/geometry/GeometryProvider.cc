@@ -45,5 +45,5 @@ GeometryProvider::get(D2dContext const& context, GeometryCompose const& compose)
 	}
 
 	storage.put(key, createdGeometry);
-	return storage.get(key);
+	return createdGeometry;
 }

@@ -17,6 +17,8 @@ class InvertedGeometryProvider {
 	D2D1_SIZE_F viewportSize = {};
 
   public:
+	InvertedGeometryProvider(uint32_t limit = 2048);
+
 	void syncViewportSize(D2dContext const& context, D2D1_SIZE_F viewportSize);
 
 	Microsoft::WRL::ComPtr<ID2D1Geometry>

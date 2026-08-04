@@ -6,6 +6,9 @@
 using namespace kke;
 using Microsoft::WRL::ComPtr;
 
+TextLayoutProvider::TextLayoutProvider(uint32_t limit) : storage(limit) {
+}
+
 ComPtr<IDWriteTextLayout> TextLayoutProvider::get(
 	IDWriteFactory5* writeFactory,
 	IDWriteFontCollection1* fontCollection,

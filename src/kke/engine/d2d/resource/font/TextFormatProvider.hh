@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstdint>
+
 #include "kke/appearance/resource/font/FontAppearance.hh"
 #include "kke/engine/d2d/d2d1_headers.hh"
 #include "kke/engine/d2d/resource/KeyCacheStorage.hh"
@@ -9,6 +11,8 @@ class TextFormatProvider {
 	KeyCacheStorage<IDWriteTextFormat> storage;
 
   public:
+	TextFormatProvider(uint32_t limit = 2048);
+
 	Microsoft::WRL::ComPtr<IDWriteTextFormat>
 	get(IDWriteFactory5* writeFactory,
 		IDWriteFontCollection1* fontCollection,

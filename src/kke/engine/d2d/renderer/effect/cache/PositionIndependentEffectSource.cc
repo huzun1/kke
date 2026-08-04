@@ -93,7 +93,12 @@ uint64_t PositionIndependentEffectSource::hash(EffectSource const& source) {
 	}
 
 	if (GeometryCompose const* compose = std::get_if<GeometryCompose>(&source)) {
-		return GeometryHasher::hash(*compose, GeometryHashMode::PositionIndependent);
+		GeometryCompose normalizedCompose;
+		Point origin = getOrigin(source);
+		for (Geometry const& geometry : compose->getGeometries()) {
+			normalizedCompose.add(normalize(geometry, origin));
+		}
+		return GeometryHasher::hash(normalizedCompose, GeometryHashMode::PositionDependent);
 	}
 
 	return FontHasher::hash(std::get<Text>(source));

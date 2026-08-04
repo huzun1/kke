@@ -6,6 +6,9 @@
 using namespace kke;
 using Microsoft::WRL::ComPtr;
 
+TextFormatProvider::TextFormatProvider(uint32_t limit) : storage(limit) {
+}
+
 ComPtr<IDWriteTextFormat> TextFormatProvider::get(
 	IDWriteFactory5* writeFactory,
 	IDWriteFontCollection1* fontCollection,
