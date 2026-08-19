@@ -25,7 +25,7 @@ void TextureRenderer::draw(
 
 	context.getD2dContext()->getDeviceContext()->DrawBitmap(
 		d2dTexture->getBitmap().Get(),
-		&d2dDestRect,
+		d2dDestRect,
 		appearance.opacity,
 		toD2dInterpolation(appearance.interpolation),
 		d2dSourceRect ? &*d2dSourceRect : nullptr
@@ -36,14 +36,16 @@ D2D1_RECT_F TextureRenderer::toD2dRect(Rect const& rect) {
 	return {rect.min.x, rect.min.y, rect.max.x, rect.max.y};
 }
 
-D2D1_BITMAP_INTERPOLATION_MODE
+D2D1_INTERPOLATION_MODE
 TextureRenderer::toD2dInterpolation(TextureInterpolation interpolation) {
 	switch (interpolation) {
 	case TextureInterpolation::Nearest:
-		return D2D1_BITMAP_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
+		return D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR;
 	case TextureInterpolation::Linear:
-		return D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
+		return D2D1_INTERPOLATION_MODE_LINEAR;
+	case TextureInterpolation::HighQualityCubic:
+		return D2D1_INTERPOLATION_MODE_HIGH_QUALITY_CUBIC;
 	default:
-		return D2D1_BITMAP_INTERPOLATION_MODE_LINEAR;
+		return D2D1_INTERPOLATION_MODE_LINEAR;
 	}
 }

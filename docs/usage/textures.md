@@ -56,3 +56,5 @@ The fields are:
 - Use encoded upload when your app already loads PNG or similar assets.
 - Use raw upload for procedural textures, generated previews, or test patterns.
 - Use `TextureInterpolation::Nearest` for pixel-art style output.
+- Use `TextureInterpolation::HighQualityCubic` when photographs or artwork are
+  reduced significantly and smooth downscaling matters more than sampling cost.

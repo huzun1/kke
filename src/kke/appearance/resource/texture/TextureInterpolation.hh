@@ -14,5 +14,10 @@ enum class TextureInterpolation {
 	 * @brief Linearly blends neighboring texels for smoother scaling.
 	 */
 	Linear,
+
+	/**
+	 * @brief Uses high-quality cubic filtering for smooth image scaling.
+	 */
+	HighQualityCubic,
 };
 } // namespace kke

@@ -107,8 +107,14 @@ ComPtr<ID2D1Bitmap1> TextureFactory::createEncodedBitmap(
 	}
 
 	ComPtr<ID2D1Bitmap1> bitmap;
-	result =
-		context.getDeviceContext()->CreateBitmapFromWicBitmap(converter.Get(), nullptr, &bitmap);
+	D2D1_BITMAP_PROPERTIES1 properties = D2D1::BitmapProperties1(
+		D2D1_BITMAP_OPTIONS_NONE,
+		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
+		96.0f,
+		96.0f
+	);
+	result = context.getDeviceContext()
+				 ->CreateBitmapFromWicBitmap(converter.Get(), &properties, &bitmap);
 	if (FAILED(result)) {
 		kke::debug::log(
 			"[kke][TextureFactory] CreateBitmapFromWicBitmap failed: 0x%08x",
