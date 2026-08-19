@@ -1,14 +1,16 @@
 #include "LinearGradientBrush.hh"
 
+#include <utility>
+
 using namespace kke;
 
 LinearGradientBrush::LinearGradientBrush(
-	std::vector<kke::Color> const& colors,
+	std::vector<kke::Color> colors,
 	kke::Point const& startPoint,
 	kke::Point const& endPoint,
 	float angle
 )
-	: colors(colors), startPoint(startPoint), endPoint(endPoint), angle(angle) {
+	: colors(std::move(colors)), startPoint(startPoint), endPoint(endPoint), angle(angle) {
 }
 
 std::vector<kke::Color> const& LinearGradientBrush::getColors() const {

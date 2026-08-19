@@ -26,20 +26,23 @@ uint64_t BrushHasher::hash(SolidColorBrush const& brush) {
 }
 
 uint64_t BrushHasher::hash(LinearGradientBrush const& brush) {
+	Hasher hasher(hashGradientStops(brush));
+	hasher.combine(brush.getStartPoint().x);
+	hasher.combine(brush.getStartPoint().y);
+	hasher.combine(brush.getEndPoint().x);
+	hasher.combine(brush.getEndPoint().y);
+	hasher.combine(brush.getAngle());
+	return hasher.get();
+}
+
+uint64_t BrushHasher::hashGradientStops(LinearGradientBrush const& brush) {
 	Hasher hasher;
 	hasher.combine(BrushHashTag::LinearGradient);
-
 	for (Color const& color : brush.getColors()) {
 		hasher.combine(ColorQuantizer::quantizeComponent(color.r));
 		hasher.combine(ColorQuantizer::quantizeComponent(color.g));
 		hasher.combine(ColorQuantizer::quantizeComponent(color.b));
 		hasher.combine(ColorQuantizer::quantizeComponent(color.a));
 	}
-
-	hasher.combine(brush.getStartPoint().x);
-	hasher.combine(brush.getStartPoint().y);
-	hasher.combine(brush.getEndPoint().x);
-	hasher.combine(brush.getEndPoint().y);
-	hasher.combine(brush.getAngle());
 	return hasher.get();
 }

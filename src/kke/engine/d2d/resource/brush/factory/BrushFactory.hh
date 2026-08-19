@@ -9,6 +9,9 @@ class BrushFactory {
   public:
 	static Microsoft::WRL::ComPtr<ID2D1Brush> create(D2dContext const& context, Brush const& brush);
 
+	static void
+	updateGradientLine(ID2D1LinearGradientBrush* d2dBrush, LinearGradientBrush const& brush);
+
   private:
 	static Microsoft::WRL::ComPtr<ID2D1Brush>
 	create(D2dContext const& context, SolidColorBrush const& brush);
