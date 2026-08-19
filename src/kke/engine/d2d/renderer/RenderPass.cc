@@ -40,16 +40,12 @@ void RenderPass::endDraw(D2dEngineContext& context) {
 
 	deviceContext->SetTarget(lastRenderTarget);
 	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	deviceContext->Clear();
 
 	// FIXME: make target command list abstract
 	ID2D1CommandList* targetCommandList = d2dContext->getTargetCommandList().Get();
 	targetCommandList->Close();
-	if (shouldPreserveRenderTarget) {
-		Microsoft::WRL::ComPtr<ID2D1Bitmap> baseBitmap = acquirePreservedBaseBitmap(deviceContext);
-		if (baseBitmap) {
-			deviceContext->DrawBitmap(baseBitmap.Get());
-		}
+	if (!shouldPreserveRenderTarget) {
+		deviceContext->Clear();
 	}
 	deviceContext->DrawImage(targetCommandList);
 
@@ -65,7 +61,7 @@ void RenderPass::clear(D2dEngineContext& context) {
 	shouldFlattenNextTargetSnapshot = true;
 }
 
-Microsoft::WRL::ComPtr<ID2D1Bitmap1>
+Microsoft::WRL::ComPtr<ID2D1Image>
 RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode opacityMode) {
 	D2dContext* d2dContext = context.getD2dContext();
 	Microsoft::WRL::ComPtr<ID2D1CommandList> currentTargetCommandList =
@@ -77,13 +73,13 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
 	D2D1_MATRIX_3X2_F activeTransform;
 	deviceContext->GetTransform(&activeTransform);
-	Microsoft::WRL::ComPtr<ID2D1Bitmap1> snapshotBitmap = cachedTargetSnapshot;
+	Microsoft::WRL::ComPtr<ID2D1Image> snapshotImage = cachedTargetSnapshot;
 	HRESULT closeResult = currentTargetCommandList->Close();
 	if (FAILED(closeResult)) {
 		return nullptr;
 	}
 
-	if (!snapshotBitmap) {
+	if (!snapshotImage) {
 		SnapshotOpacityMode effectiveOpacityMode = opacityMode;
 		if (shouldFlattenNextTargetSnapshot) {
 			effectiveOpacityMode = SnapshotOpacityMode::FlattenToOpaqueBlack;
@@ -92,16 +88,24 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 		}
 
 		if (shouldPreserveRenderTarget) {
-			Microsoft::WRL::ComPtr<ID2D1Bitmap> baseBitmap = acquirePreservedBaseBitmap(deviceContext);
-			snapshotBitmap = commandListSnapshotter.snapshotComposite(
+			Microsoft::WRL::ComPtr<ID2D1Bitmap> baseBitmap =
+				acquirePreservedBaseBitmap(deviceContext);
+			snapshotImage = createCompositeSnapshot(
 				deviceContext,
 				baseBitmap.Get(),
-				currentTargetCommandList.Get(),
-				lastRenderTarget,
-				effectiveOpacityMode
+				currentTargetCommandList.Get()
 			);
+			if (!snapshotImage) {
+				snapshotImage = commandListSnapshotter.snapshotComposite(
+					deviceContext,
+					baseBitmap.Get(),
+					currentTargetCommandList.Get(),
+					lastRenderTarget,
+					effectiveOpacityMode
+				);
+			}
 		} else {
-			snapshotBitmap = commandListSnapshotter.snapshot(
+			snapshotImage = commandListSnapshotter.snapshot(
 				deviceContext,
 				currentTargetCommandList.Get(),
 				lastRenderTarget,
@@ -109,7 +113,7 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 			);
 		}
 	}
-	if (!snapshotBitmap) {
+	if (!snapshotImage) {
 		return nullptr;
 	}
 
@@ -121,14 +125,12 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 
 	deviceContext->SetTarget(nextTargetCommandList.Get());
 	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
-	deviceContext->DrawBitmap(snapshotBitmap.Get());
+	deviceContext->DrawImage(currentTargetCommandList.Get());
 	deviceContext->SetTransform(activeTransform);
 	d2dContext->setTargetCommandList(nextTargetCommandList);
-	shouldPreserveRenderTarget = false;
-	preservedBaseBitmap.Reset();
 	cachedTargetSnapshot.Reset();
 	shouldFlattenNextTargetSnapshot = false;
-	return snapshotBitmap;
+	return snapshotImage;
 }
 
 void RenderPass::invalidateCachedTargetSnapshot() {
@@ -166,4 +168,25 @@ RenderPass::createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* sou
 	bitmapCopy->CopyFromBitmap(&origin, source, &sourceRect);
 
 	return bitmapCopy;
+}
+
+Microsoft::WRL::ComPtr<ID2D1Image> RenderPass::createCompositeSnapshot(
+	ID2D1DeviceContext* deviceContext, ID2D1Image* background, ID2D1Image* foreground
+) {
+	if (deviceContext == nullptr || background == nullptr || foreground == nullptr) {
+		return nullptr;
+	}
+
+	Microsoft::WRL::ComPtr<ID2D1Effect> compositeEffect;
+	if (FAILED(deviceContext->CreateEffect(CLSID_D2D1Composite, &compositeEffect)) ||
+		!compositeEffect) {
+		return nullptr;
+	}
+	compositeEffect->SetInput(0, background);
+	compositeEffect->SetInput(1, foreground);
+	compositeEffect->SetValue(D2D1_COMPOSITE_PROP_MODE, D2D1_COMPOSITE_MODE_SOURCE_OVER);
+
+	Microsoft::WRL::ComPtr<ID2D1Image> output;
+	compositeEffect->GetOutput(&output);
+	return output;
 }
