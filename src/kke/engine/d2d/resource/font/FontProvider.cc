@@ -1,5 +1,8 @@
 #include "FontProvider.hh"
 
+#include <optional>
+
+#include "hash/FontHasher.hh"
 #include "kke/utils/DebugLog.hh"
 
 using namespace kke;
@@ -53,6 +56,28 @@ ComPtr<IDWriteTextFormat> FontProvider::createTextFormat(FontAppearance const& a
 ComPtr<IDWriteTextLayout> FontProvider::createTextLayout(Text const& text) {
 	return textLayoutProvider
 		.get(writeFactory.Get(), fontCollection.Get(), textFormatProvider, text);
+}
+
+Scale FontProvider::measureTextSize(Text const& text) {
+	uint64_t textKey = FontHasher::hash(text);
+	if (std::optional<Scale> cachedSize = textMeasurementCache.get(textKey)) {
+		return *cachedSize;
+	}
+
+	ComPtr<IDWriteTextLayout> textLayout = createTextLayout(text);
+	if (!textLayout) {
+		return {0.0f, 0.0f};
+	}
+
+	DWRITE_TEXT_METRICS metrics = {};
+	HRESULT result = textLayout->GetMetrics(&metrics);
+	if (FAILED(result)) {
+		return {0.0f, 0.0f};
+	}
+
+	Scale size{metrics.widthIncludingTrailingWhitespace, metrics.height};
+	textMeasurementCache.put(textKey, size);
+	return size;
 }
 
 std::vector<std::shared_ptr<D2dFont>> const& FontProvider::getFonts() const {
@@ -146,6 +171,7 @@ void FontProvider::rebuildFontCollection() {
 }
 
 void FontProvider::clearTextCaches() {
+	textMeasurementCache.clear();
 	textLayoutProvider.clear();
 	textFormatProvider.clear();
 }

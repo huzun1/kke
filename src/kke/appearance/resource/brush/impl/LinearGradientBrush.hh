@@ -26,7 +26,7 @@ class LinearGradientBrush {
 	 * @param angle Optional angle override for backends that support it.
 	 */
 	LinearGradientBrush(
-		std::vector<Color> const& colors,
+		std::vector<Color> colors,
 		Point const& startPoint,
 		Point const& endPoint,
 		float angle = 0.0f

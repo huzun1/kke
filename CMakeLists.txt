@@ -72,6 +72,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/resource/font/FontProvider.cc
     src/kke/engine/d2d/resource/font/TextFormatProvider.cc
     src/kke/engine/d2d/resource/font/TextLayoutProvider.cc
+    src/kke/engine/d2d/resource/font/TextMeasurementCache.cc
     src/kke/engine/d2d/resource/font/factory/FontFactory.cc
     src/kke/engine/d2d/resource/font/hash/FontHasher.cc
     src/kke/engine/d2d/resource/canvas/CanvasFactory.cc

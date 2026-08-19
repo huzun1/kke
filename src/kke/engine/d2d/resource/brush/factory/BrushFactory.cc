@@ -79,6 +79,20 @@ BrushFactory::create(D2dContext const& context, LinearGradientBrush const& brush
 	return d2dBrush;
 }
 
+void BrushFactory::updateGradientLine(
+	ID2D1LinearGradientBrush* d2dBrush, LinearGradientBrush const& brush
+) {
+	if (d2dBrush == nullptr) {
+		return;
+	}
+
+	Point center = (brush.getStartPoint() + brush.getEndPoint()) / 2.0f;
+	Point startPoint = rotatePoint(brush.getStartPoint(), center, brush.getAngle());
+	Point endPoint = rotatePoint(brush.getEndPoint(), center, brush.getAngle());
+	d2dBrush->SetStartPoint({startPoint.x, startPoint.y});
+	d2dBrush->SetEndPoint({endPoint.x, endPoint.y});
+}
+
 Point BrushFactory::rotatePoint(Point const& point, Point const& center, float angle) {
 	constexpr float pi = 3.14159265358979323846f;
 	float radian = angle * pi / 180.0f;

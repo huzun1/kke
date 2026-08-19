@@ -53,3 +53,11 @@ target_include_directories(kke_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(kke_matrix_test MatrixTest.cc)
 target_link_libraries(kke_matrix_test PRIVATE kke)
 add_test(NAME kke_matrix_test COMMAND kke_matrix_test)
+
+add_executable(kke_text_measurement_cache_test TextMeasurementCacheTest.cc)
+target_link_libraries(kke_text_measurement_cache_test PRIVATE kke)
+add_test(NAME kke_text_measurement_cache_test COMMAND kke_text_measurement_cache_test)
+
+add_executable(kke_brush_hasher_test BrushHasherTest.cc)
+target_link_libraries(kke_brush_hasher_test PRIVATE kke)
+add_test(NAME kke_brush_hasher_test COMMAND kke_brush_hasher_test)

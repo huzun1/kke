@@ -8,7 +8,7 @@ namespace kke {
 class RenderPass {
 	CommandListSnapshotter commandListSnapshotter;
 	Microsoft::WRL::ComPtr<ID2D1Bitmap> preservedBaseBitmap;
-	Microsoft::WRL::ComPtr<ID2D1Bitmap1> cachedTargetSnapshot;
+	Microsoft::WRL::ComPtr<ID2D1Image> cachedTargetSnapshot;
 	ID2D1Bitmap* lastRenderTarget = nullptr;
 	bool shouldPreserveRenderTarget = true;
 	bool shouldFlattenNextTargetSnapshot = true;
@@ -20,7 +20,7 @@ class RenderPass {
 
 	void clear(D2dEngineContext& context);
 
-	Microsoft::WRL::ComPtr<ID2D1Bitmap1> cycleTargetSnapshot(
+	Microsoft::WRL::ComPtr<ID2D1Image> cycleTargetSnapshot(
 		D2dEngineContext& context,
 		SnapshotOpacityMode opacityMode = SnapshotOpacityMode::PreserveAlpha
 	);
@@ -28,9 +28,14 @@ class RenderPass {
 	void invalidateCachedTargetSnapshot();
 
   private:
-	Microsoft::WRL::ComPtr<ID2D1Bitmap> acquirePreservedBaseBitmap(ID2D1DeviceContext* deviceContext);
+	Microsoft::WRL::ComPtr<ID2D1Bitmap> acquirePreservedBaseBitmap(ID2D1DeviceContext* deviceContext
+	);
 
 	static Microsoft::WRL::ComPtr<ID2D1Bitmap>
 	createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* source);
+
+	static Microsoft::WRL::ComPtr<ID2D1Image> createCompositeSnapshot(
+		ID2D1DeviceContext* deviceContext, ID2D1Image* background, ID2D1Image* foreground
+	);
 };
 }; // namespace kke

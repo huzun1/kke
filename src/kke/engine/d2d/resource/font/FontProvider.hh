@@ -7,6 +7,8 @@
 #include "D2dFont.hh"
 #include "TextFormatProvider.hh"
 #include "TextLayoutProvider.hh"
+#include "TextMeasurementCache.hh"
+#include "kke/appearance/Scale.hh"
 #include "kke/appearance/Text.hh"
 #include "kke/appearance/resource/font/FontAppearance.hh"
 #include "kke/engine/d2d/d2d1_headers.hh"
@@ -21,6 +23,7 @@ class FontProvider {
 	std::vector<std::shared_ptr<D2dFont>> fonts;
 	TextFormatProvider textFormatProvider;
 	TextLayoutProvider textLayoutProvider;
+	TextMeasurementCache textMeasurementCache;
 
   public:
 	FontProvider();
@@ -32,6 +35,8 @@ class FontProvider {
 	Microsoft::WRL::ComPtr<IDWriteTextFormat> createTextFormat(FontAppearance const& appearance);
 
 	Microsoft::WRL::ComPtr<IDWriteTextLayout> createTextLayout(Text const& text);
+
+	Scale measureTextSize(Text const& text);
 
 	std::vector<std::shared_ptr<D2dFont>> const& getFonts() const;
 
