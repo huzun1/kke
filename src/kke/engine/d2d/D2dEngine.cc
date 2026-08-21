@@ -255,6 +255,22 @@ D2dEngine::captureEffect(Effect const& effect, std::optional<EffectClipSource> c
 	return canvas;
 }
 
+std::optional<CapturedEffect> D2dEngine::captureEffect(
+	Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
+) {
+	assertD2dContext();
+	auto captured = impl->effectRenderer.capture(
+		*impl->engineContext,
+		impl->renderPass,
+		effect,
+		clip,
+		options,
+		impl->rasterSurfaceService
+	);
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	return captured;
+}
+
 void D2dEngine::renderEffect(
 	EffectSource const& source,
 	EffectSourceAppearance const& sourceAppearance,

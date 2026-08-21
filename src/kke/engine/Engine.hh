@@ -7,6 +7,8 @@
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/RasterSurface.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
+#include "kke/appearance/resource/effect/CapturedEffect.hh"
+#include "kke/appearance/resource/effect/EffectCaptureOptions.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/appearance/resource/effect/EffectSourceAppearance.hh"
 #include "kke/appearance/resource/font/Font.hh"
@@ -187,6 +189,15 @@ class Engine {
 	 */
 	virtual std::shared_ptr<Canvas>
 	captureEffect(Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt) = 0;
+
+	virtual std::optional<CapturedEffect> captureEffect(
+		Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
+	) {
+		(void)effect;
+		(void)clip;
+		(void)options;
+		return std::nullopt;
+	}
 
 	/**
 	 * @brief Renders an effect using a single effect definition.

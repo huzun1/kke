@@ -100,6 +100,10 @@ class D2dEngine : public Engine {
 		Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt
 	) override;
 
+	std::optional<CapturedEffect> captureEffect(
+		Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
+	) override;
+
 	void renderEffect(
 		EffectSource const& source,
 		EffectSourceAppearance const& sourceAppearance,
