@@ -1,9 +1,9 @@
 #pragma once
 
-#include "kke/engine/Engine.hh"
-
 #include <memory>
 #include <optional>
+
+#include "kke/engine/Engine.hh"
 
 struct ID2D1Bitmap;
 
@@ -50,6 +50,18 @@ class D2dEngine : public Engine {
 	bool finishCanvas(std::shared_ptr<Canvas> canvas) override;
 
 	void draw(std::shared_ptr<Canvas> canvas, float opacity = 1.0f) override;
+
+	/* ============== Raster Surface Control ============ */
+	std::shared_ptr<RasterSurface>
+	createRasterSurface(Scale const& logicalSize, float rasterScale) override;
+
+	bool
+	beginRasterSurface(std::shared_ptr<RasterSurface> surface, Point const& logicalOrigin) override;
+
+	bool endRasterSurface() override;
+
+	void draw(std::shared_ptr<RasterSurface> surface, Rect const& destination, float opacity = 1.0f)
+		override;
 
 	/* ================= Measurement =================== */
 	kke::Scale getViewportSize() override;

@@ -63,6 +63,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/renderer/painting/FaceRenderer.cc
     src/kke/engine/d2d/renderer/painting/StrokeRenderer.cc
     src/kke/engine/d2d/renderer/painting/TextureRenderer.cc
+    src/kke/engine/d2d/renderer/raster_surface/RasterSurfaceService.cc
     src/kke/engine/d2d/renderer/view/MatrixState.cc
     src/kke/engine/d2d/renderer/view/ViewLayerController.cc
     src/kke/engine/d2d/resource/brush/BrushProvider.cc
@@ -87,6 +88,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/resource/texture/D2dTexture.cc
     src/kke/engine/d2d/resource/texture/TextureProvider.cc
     src/kke/engine/d2d/resource/texture/factory/TextureFactory.cc
+    src/kke/engine/d2d/resource/raster_surface/D2dRasterSurface.cc
     src/kke/engine/d2d/transform/Matrix.cc
     src/kke/engine/d2d/transform/impl/RotateManipulator.cc
     src/kke/engine/d2d/transform/impl/ScaleManipulator.cc

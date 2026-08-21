@@ -13,8 +13,10 @@
 #include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/TextureRenderer.hh"
+#include "kke/engine/d2d/renderer/raster_surface/RasterSurfaceService.hh"
 #include "kke/engine/d2d/renderer/view/MatrixState.hh"
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
+#include "kke/engine/d2d/resource/raster_surface/D2dRasterSurface.hh"
 
 using namespace kke;
 
@@ -29,6 +31,7 @@ struct D2dEngine::Impl {
 	FaceRenderer faceRenderer;
 	StrokeRenderer strokeRenderer;
 	TextureRenderer textureRenderer;
+	RasterSurfaceService rasterSurfaceService;
 	EffectRenderer effectRenderer;
 };
 
@@ -126,6 +129,48 @@ void D2dEngine::draw(std::shared_ptr<Canvas> canvas, float opacity) {
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
 	impl->canvasService.drawCanvas(*impl->engineContext, canvas, opacity);
+}
+
+std::shared_ptr<RasterSurface>
+D2dEngine::createRasterSurface(Scale const& logicalSize, float rasterScale) {
+	assertD2dContext();
+	return impl->rasterSurfaceService.create(*impl->engineContext, logicalSize, rasterScale);
+}
+
+bool D2dEngine::beginRasterSurface(
+	std::shared_ptr<RasterSurface> surface, Point const& logicalOrigin
+) {
+	assertD2dContext();
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	if (!impl->rasterSurfaceService.begin(*impl->engineContext, surface)) {
+		return false;
+	}
+	impl->matrixState.beginCanvas(*impl->engineContext);
+	impl->matrixState.pushTransform(
+		*impl->engineContext,
+		TransformSource{Translation({-logicalOrigin.x, -logicalOrigin.y})}
+	);
+	return true;
+}
+
+bool D2dEngine::endRasterSurface() {
+	assertD2dContext();
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	impl->matrixState.popTransform(*impl->engineContext);
+	if (!impl->rasterSurfaceService.end(*impl->engineContext)) {
+		impl->matrixState.endCanvas(*impl->engineContext);
+		return false;
+	}
+	impl->matrixState.endCanvas(*impl->engineContext);
+	return true;
+}
+
+void D2dEngine::draw(
+	std::shared_ptr<RasterSurface> surface, Rect const& destination, float opacity
+) {
+	assertD2dContext();
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	impl->rasterSurfaceService.draw(*impl->engineContext, surface, destination, opacity);
 }
 
 Scale D2dEngine::getViewportSize() {

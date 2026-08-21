@@ -1,6 +1,11 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <optional>
+
 #include "kke/appearance/painting/StrokeAppearance.hh"
+#include "kke/appearance/resource/RasterSurface.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/appearance/resource/effect/EffectSourceAppearance.hh"
@@ -10,10 +15,6 @@
 #include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/Sources.hh"
-#include <cstddef>
-#include <memory>
-#include <optional>
-
 namespace kke {
 /**
  * @brief Abstract interface for a rendering engine.
@@ -81,6 +82,21 @@ class Engine {
 
 	/** @brief Draws a finalized canvas onto the current render target. */
 	virtual void draw(std::shared_ptr<Canvas> canvas, float opacity = 1.0f) = 0;
+
+	/* ============== Raster Surface Control ============ */
+
+	/** @brief Creates a reusable transparent bitmap at the requested pixel density. */
+	virtual std::shared_ptr<RasterSurface>
+	createRasterSurface(Scale const& logicalSize, float rasterScale) = 0;
+
+	/** @brief Clears the surface and maps logicalOrigin to its top-left pixel. */
+	virtual bool
+	beginRasterSurface(std::shared_ptr<RasterSurface> surface, Point const& logicalOrigin) = 0;
+
+	virtual bool endRasterSurface() = 0;
+
+	virtual void
+	draw(std::shared_ptr<RasterSurface> surface, Rect const& destination, float opacity = 1.0f) = 0;
 
 	/* ================= Measurement =================== */
 
