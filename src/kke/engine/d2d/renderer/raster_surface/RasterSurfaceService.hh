@@ -19,6 +19,8 @@ class RasterSurfaceService {
 		Microsoft::WRL::ComPtr<ID2D1Image> target;
 		D2D1_MATRIX_3X2_F transform;
 		D2D1_TEXT_ANTIALIAS_MODE textAntialiasMode;
+		float dpiX;
+		float dpiY;
 	};
 
 	std::stack<RenderTargetState> renderTargetStates;

@@ -61,7 +61,11 @@ bool RasterSurfaceService::begin(
 
 	pushCurrentRenderTarget(context);
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	float surfaceDpiX = 96.0f;
+	float surfaceDpiY = 96.0f;
+	d2dSurface->getBitmap()->GetDpi(&surfaceDpiX, &surfaceDpiY);
 	deviceContext->SetTarget(d2dSurface->getBitmap().Get());
+	deviceContext->SetDpi(surfaceDpiX, surfaceDpiY);
 	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	deviceContext->SetTextAntialiasMode(D2D1_TEXT_ANTIALIAS_MODE_GRAYSCALE);
 	deviceContext->Clear(D2D1::ColorF(0.0f, 0.0f));
@@ -78,6 +82,7 @@ bool RasterSurfaceService::end(D2dEngineContext const& context) {
 	renderTargetStates.pop();
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 	deviceContext->SetTarget(state.target.Get());
+	deviceContext->SetDpi(state.dpiX, state.dpiY);
 	deviceContext->SetTransform(state.transform);
 	deviceContext->SetTextAntialiasMode(state.textAntialiasMode);
 	return true;
@@ -107,11 +112,16 @@ void RasterSurfaceService::pushCurrentRenderTarget(D2dEngineContext const& conte
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 	ComPtr<ID2D1Image> target;
 	D2D1_MATRIX_3X2_F transform;
+	float dpiX = 96.0f;
+	float dpiY = 96.0f;
 	deviceContext->GetTarget(&target);
 	deviceContext->GetTransform(&transform);
+	deviceContext->GetDpi(&dpiX, &dpiY);
 	renderTargetStates.push({
 		.target = target,
 		.transform = transform,
 		.textAntialiasMode = deviceContext->GetTextAntialiasMode(),
+		.dpiX = dpiX,
+		.dpiY = dpiY,
 	});
 }
