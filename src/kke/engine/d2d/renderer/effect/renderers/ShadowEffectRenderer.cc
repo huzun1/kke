@@ -78,6 +78,7 @@ ComPtr<ID2D1Image> ShadowEffectRenderer::render(
 
 	compositeEffect->SetInput(0, outerShadowImage.Get());
 	compositeEffect->SetInput(1, sourceImage.Get());
+	compositeEffect->SetValue(D2D1_COMPOSITE_PROP_MODE, D2D1_COMPOSITE_MODE_SOURCE_OVER);
 
 	ComPtr<ID2D1Image> outputImage;
 	compositeEffect->GetOutput(&outputImage);
