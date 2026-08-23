@@ -8,6 +8,5 @@ class RasterSurface;
 struct EffectCaptureOptions {
 	float rasterScale = 1.0f;
 	std::shared_ptr<RasterSurface> reusableSurface;
-	bool reuseWithinFrame = false;
 };
 } // namespace kke
