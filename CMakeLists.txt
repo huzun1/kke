@@ -14,6 +14,7 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
 endif()
 
 option(KKE_BUILD_TESTS "Build the kke test application" ${KKE_IS_TOP_LEVEL})
+option(KKE_BUILD_BENCHMARKS "Build the kke microbenchmarks" ${KKE_IS_TOP_LEVEL})
 option(KKE_DEBUG "Enable kke debug logging" ${KKE_IS_TOP_LEVEL})
 
 set(KKE_PUBLIC_ENGINE_HEADERS
@@ -170,4 +171,8 @@ install(FILES
 if(KKE_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if(KKE_BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()

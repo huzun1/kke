@@ -58,6 +58,10 @@ add_executable(kke_text_measurement_cache_test TextMeasurementCacheTest.cc)
 target_link_libraries(kke_text_measurement_cache_test PRIVATE kke)
 add_test(NAME kke_text_measurement_cache_test COMMAND kke_text_measurement_cache_test)
 
+add_executable(kke_font_hasher_test FontHasherTest.cc)
+target_link_libraries(kke_font_hasher_test PRIVATE kke)
+add_test(NAME kke_font_hasher_test COMMAND kke_font_hasher_test)
+
 add_executable(kke_brush_hasher_test BrushHasherTest.cc)
 target_link_libraries(kke_brush_hasher_test PRIVATE kke)
 add_test(NAME kke_brush_hasher_test COMMAND kke_brush_hasher_test)

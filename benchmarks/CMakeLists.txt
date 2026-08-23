@@ -1,0 +1,1 @@
+add_subdirectory(core_hot_path_benchmark)

@@ -43,8 +43,7 @@ D2dEngine::D2dEngine() : impl(std::make_unique<Impl>()) {
 D2dEngine::~D2dEngine() = default;
 
 void D2dEngine::beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget) {
-	std::unique_ptr<D2dContext> d2dContext = std::make_unique<D2dContext>(context);
-	impl->engineContext->setD2dContext(std::move(d2dContext));
+	impl->engineContext->setD2dContext(context);
 	D2D1_SIZE_F viewportSize = renderTarget->GetSize();
 	impl->engineContext->update(viewportSize);
 
