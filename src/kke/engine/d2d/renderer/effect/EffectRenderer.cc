@@ -104,7 +104,12 @@ std::optional<CapturedEffect> EffectRenderer::capture(
 		return std::nullopt;
 	}
 	sourceImage = clipCropper.crop(context, sourceImage, effect, viewportClip);
-	ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, effect);
+	sourceImage = rasterScaler.scaleSource(context, sourceImage, options.rasterScale);
+	if (!sourceImage) {
+		return std::nullopt;
+	}
+	Effect scaledEffect = rasterScaler.scaleEffect(effect, options.rasterScale);
+	ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, scaledEffect);
 	if (!effectImage) {
 		return std::nullopt;
 	}
@@ -113,21 +118,36 @@ std::optional<CapturedEffect> EffectRenderer::capture(
 	if (auto d2dSurface = std::dynamic_pointer_cast<D2dRasterSurface>(surface);
 		d2dSurface && d2dSurface->getBitmap()) {
 		D2D1_SIZE_U pixelSize = d2dSurface->getBitmap()->GetPixelSize();
+		float dpiX = 0.0f;
+		float dpiY = 0.0f;
+		d2dSurface->getBitmap()->GetDpi(&dpiX, &dpiY);
 		UINT32 expectedWidth = static_cast<UINT32>(std::ceil(logicalSize.x * options.rasterScale));
 		UINT32 expectedHeight = static_cast<UINT32>(std::ceil(logicalSize.y * options.rasterScale));
-		if (pixelSize.width != expectedWidth || pixelSize.height != expectedHeight) {
+		if (pixelSize.width != expectedWidth || pixelSize.height != expectedHeight ||
+			dpiX != 96.0f || dpiY != 96.0f) {
 			surface.reset();
 		}
 	} else {
 		surface.reset();
 	}
 	if (!surface) {
-		surface = rasterSurfaceService.create(context, logicalSize, options.rasterScale);
+		surface = rasterSurfaceService.create(context, logicalSize, options.rasterScale, 96.0f);
+	}
+	auto d2dSurface = std::dynamic_pointer_cast<D2dRasterSurface>(surface);
+	if (!d2dSurface || !d2dSurface->getBitmap()) {
+		return std::nullopt;
 	}
 	if (!surface || !rasterSurfaceService.begin(context, surface)) {
 		return std::nullopt;
 	}
-	deviceContext->SetTransform(D2D1::Matrix3x2F::Translation(-bounds.left, -bounds.top));
+	deviceContext->SetTransform(D2D1::Matrix3x2F(
+		1.0f,
+		0.0f,
+		0.0f,
+		1.0f,
+		-bounds.left * options.rasterScale,
+		-bounds.top * options.rasterScale
+	));
 	deviceContext->DrawImage(effectImage.Get());
 	if (!rasterSurfaceService.end(context)) {
 		return std::nullopt;

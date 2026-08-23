@@ -6,6 +6,7 @@
 
 #include "kke/appearance/Color.hh"
 #include "kke/appearance/ColorQuantizer.hh"
+#include "kke/engine/d2d/resource/raster_surface/D2dRasterSurface.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
@@ -76,6 +77,48 @@ BrushFactory::create(D2dContext const& context, LinearGradientBrush const& brush
 
 	ComPtr<ID2D1Brush> d2dBrush;
 	linearBrush.As(&d2dBrush);
+	return d2dBrush;
+}
+
+ComPtr<ID2D1Brush>
+BrushFactory::create(D2dContext const& context, RasterSurfaceBrush const& brush) {
+	auto surface = std::dynamic_pointer_cast<D2dRasterSurface>(brush.getSurface());
+	if (surface == nullptr || surface->getBitmap() == nullptr) {
+		return nullptr;
+	}
+
+	D2D1_SIZE_F bitmapSize = surface->getBitmap()->GetSize();
+	Rect const& destination = brush.getDestination();
+	if (bitmapSize.width <= 0.0f || bitmapSize.height <= 0.0f ||
+		destination.max.x <= destination.min.x || destination.max.y <= destination.min.y) {
+		return nullptr;
+	}
+
+	float scaleX = (destination.max.x - destination.min.x) / bitmapSize.width;
+	float scaleY = (destination.max.y - destination.min.y) / bitmapSize.height;
+	D2D1_BITMAP_BRUSH_PROPERTIES1 bitmapProperties = D2D1::BitmapBrushProperties1(
+		D2D1_EXTEND_MODE_CLAMP,
+		D2D1_EXTEND_MODE_CLAMP,
+		D2D1_INTERPOLATION_MODE_LINEAR
+	);
+	D2D1_BRUSH_PROPERTIES brushProperties = D2D1::BrushProperties(
+		brush.getOpacity(),
+		D2D1::Matrix3x2F::Scale(scaleX, scaleY) *
+			D2D1::Matrix3x2F::Translation(destination.min.x, destination.min.y)
+	);
+	ComPtr<ID2D1BitmapBrush1> bitmapBrush;
+	HRESULT result = context.getDeviceContext()->CreateBitmapBrush(
+		surface->getBitmap().Get(),
+		bitmapProperties,
+		brushProperties,
+		&bitmapBrush
+	);
+	if (FAILED(result)) {
+		return nullptr;
+	}
+
+	ComPtr<ID2D1Brush> d2dBrush;
+	bitmapBrush.As(&d2dBrush);
 	return d2dBrush;
 }
 

@@ -19,6 +19,9 @@ class BrushFactory {
 	static Microsoft::WRL::ComPtr<ID2D1Brush>
 	create(D2dContext const& context, LinearGradientBrush const& brush);
 
+	static Microsoft::WRL::ComPtr<ID2D1Brush>
+	create(D2dContext const& context, RasterSurfaceBrush const& brush);
+
 	static kke::Point rotatePoint(Point const& point, Point const& center, float angle);
 };
 } // namespace kke

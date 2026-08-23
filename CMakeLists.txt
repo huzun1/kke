@@ -37,6 +37,7 @@ add_library(kke STATIC
     src/kke/appearance/resource/effect/EffectCompose.cc
     src/kke/appearance/resource/effect/EffectIdentifier.cc
     src/kke/appearance/resource/brush/impl/LinearGradientBrush.cc
+    src/kke/appearance/resource/brush/impl/RasterSurfaceBrush.cc
     src/kke/appearance/resource/brush/impl/SolidColorBrush.cc
     src/kke/engine/d2d/D2dEngine.cc
     src/kke/engine/d2d/context/D2dContext.cc
@@ -51,6 +52,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/renderer/effect/EffectClipCropper.cc
     src/kke/engine/d2d/renderer/effect/EffectClipTransformer.cc
     src/kke/engine/d2d/renderer/effect/EffectPaddingEstimator.cc
+    src/kke/engine/d2d/renderer/effect/EffectRasterScaler.cc
     src/kke/engine/d2d/renderer/effect/EffectRenderer.cc
     src/kke/engine/d2d/renderer/effect/EffectSourceRenderer.cc
     src/kke/engine/d2d/renderer/effect/cache/PositionIndependentBrush.cc

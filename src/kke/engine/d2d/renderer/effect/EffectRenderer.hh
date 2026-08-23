@@ -9,6 +9,7 @@
 #include "kke/engine/d2d/renderer/RenderPass.hh"
 #include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
 #include "kke/engine/d2d/renderer/effect/EffectClipCropper.hh"
+#include "kke/engine/d2d/renderer/effect/EffectRasterScaler.hh"
 #include "kke/engine/d2d/renderer/effect/EffectSourceRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/BlurEffectRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/ColorMatrixEffectRenderer.hh"
@@ -22,6 +23,7 @@ class EffectRenderer {
 	CanvasService canvasService;
 	EffectSourceRenderer sourceRenderer;
 	EffectClipCropper clipCropper;
+	EffectRasterScaler rasterScaler;
 	BlurEffectRenderer blurEffectRenderer;
 	DirectionalBlurEffectRenderer directionalBlurEffectRenderer;
 	ColorMatrixEffectRenderer colorMatrixEffectRenderer;

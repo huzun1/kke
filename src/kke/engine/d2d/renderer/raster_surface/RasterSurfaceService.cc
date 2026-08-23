@@ -12,9 +12,15 @@ using Microsoft::WRL::ComPtr;
 std::shared_ptr<D2dRasterSurface> RasterSurfaceService::create(
 	D2dEngineContext const& context, Scale const& logicalSize, float rasterScale
 ) {
+	return create(context, logicalSize, rasterScale, 96.0f * rasterScale);
+}
+
+std::shared_ptr<D2dRasterSurface> RasterSurfaceService::create(
+	D2dEngineContext const& context, Scale const& logicalSize, float rasterScale, float bitmapDpi
+) {
 	if (!std::isfinite(logicalSize.x) || !std::isfinite(logicalSize.y) ||
 		!std::isfinite(rasterScale) || logicalSize.x <= 0.0f || logicalSize.y <= 0.0f ||
-		rasterScale <= 0.0f) {
+		rasterScale <= 0.0f || !std::isfinite(bitmapDpi) || bitmapDpi <= 0.0f) {
 		return nullptr;
 	}
 
@@ -28,8 +34,8 @@ std::shared_ptr<D2dRasterSurface> RasterSurfaceService::create(
 	D2D1_BITMAP_PROPERTIES1 properties = D2D1::BitmapProperties1(
 		D2D1_BITMAP_OPTIONS_TARGET,
 		D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED),
-		96.0f * rasterScale,
-		96.0f * rasterScale
+		bitmapDpi,
+		bitmapDpi
 	);
 	ComPtr<ID2D1Bitmap1> bitmap;
 	HRESULT result = context.getD2dContext()->getDeviceContext()->CreateBitmap(

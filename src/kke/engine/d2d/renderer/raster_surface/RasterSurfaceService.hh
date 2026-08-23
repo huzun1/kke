@@ -29,6 +29,13 @@ class RasterSurfaceService {
 	std::shared_ptr<D2dRasterSurface>
 	create(D2dEngineContext const& context, Scale const& logicalSize, float rasterScale);
 
+	std::shared_ptr<D2dRasterSurface> create(
+		D2dEngineContext const& context,
+		Scale const& logicalSize,
+		float rasterScale,
+		float bitmapDpi
+	);
+
 	bool begin(D2dEngineContext const& context, std::shared_ptr<RasterSurface> const& surface);
 
 	bool end(D2dEngineContext const& context);

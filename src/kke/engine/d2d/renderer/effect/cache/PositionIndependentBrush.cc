@@ -12,12 +12,21 @@ Brush PositionIndependentBrush::normalize(Brush const& brush, Point const& origi
 			using BrushType = std::decay_t<decltype(brushVariant)>;
 			if constexpr (std::is_same_v<BrushType, SolidColorBrush>) {
 				return brushVariant;
-			} else {
+			} else if constexpr (std::is_same_v<BrushType, LinearGradientBrush>) {
 				return LinearGradientBrush{
 					brushVariant.getColors(),
 					brushVariant.getStartPoint() - origin,
 					brushVariant.getEndPoint() - origin,
 					brushVariant.getAngle()
+				};
+			} else {
+				Rect destination = brushVariant.getDestination();
+				destination.min = destination.min - origin;
+				destination.max = destination.max - origin;
+				return RasterSurfaceBrush{
+					brushVariant.getSurface(),
+					destination,
+					brushVariant.getOpacity()
 				};
 			}
 		},

@@ -61,3 +61,7 @@ add_test(NAME kke_text_measurement_cache_test COMMAND kke_text_measurement_cache
 add_executable(kke_brush_hasher_test BrushHasherTest.cc)
 target_link_libraries(kke_brush_hasher_test PRIVATE kke)
 add_test(NAME kke_brush_hasher_test COMMAND kke_brush_hasher_test)
+
+add_executable(kke_effect_raster_scaler_test EffectRasterScalerTest.cc)
+target_link_libraries(kke_effect_raster_scaler_test PRIVATE kke)
+add_test(NAME kke_effect_raster_scaler_test COMMAND kke_effect_raster_scaler_test)
