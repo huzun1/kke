@@ -90,11 +90,8 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 		if (shouldPreserveRenderTarget) {
 			Microsoft::WRL::ComPtr<ID2D1Bitmap> baseBitmap =
 				acquirePreservedBaseBitmap(deviceContext);
-			snapshotImage = createCompositeSnapshot(
-				deviceContext,
-				baseBitmap.Get(),
-				currentTargetCommandList.Get()
-			);
+			snapshotImage =
+				createCompositeSnapshot(context, baseBitmap.Get(), currentTargetCommandList.Get());
 			if (!snapshotImage) {
 				snapshotImage = commandListSnapshotter.snapshotComposite(
 					deviceContext,
@@ -171,15 +168,19 @@ RenderPass::createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* sou
 }
 
 Microsoft::WRL::ComPtr<ID2D1Image> RenderPass::createCompositeSnapshot(
-	ID2D1DeviceContext* deviceContext, ID2D1Image* background, ID2D1Image* foreground
+	D2dEngineContext& context, ID2D1Image* background, ID2D1Image* foreground
 ) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
 	if (deviceContext == nullptr || background == nullptr || foreground == nullptr) {
 		return nullptr;
 	}
 
-	Microsoft::WRL::ComPtr<ID2D1Effect> compositeEffect;
-	if (FAILED(deviceContext->CreateEffect(CLSID_D2D1Composite, &compositeEffect)) ||
-		!compositeEffect) {
+	Microsoft::WRL::ComPtr<ID2D1Effect> compositeEffect =
+		context.getResourceProviders()->getEffectPool()->acquire(
+			deviceContext,
+			CLSID_D2D1Composite
+		);
+	if (!compositeEffect) {
 		return nullptr;
 	}
 	compositeEffect->SetInput(0, background);

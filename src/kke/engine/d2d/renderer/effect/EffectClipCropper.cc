@@ -13,12 +13,15 @@ ComPtr<ID2D1Image> EffectClipCropper::crop(
 	EffectClipSource const& clip
 ) const {
 	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	D2D1_RECT_F cropBounds =
-		expandRect(EffectClipBoundsResolver::resolve(clip), EffectPaddingEstimator::estimate(effect));
+	D2D1_RECT_F cropBounds = expandRect(
+		EffectClipBoundsResolver::resolve(clip),
+		EffectPaddingEstimator::estimate(effect)
+	);
 
 	ComPtr<ID2D1Effect> cropEffect;
-	HRESULT createResult = deviceContext->CreateEffect(CLSID_D2D1Crop, &cropEffect);
-	if (FAILED(createResult) || !cropEffect) {
+	cropEffect =
+		context.getResourceProviders()->getEffectPool()->acquire(deviceContext, CLSID_D2D1Crop);
+	if (!cropEffect) {
 		return sourceImage;
 	}
 
@@ -43,8 +46,9 @@ ComPtr<ID2D1Image> EffectClipCropper::crop(
 	);
 
 	ComPtr<ID2D1Effect> cropEffect;
-	HRESULT createResult = deviceContext->CreateEffect(CLSID_D2D1Crop, &cropEffect);
-	if (FAILED(createResult) || !cropEffect) {
+	cropEffect =
+		context.getResourceProviders()->getEffectPool()->acquire(deviceContext, CLSID_D2D1Crop);
+	if (!cropEffect) {
 		return sourceImage;
 	}
 

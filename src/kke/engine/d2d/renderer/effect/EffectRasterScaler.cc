@@ -17,9 +17,10 @@ ComPtr<ID2D1Image> EffectRasterScaler::scaleSource(
 	}
 
 	ComPtr<ID2D1Effect> scaleEffect;
-	HRESULT result =
-		context.getD2dContext()->getDeviceContext()->CreateEffect(CLSID_D2D1Scale, &scaleEffect);
-	if (FAILED(result) || !scaleEffect) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	scaleEffect =
+		context.getResourceProviders()->getEffectPool()->acquire(deviceContext, CLSID_D2D1Scale);
+	if (!scaleEffect) {
 		return nullptr;
 	}
 

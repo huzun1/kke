@@ -31,17 +31,17 @@ class ShadowEffectRenderer {
 
   private:
 	Microsoft::WRL::ComPtr<ID2D1Effect> createShadowEffect(
-		ID2D1DeviceContext* deviceContext,
+		D2dEngineContext& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
 		ShadowEffect const& effect
 	) const;
 
 	Microsoft::WRL::ComPtr<ID2D1Effect> createOffsetEffect(
-		ID2D1DeviceContext* deviceContext, ID2D1Effect* shadowEffect, ShadowEffect const& effect
+		D2dEngineContext& context, ID2D1Effect* shadowEffect, ShadowEffect const& effect
 	) const;
 
 	Microsoft::WRL::ComPtr<ID2D1Image> createOuterShadowImage(
-		ID2D1DeviceContext* deviceContext,
+		D2dEngineContext& context,
 		ID2D1Effect* offsetEffect,
 		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage
 	) const;

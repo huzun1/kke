@@ -35,7 +35,7 @@ class RenderPass {
 	createBitmapCopy(ID2D1DeviceContext* deviceContext, ID2D1Bitmap* source);
 
 	static Microsoft::WRL::ComPtr<ID2D1Image> createCompositeSnapshot(
-		ID2D1DeviceContext* deviceContext, ID2D1Image* background, ID2D1Image* foreground
+		D2dEngineContext& context, ID2D1Image* background, ID2D1Image* foreground
 	);
 };
 }; // namespace kke

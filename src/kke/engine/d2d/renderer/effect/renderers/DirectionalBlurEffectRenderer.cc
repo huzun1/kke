@@ -7,11 +7,12 @@ ComPtr<ID2D1Image> DirectionalBlurEffectRenderer::render(
 	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, DirectionalBlurEffect const& effect
 ) const {
 	ComPtr<ID2D1Effect> directionalBlurEffect;
-	HRESULT result = context.getD2dContext()->getDeviceContext()->CreateEffect(
-		CLSID_D2D1DirectionalBlur,
-		&directionalBlurEffect
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	directionalBlurEffect = context.getResourceProviders()->getEffectPool()->acquire(
+		deviceContext,
+		CLSID_D2D1DirectionalBlur
 	);
-	if (FAILED(result) || !directionalBlurEffect) {
+	if (!directionalBlurEffect) {
 		return nullptr;
 	}
 

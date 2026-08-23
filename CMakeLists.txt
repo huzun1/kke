@@ -80,6 +80,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/resource/font/hash/FontHasher.cc
     src/kke/engine/d2d/resource/canvas/CanvasFactory.cc
     src/kke/engine/d2d/resource/canvas/D2dCanvas.cc
+    src/kke/engine/d2d/resource/effect/D2dEffectPool.cc
     src/kke/engine/d2d/resource/geometry/GeometryProvider.cc
     src/kke/engine/d2d/resource/geometry/InvertedGeometryProvider.cc
     src/kke/engine/d2d/resource/geometry/ViewportGeometryCache.cc
