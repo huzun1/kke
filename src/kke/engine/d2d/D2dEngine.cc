@@ -33,6 +33,8 @@ struct D2dEngine::Impl {
 	TextureRenderer textureRenderer;
 	RasterSurfaceService rasterSurfaceService;
 	EffectRenderer effectRenderer;
+	bool attemptedReusableFrameEffectCapture = false;
+	std::optional<CapturedEffect> reusedFrameEffectCapture;
 };
 
 D2dEngine::D2dEngine() : impl(std::make_unique<Impl>()) {
@@ -47,6 +49,8 @@ void D2dEngine::beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget) 
 	impl->engineContext->setD2dContext(std::move(d2dContext));
 	D2D1_SIZE_F viewportSize = renderTarget->GetSize();
 	impl->engineContext->update(viewportSize);
+	impl->attemptedReusableFrameEffectCapture = false;
+	impl->reusedFrameEffectCapture.reset();
 
 	impl->renderPass.beginDraw(*impl->engineContext, renderTarget);
 }
@@ -259,6 +263,12 @@ std::optional<CapturedEffect> D2dEngine::captureEffect(
 	Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
 ) {
 	assertD2dContext();
+	if (options.reuseWithinFrame) {
+		if (impl->attemptedReusableFrameEffectCapture) {
+			return impl->reusedFrameEffectCapture;
+		}
+		impl->attemptedReusableFrameEffectCapture = true;
+	}
 	auto captured = impl->effectRenderer.capture(
 		*impl->engineContext,
 		impl->renderPass,
@@ -267,6 +277,9 @@ std::optional<CapturedEffect> D2dEngine::captureEffect(
 		options,
 		impl->rasterSurfaceService
 	);
+	if (options.reuseWithinFrame && captured.has_value()) {
+		impl->reusedFrameEffectCapture = captured;
+	}
 	impl->renderPass.invalidateCachedTargetSnapshot();
 	return captured;
 }
