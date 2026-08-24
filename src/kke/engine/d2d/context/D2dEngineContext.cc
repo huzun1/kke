@@ -11,12 +11,12 @@ void D2dEngineContext::update(D2D1_SIZE_F viewportSize) {
 	resourceProviders->update(*d2dContext, viewportSize);
 }
 
-void D2dEngineContext::setD2dContext(std::unique_ptr<D2dContext> context) {
-	d2dContext = std::move(context);
+void D2dEngineContext::setD2dContext(D2dContext const& context) {
+	d2dContext.emplace(context);
 }
 
 D2dContext* D2dEngineContext::getD2dContext() const {
-	return d2dContext.get();
+	return d2dContext ? &*d2dContext : nullptr;
 }
 
 void D2dEngineContext::releaseD2dContext() {

@@ -43,12 +43,13 @@ ComPtr<ID2D1Image> BlurEffectRenderer::render(
 	}
 
 	if (effect.appearance.mode == BlurMode::OuterOnly) {
-		ComPtr<ID2D1Effect> compositeEffect;
-		HRESULT compositeResult = context.getD2dContext()->getDeviceContext()->CreateEffect(
-			CLSID_D2D1Composite,
-			&compositeEffect
-		);
-		if (FAILED(compositeResult) || !compositeEffect) {
+		ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+		ComPtr<ID2D1Effect> compositeEffect =
+			context.getResourceProviders()->getEffectPool()->acquire(
+				deviceContext,
+				CLSID_D2D1Composite
+			);
+		if (!compositeEffect) {
 			return nullptr;
 		}
 
@@ -70,11 +71,12 @@ ComPtr<ID2D1Effect> BlurEffectRenderer::createBlurEffect(
 	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, BlurEffect const& effect
 ) const {
 	ComPtr<ID2D1Effect> blurEffect;
-	HRESULT result = context.getD2dContext()->getDeviceContext()->CreateEffect(
-		CLSID_D2D1GaussianBlur,
-		&blurEffect
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	blurEffect = context.getResourceProviders()->getEffectPool()->acquire(
+		deviceContext,
+		CLSID_D2D1GaussianBlur
 	);
-	if (FAILED(result) || !blurEffect) {
+	if (!blurEffect) {
 		return nullptr;
 	}
 

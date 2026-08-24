@@ -14,6 +14,7 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
 endif()
 
 option(KKE_BUILD_TESTS "Build the kke test application" ${KKE_IS_TOP_LEVEL})
+option(KKE_BUILD_BENCHMARKS "Build the kke microbenchmarks" ${KKE_IS_TOP_LEVEL})
 option(KKE_DEBUG "Enable kke debug logging" ${KKE_IS_TOP_LEVEL})
 
 set(KKE_PUBLIC_ENGINE_HEADERS
@@ -37,6 +38,7 @@ add_library(kke STATIC
     src/kke/appearance/resource/effect/EffectCompose.cc
     src/kke/appearance/resource/effect/EffectIdentifier.cc
     src/kke/appearance/resource/brush/impl/LinearGradientBrush.cc
+    src/kke/appearance/resource/brush/impl/RasterSurfaceBrush.cc
     src/kke/appearance/resource/brush/impl/SolidColorBrush.cc
     src/kke/engine/d2d/D2dEngine.cc
     src/kke/engine/d2d/context/D2dContext.cc
@@ -51,6 +53,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/renderer/effect/EffectClipCropper.cc
     src/kke/engine/d2d/renderer/effect/EffectClipTransformer.cc
     src/kke/engine/d2d/renderer/effect/EffectPaddingEstimator.cc
+    src/kke/engine/d2d/renderer/effect/EffectRasterScaler.cc
     src/kke/engine/d2d/renderer/effect/EffectRenderer.cc
     src/kke/engine/d2d/renderer/effect/EffectSourceRenderer.cc
     src/kke/engine/d2d/renderer/effect/cache/PositionIndependentBrush.cc
@@ -63,6 +66,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/renderer/painting/FaceRenderer.cc
     src/kke/engine/d2d/renderer/painting/StrokeRenderer.cc
     src/kke/engine/d2d/renderer/painting/TextureRenderer.cc
+    src/kke/engine/d2d/renderer/raster_surface/RasterSurfaceService.cc
     src/kke/engine/d2d/renderer/view/MatrixState.cc
     src/kke/engine/d2d/renderer/view/ViewLayerController.cc
     src/kke/engine/d2d/resource/brush/BrushProvider.cc
@@ -77,6 +81,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/resource/font/hash/FontHasher.cc
     src/kke/engine/d2d/resource/canvas/CanvasFactory.cc
     src/kke/engine/d2d/resource/canvas/D2dCanvas.cc
+    src/kke/engine/d2d/resource/effect/D2dEffectPool.cc
     src/kke/engine/d2d/resource/geometry/GeometryProvider.cc
     src/kke/engine/d2d/resource/geometry/InvertedGeometryProvider.cc
     src/kke/engine/d2d/resource/geometry/ViewportGeometryCache.cc
@@ -87,6 +92,8 @@ add_library(kke STATIC
     src/kke/engine/d2d/resource/texture/D2dTexture.cc
     src/kke/engine/d2d/resource/texture/TextureProvider.cc
     src/kke/engine/d2d/resource/texture/factory/TextureFactory.cc
+    src/kke/engine/d2d/resource/raster_surface/D2dRasterSurface.cc
+    src/kke/engine/d2d/resource/target_snapshot/D2dTargetSnapshot.cc
     src/kke/engine/d2d/transform/Matrix.cc
     src/kke/engine/d2d/transform/impl/RotateManipulator.cc
     src/kke/engine/d2d/transform/impl/ScaleManipulator.cc
@@ -165,4 +172,8 @@ install(FILES
 if(KKE_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if(KKE_BUILD_BENCHMARKS)
+    add_subdirectory(benchmarks)
 endif()

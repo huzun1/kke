@@ -1,9 +1,10 @@
 #pragma once
 
-#include "kke/engine/Engine.hh"
-
 #include <memory>
 #include <optional>
+
+#include "kke/engine/Engine.hh"
+#include "kke/engine/d2d/D2dLayerStatistics.hh"
 
 struct ID2D1Bitmap;
 
@@ -24,6 +25,8 @@ class D2dEngine : public Engine {
 
 	void endDraw();
 
+	D2dLayerStatistics const& getLayerStatistics() const;
+
 	void clear() override;
 
 	/*================ Transform Control ================ */
@@ -36,10 +39,6 @@ class D2dEngine : public Engine {
 
 	void popLayer() override;
 
-	void pushAxisAlignedClip(Rect const& rect) override;
-
-	void popAxisAlignedClip() override;
-
 	/* ================= Canvas Control ================= */
 	std::shared_ptr<Canvas> createCanvas() override;
 
@@ -50,6 +49,18 @@ class D2dEngine : public Engine {
 	bool finishCanvas(std::shared_ptr<Canvas> canvas) override;
 
 	void draw(std::shared_ptr<Canvas> canvas, float opacity = 1.0f) override;
+
+	/* ============== Raster Surface Control ============ */
+	std::shared_ptr<RasterSurface>
+	createRasterSurface(Scale const& logicalSize, float rasterScale) override;
+
+	bool
+	beginRasterSurface(std::shared_ptr<RasterSurface> surface, Point const& logicalOrigin) override;
+
+	bool endRasterSurface() override;
+
+	void draw(std::shared_ptr<RasterSurface> surface, Rect const& destination, float opacity = 1.0f)
+		override;
 
 	/* ================= Measurement =================== */
 	kke::Scale getViewportSize() override;
@@ -78,6 +89,8 @@ class D2dEngine : public Engine {
 	) override;
 
 	/* ================= Effect Rendering ================== */
+	std::shared_ptr<TargetSnapshot> captureTargetSnapshot() override;
+
 	void renderEffect(
 		Effect const& effect,
 		std::optional<EffectClipSource> clip = std::nullopt,
@@ -86,6 +99,17 @@ class D2dEngine : public Engine {
 
 	std::shared_ptr<Canvas> captureEffect(
 		Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt
+	) override;
+
+	std::optional<CapturedEffect> captureEffect(
+		Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
+	) override;
+
+	std::optional<CapturedEffect> captureEffect(
+		std::shared_ptr<TargetSnapshot> const& source,
+		Effect const& effect,
+		EffectClipSource const& clip,
+		EffectCaptureOptions const& options
 	) override;
 
 	void renderEffect(

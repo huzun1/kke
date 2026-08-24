@@ -1,7 +1,12 @@
 #include "EffectRenderer.hh"
 
+#include <cmath>
+#include <utility>
+
 #include "kke/appearance/resource/effect/EffectIdentifier.hh"
+#include "kke/engine/d2d/renderer/effect/EffectClipBoundsResolver.hh"
 #include "kke/engine/d2d/renderer/effect/EffectClipTransformer.hh"
+#include "kke/engine/d2d/resource/raster_surface/D2dRasterSurface.hh"
 
 using namespace kke;
 using Microsoft::WRL::ComPtr;
@@ -71,6 +76,101 @@ std::shared_ptr<Canvas> EffectRenderer::capture(
 	}
 	deviceContext->SetTransform(activeTransform);
 	return canvas;
+}
+
+std::optional<CapturedEffect> EffectRenderer::capture(
+	D2dEngineContext& context,
+	RenderPass& renderPass,
+	Effect const& effect,
+	EffectClipSource const& clip,
+	EffectCaptureOptions const& options,
+	RasterSurfaceService& rasterSurfaceService
+) {
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
+	if (!sourceImage) {
+		return std::nullopt;
+	}
+	return capture(context, std::move(sourceImage), effect, clip, options, rasterSurfaceService);
+}
+
+std::optional<CapturedEffect> EffectRenderer::capture(
+	D2dEngineContext& context,
+	ComPtr<ID2D1Image> sourceImage,
+	Effect const& effect,
+	EffectClipSource const& clip,
+	EffectCaptureOptions const& options,
+	RasterSurfaceService& rasterSurfaceService
+) {
+	if (!std::isfinite(options.rasterScale) || options.rasterScale <= 0.0f) {
+		return std::nullopt;
+	}
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	D2D1_MATRIX_3X2_F activeTransform;
+	deviceContext->GetTransform(&activeTransform);
+	EffectClipSource viewportClip = EffectClipTransformer::transform(clip, activeTransform);
+	D2D1_RECT_F bounds = EffectClipBoundsResolver::resolve(viewportClip);
+	Scale logicalSize{bounds.right - bounds.left, bounds.bottom - bounds.top};
+	if (logicalSize.x <= 0.0f || logicalSize.y <= 0.0f) {
+		return std::nullopt;
+	}
+
+	if (!sourceImage) {
+		return std::nullopt;
+	}
+	sourceImage = clipCropper.crop(context, sourceImage, effect, viewportClip);
+	sourceImage = rasterScaler.scaleSource(context, sourceImage, options.rasterScale);
+	if (!sourceImage) {
+		return std::nullopt;
+	}
+	Effect scaledEffect = rasterScaler.scaleEffect(effect, options.rasterScale);
+	ComPtr<ID2D1Image> effectImage = apply(context, sourceImage, scaledEffect);
+	if (!effectImage) {
+		return std::nullopt;
+	}
+
+	auto surface = options.reusableSurface;
+	if (auto d2dSurface = std::dynamic_pointer_cast<D2dRasterSurface>(surface);
+		d2dSurface && d2dSurface->getBitmap()) {
+		D2D1_SIZE_U pixelSize = d2dSurface->getBitmap()->GetPixelSize();
+		float dpiX = 0.0f;
+		float dpiY = 0.0f;
+		d2dSurface->getBitmap()->GetDpi(&dpiX, &dpiY);
+		UINT32 expectedWidth = static_cast<UINT32>(std::ceil(logicalSize.x * options.rasterScale));
+		UINT32 expectedHeight = static_cast<UINT32>(std::ceil(logicalSize.y * options.rasterScale));
+		if (pixelSize.width != expectedWidth || pixelSize.height != expectedHeight ||
+			dpiX != 96.0f || dpiY != 96.0f) {
+			surface.reset();
+		}
+	} else {
+		surface.reset();
+	}
+	if (!surface) {
+		surface = rasterSurfaceService.create(context, logicalSize, options.rasterScale, 96.0f);
+	}
+	auto d2dSurface = std::dynamic_pointer_cast<D2dRasterSurface>(surface);
+	if (!d2dSurface || !d2dSurface->getBitmap()) {
+		return std::nullopt;
+	}
+	if (!surface || !rasterSurfaceService.begin(context, surface)) {
+		return std::nullopt;
+	}
+	deviceContext->SetTransform(D2D1::Matrix3x2F(
+		1.0f,
+		0.0f,
+		0.0f,
+		1.0f,
+		-bounds.left * options.rasterScale,
+		-bounds.top * options.rasterScale
+	));
+	deviceContext->DrawImage(effectImage.Get());
+	if (!rasterSurfaceService.end(context)) {
+		return std::nullopt;
+	}
+	return CapturedEffect{
+		.surface = std::move(surface),
+		.bounds = {{bounds.left, bounds.top}, {bounds.right, bounds.bottom}},
+	};
 }
 
 void EffectRenderer::render(

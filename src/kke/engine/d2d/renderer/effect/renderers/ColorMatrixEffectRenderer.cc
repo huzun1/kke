@@ -7,11 +7,12 @@ ComPtr<ID2D1Image> ColorMatrixEffectRenderer::render(
 	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, ColorMatrixEffect const& effect
 ) const {
 	ComPtr<ID2D1Effect> colorMatrixEffect;
-	HRESULT result = context.getD2dContext()->getDeviceContext()->CreateEffect(
-		CLSID_D2D1ColorMatrix,
-		&colorMatrixEffect
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	colorMatrixEffect = context.getResourceProviders()->getEffectPool()->acquire(
+		deviceContext,
+		CLSID_D2D1ColorMatrix
 	);
-	if (FAILED(result) || !colorMatrixEffect) {
+	if (!colorMatrixEffect) {
 		return nullptr;
 	}
 

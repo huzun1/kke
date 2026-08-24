@@ -13,8 +13,11 @@
 #include "kke/engine/d2d/renderer/painting/FaceRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/StrokeRenderer.hh"
 #include "kke/engine/d2d/renderer/painting/TextureRenderer.hh"
+#include "kke/engine/d2d/renderer/raster_surface/RasterSurfaceService.hh"
 #include "kke/engine/d2d/renderer/view/MatrixState.hh"
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
+#include "kke/engine/d2d/resource/raster_surface/D2dRasterSurface.hh"
+#include "kke/engine/d2d/resource/target_snapshot/D2dTargetSnapshot.hh"
 
 using namespace kke;
 
@@ -29,6 +32,7 @@ struct D2dEngine::Impl {
 	FaceRenderer faceRenderer;
 	StrokeRenderer strokeRenderer;
 	TextureRenderer textureRenderer;
+	RasterSurfaceService rasterSurfaceService;
 	EffectRenderer effectRenderer;
 };
 
@@ -40,8 +44,8 @@ D2dEngine::D2dEngine() : impl(std::make_unique<Impl>()) {
 D2dEngine::~D2dEngine() = default;
 
 void D2dEngine::beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget) {
-	std::unique_ptr<D2dContext> d2dContext = std::make_unique<D2dContext>(context);
-	impl->engineContext->setD2dContext(std::move(d2dContext));
+	impl->viewLayerController.beginFrame();
+	impl->engineContext->setD2dContext(context);
 	D2D1_SIZE_F viewportSize = renderTarget->GetSize();
 	impl->engineContext->update(viewportSize);
 
@@ -52,6 +56,10 @@ void D2dEngine::endDraw() {
 	assertD2dContext();
 	impl->renderPass.endDraw(*impl->engineContext);
 	impl->engineContext->releaseD2dContext();
+}
+
+D2dLayerStatistics const& D2dEngine::getLayerStatistics() const {
+	return impl->viewLayerController.getStatistics();
 }
 
 void D2dEngine::clear() {
@@ -77,19 +85,6 @@ void D2dEngine::pushLayer(MaskSource const& mask, LayerMode mode) {
 void D2dEngine::popLayer() {
 	assertD2dContext();
 	impl->viewLayerController.popLayer(*impl->engineContext);
-}
-
-void D2dEngine::pushAxisAlignedClip(Rect const& rect) {
-	assertD2dContext();
-	impl->engineContext->getD2dContext()->getDeviceContext()->PushAxisAlignedClip(
-		D2D1::RectF(rect.min.x, rect.min.y, rect.max.x, rect.max.y),
-		D2D1_ANTIALIAS_MODE_ALIASED
-	);
-}
-
-void D2dEngine::popAxisAlignedClip() {
-	assertD2dContext();
-	impl->engineContext->getD2dContext()->getDeviceContext()->PopAxisAlignedClip();
 }
 
 std::shared_ptr<Canvas> D2dEngine::createCanvas() {
@@ -126,6 +121,48 @@ void D2dEngine::draw(std::shared_ptr<Canvas> canvas, float opacity) {
 	assertD2dContext();
 	impl->renderPass.invalidateCachedTargetSnapshot();
 	impl->canvasService.drawCanvas(*impl->engineContext, canvas, opacity);
+}
+
+std::shared_ptr<RasterSurface>
+D2dEngine::createRasterSurface(Scale const& logicalSize, float rasterScale) {
+	assertD2dContext();
+	return impl->rasterSurfaceService.create(*impl->engineContext, logicalSize, rasterScale);
+}
+
+bool D2dEngine::beginRasterSurface(
+	std::shared_ptr<RasterSurface> surface, Point const& logicalOrigin
+) {
+	assertD2dContext();
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	if (!impl->rasterSurfaceService.begin(*impl->engineContext, surface)) {
+		return false;
+	}
+	impl->matrixState.beginCanvas(*impl->engineContext);
+	impl->matrixState.pushTransform(
+		*impl->engineContext,
+		TransformSource{Translation({-logicalOrigin.x, -logicalOrigin.y})}
+	);
+	return true;
+}
+
+bool D2dEngine::endRasterSurface() {
+	assertD2dContext();
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	impl->matrixState.popTransform(*impl->engineContext);
+	if (!impl->rasterSurfaceService.end(*impl->engineContext)) {
+		impl->matrixState.endCanvas(*impl->engineContext);
+		return false;
+	}
+	impl->matrixState.endCanvas(*impl->engineContext);
+	return true;
+}
+
+void D2dEngine::draw(
+	std::shared_ptr<RasterSurface> surface, Rect const& destination, float opacity
+) {
+	assertD2dContext();
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	impl->rasterSurfaceService.draw(*impl->engineContext, surface, destination, opacity);
 }
 
 Scale D2dEngine::getViewportSize() {
@@ -208,6 +245,55 @@ D2dEngine::captureEffect(Effect const& effect, std::optional<EffectClipSource> c
 	);
 	impl->renderPass.invalidateCachedTargetSnapshot();
 	return canvas;
+}
+
+std::optional<CapturedEffect> D2dEngine::captureEffect(
+	Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
+) {
+	assertD2dContext();
+	auto captured = impl->effectRenderer.capture(
+		*impl->engineContext,
+		impl->renderPass,
+		effect,
+		clip,
+		options,
+		impl->rasterSurfaceService
+	);
+	impl->renderPass.invalidateCachedTargetSnapshot();
+	return captured;
+}
+
+std::shared_ptr<TargetSnapshot> D2dEngine::captureTargetSnapshot() {
+	assertD2dContext();
+	auto snapshotImage = impl->renderPass.cycleTargetSnapshot(
+		*impl->engineContext,
+		SnapshotOpacityMode::FlattenToOpaqueBlack
+	);
+	if (!snapshotImage) {
+		return nullptr;
+	}
+	return std::make_shared<D2dTargetSnapshot>(std::move(snapshotImage));
+}
+
+std::optional<CapturedEffect> D2dEngine::captureEffect(
+	std::shared_ptr<TargetSnapshot> const& source,
+	Effect const& effect,
+	EffectClipSource const& clip,
+	EffectCaptureOptions const& options
+) {
+	assertD2dContext();
+	auto d2dSource = std::dynamic_pointer_cast<D2dTargetSnapshot>(source);
+	if (!d2dSource || !d2dSource->getImage()) {
+		return std::nullopt;
+	}
+	return impl->effectRenderer.capture(
+		*impl->engineContext,
+		d2dSource->getImage(),
+		effect,
+		clip,
+		options,
+		impl->rasterSurfaceService
+	);
 }
 
 void D2dEngine::renderEffect(

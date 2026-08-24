@@ -2,16 +2,20 @@
 
 #include <optional>
 
+#include "kke/appearance/resource/effect/CapturedEffect.hh"
+#include "kke/appearance/resource/effect/EffectCaptureOptions.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/engine/d2d/context/D2dEngineContext.hh"
 #include "kke/engine/d2d/renderer/RenderPass.hh"
 #include "kke/engine/d2d/renderer/canvas/CanvasService.hh"
 #include "kke/engine/d2d/renderer/effect/EffectClipCropper.hh"
+#include "kke/engine/d2d/renderer/effect/EffectRasterScaler.hh"
 #include "kke/engine/d2d/renderer/effect/EffectSourceRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/BlurEffectRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/ColorMatrixEffectRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/DirectionalBlurEffectRenderer.hh"
 #include "kke/engine/d2d/renderer/effect/renderers/ShadowEffectRenderer.hh"
+#include "kke/engine/d2d/renderer/raster_surface/RasterSurfaceService.hh"
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
 
 namespace kke {
@@ -19,6 +23,7 @@ class EffectRenderer {
 	CanvasService canvasService;
 	EffectSourceRenderer sourceRenderer;
 	EffectClipCropper clipCropper;
+	EffectRasterScaler rasterScaler;
 	BlurEffectRenderer blurEffectRenderer;
 	DirectionalBlurEffectRenderer directionalBlurEffectRenderer;
 	ColorMatrixEffectRenderer colorMatrixEffectRenderer;
@@ -40,6 +45,24 @@ class EffectRenderer {
 		Effect const& effect,
 		std::optional<EffectClipSource> clip,
 		ViewLayerController& viewLayerController
+	);
+
+	std::optional<CapturedEffect> capture(
+		D2dEngineContext& context,
+		RenderPass& renderPass,
+		Effect const& effect,
+		EffectClipSource const& clip,
+		EffectCaptureOptions const& options,
+		RasterSurfaceService& rasterSurfaceService
+	);
+
+	std::optional<CapturedEffect> capture(
+		D2dEngineContext& context,
+		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
+		Effect const& effect,
+		EffectClipSource const& clip,
+		EffectCaptureOptions const& options,
+		RasterSurfaceService& rasterSurfaceService
 	);
 
 	void render(

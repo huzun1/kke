@@ -38,15 +38,12 @@ PositionIndependentEffectCache::RenderResult ShadowEffectRenderer::render(
 ComPtr<ID2D1Image> ShadowEffectRenderer::render(
 	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, ShadowEffect const& effect
 ) const {
-	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-
-	ComPtr<ID2D1Effect> shadowEffect = createShadowEffect(deviceContext, sourceImage, effect);
+	ComPtr<ID2D1Effect> shadowEffect = createShadowEffect(context, sourceImage, effect);
 	if (!shadowEffect) {
 		return nullptr;
 	}
 
-	ComPtr<ID2D1Effect> offsetEffect =
-		createOffsetEffect(deviceContext, shadowEffect.Get(), effect);
+	ComPtr<ID2D1Effect> offsetEffect = createOffsetEffect(context, shadowEffect.Get(), effect);
 	if (!offsetEffect) {
 		return nullptr;
 	}
@@ -58,26 +55,30 @@ ComPtr<ID2D1Image> ShadowEffectRenderer::render(
 		return outputImage;
 	}
 	case ShadowMode::OuterShadowOnly:
-		return createOuterShadowImage(deviceContext, offsetEffect.Get(), sourceImage);
+		return createOuterShadowImage(context, offsetEffect.Get(), sourceImage);
 	case ShadowMode::ShadowWithSource:
 	default:
 		break;
 	}
 
 	ComPtr<ID2D1Image> outerShadowImage =
-		createOuterShadowImage(deviceContext, offsetEffect.Get(), sourceImage);
+		createOuterShadowImage(context, offsetEffect.Get(), sourceImage);
 	if (!outerShadowImage) {
 		return nullptr;
 	}
 
-	ComPtr<ID2D1Effect> compositeEffect;
-	HRESULT compositeResult = deviceContext->CreateEffect(CLSID_D2D1Composite, &compositeEffect);
-	if (FAILED(compositeResult) || !compositeEffect) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	ComPtr<ID2D1Effect> compositeEffect = context.getResourceProviders()->getEffectPool()->acquire(
+		deviceContext,
+		CLSID_D2D1Composite
+	);
+	if (!compositeEffect) {
 		return nullptr;
 	}
 
 	compositeEffect->SetInput(0, outerShadowImage.Get());
 	compositeEffect->SetInput(1, sourceImage.Get());
+	compositeEffect->SetValue(D2D1_COMPOSITE_PROP_MODE, D2D1_COMPOSITE_MODE_SOURCE_OVER);
 
 	ComPtr<ID2D1Image> outputImage;
 	compositeEffect->GetOutput(&outputImage);
@@ -98,11 +99,12 @@ uint64_t ShadowEffectRenderer::hashEffect(ShadowEffect const& effect) {
 }
 
 ComPtr<ID2D1Effect> ShadowEffectRenderer::createShadowEffect(
-	ID2D1DeviceContext* deviceContext, ComPtr<ID2D1Image> sourceImage, ShadowEffect const& effect
+	D2dEngineContext& context, ComPtr<ID2D1Image> sourceImage, ShadowEffect const& effect
 ) const {
-	ComPtr<ID2D1Effect> shadowEffect;
-	HRESULT shadowResult = deviceContext->CreateEffect(CLSID_D2D1Shadow, &shadowEffect);
-	if (FAILED(shadowResult) || !shadowEffect) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	ComPtr<ID2D1Effect> shadowEffect =
+		context.getResourceProviders()->getEffectPool()->acquire(deviceContext, CLSID_D2D1Shadow);
+	if (!shadowEffect) {
 		return nullptr;
 	}
 
@@ -117,11 +119,14 @@ ComPtr<ID2D1Effect> ShadowEffectRenderer::createShadowEffect(
 }
 
 ComPtr<ID2D1Effect> ShadowEffectRenderer::createOffsetEffect(
-	ID2D1DeviceContext* deviceContext, ID2D1Effect* shadowEffect, ShadowEffect const& effect
+	D2dEngineContext& context, ID2D1Effect* shadowEffect, ShadowEffect const& effect
 ) const {
-	ComPtr<ID2D1Effect> offsetEffect;
-	HRESULT offsetResult = deviceContext->CreateEffect(CLSID_D2D12DAffineTransform, &offsetEffect);
-	if (FAILED(offsetResult) || !offsetEffect) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	ComPtr<ID2D1Effect> offsetEffect = context.getResourceProviders()->getEffectPool()->acquire(
+		deviceContext,
+		CLSID_D2D12DAffineTransform
+	);
+	if (!offsetEffect) {
 		return nullptr;
 	}
 
@@ -134,11 +139,14 @@ ComPtr<ID2D1Effect> ShadowEffectRenderer::createOffsetEffect(
 }
 
 ComPtr<ID2D1Image> ShadowEffectRenderer::createOuterShadowImage(
-	ID2D1DeviceContext* deviceContext, ID2D1Effect* offsetEffect, ComPtr<ID2D1Image> sourceImage
+	D2dEngineContext& context, ID2D1Effect* offsetEffect, ComPtr<ID2D1Image> sourceImage
 ) const {
-	ComPtr<ID2D1Effect> compositeEffect;
-	HRESULT compositeResult = deviceContext->CreateEffect(CLSID_D2D1Composite, &compositeEffect);
-	if (FAILED(compositeResult) || !compositeEffect) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	ComPtr<ID2D1Effect> compositeEffect = context.getResourceProviders()->getEffectPool()->acquire(
+		deviceContext,
+		CLSID_D2D1Composite
+	);
+	if (!compositeEffect) {
 		return nullptr;
 	}
 

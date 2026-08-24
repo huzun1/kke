@@ -21,7 +21,20 @@ uint64_t FontHasher::hash(Text const& text) {
 	Hasher hasher;
 	hasher.combine(FontHashTag::TextLayout);
 	hasher.combine(hash(text.fontAppearance));
-	hasher.combine(getTextString(text));
+	uint64_t textHash = 14695981039346656037ull;
+	std::visit(
+		[&textHash](auto const& value) {
+			using Value = std::decay_t<decltype(value)>;
+			using Character = typename Value::value_type;
+			using UnsignedCharacter = std::make_unsigned_t<Character>;
+			for (Character character : value) {
+				textHash ^= static_cast<uint64_t>(static_cast<UnsignedCharacter>(character));
+				textHash *= 1099511628211ull;
+			}
+		},
+		text.text
+	);
+	hasher.combine(textHash);
 	return hasher.get();
 }
 

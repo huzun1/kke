@@ -1,7 +1,15 @@
 #pragma once
 
+#include <cstddef>
+#include <memory>
+#include <optional>
+
 #include "kke/appearance/painting/StrokeAppearance.hh"
+#include "kke/appearance/resource/RasterSurface.hh"
+#include "kke/appearance/resource/TargetSnapshot.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
+#include "kke/appearance/resource/effect/CapturedEffect.hh"
+#include "kke/appearance/resource/effect/EffectCaptureOptions.hh"
 #include "kke/appearance/resource/effect/EffectCompose.hh"
 #include "kke/appearance/resource/effect/EffectSourceAppearance.hh"
 #include "kke/appearance/resource/font/Font.hh"
@@ -10,10 +18,6 @@
 #include "kke/appearance/resource/texture/TextureDrawAppearance.hh"
 #include "kke/appearance/view/LayerMode.hh"
 #include "kke/engine/Sources.hh"
-#include <cstddef>
-#include <memory>
-#include <optional>
-
 namespace kke {
 /**
  * @brief Abstract interface for a rendering engine.
@@ -58,10 +62,6 @@ class Engine {
 	 */
 	virtual void popLayer() = 0;
 
-	virtual void pushAxisAlignedClip(Rect const& rect) = 0;
-
-	virtual void popAxisAlignedClip() = 0;
-
 	/* ================= Canvas Control ================= */
 
 	/**
@@ -81,6 +81,21 @@ class Engine {
 
 	/** @brief Draws a finalized canvas onto the current render target. */
 	virtual void draw(std::shared_ptr<Canvas> canvas, float opacity = 1.0f) = 0;
+
+	/* ============== Raster Surface Control ============ */
+
+	/** @brief Creates a reusable transparent bitmap at the requested pixel density. */
+	virtual std::shared_ptr<RasterSurface>
+	createRasterSurface(Scale const& logicalSize, float rasterScale) = 0;
+
+	/** @brief Clears the surface and maps logicalOrigin to its top-left pixel. */
+	virtual bool
+	beginRasterSurface(std::shared_ptr<RasterSurface> surface, Point const& logicalOrigin) = 0;
+
+	virtual bool endRasterSurface() = 0;
+
+	virtual void
+	draw(std::shared_ptr<RasterSurface> surface, Rect const& destination, float opacity = 1.0f) = 0;
 
 	/* ================= Measurement =================== */
 
@@ -153,6 +168,11 @@ class Engine {
 
 	/* ================= Effect Rendering ================= */
 
+	/** Captures the active target for use as an explicit effect input. */
+	virtual std::shared_ptr<TargetSnapshot> captureTargetSnapshot() {
+		return nullptr;
+	}
+
 	/**
 	 * @brief Renders an effect using a single effect definition.
 	 * @param source The effect source.
@@ -171,6 +191,29 @@ class Engine {
 	 */
 	virtual std::shared_ptr<Canvas>
 	captureEffect(Effect const& effect, std::optional<EffectClipSource> clip = std::nullopt) = 0;
+
+	virtual std::optional<CapturedEffect> captureEffect(
+		Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
+	) {
+		(void)effect;
+		(void)clip;
+		(void)options;
+		return std::nullopt;
+	}
+
+	/** Captures an effect from an immutable target snapshot. */
+	virtual std::optional<CapturedEffect> captureEffect(
+		std::shared_ptr<TargetSnapshot> const& source,
+		Effect const& effect,
+		EffectClipSource const& clip,
+		EffectCaptureOptions const& options
+	) {
+		(void)source;
+		(void)effect;
+		(void)clip;
+		(void)options;
+		return std::nullopt;
+	}
 
 	/**
 	 * @brief Renders an effect using a single effect definition.
