@@ -4,6 +4,7 @@
 #include <optional>
 
 #include "kke/engine/Engine.hh"
+#include "kke/engine/d2d/D2dLayerStatistics.hh"
 
 struct ID2D1Bitmap;
 
@@ -23,6 +24,8 @@ class D2dEngine : public Engine {
 	void beginDraw(D2dContext const& context, ID2D1Bitmap* renderTarget);
 
 	void endDraw();
+
+	D2dLayerStatistics const& getLayerStatistics() const;
 
 	void clear() override;
 

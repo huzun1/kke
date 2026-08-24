@@ -1,5 +1,6 @@
 #include "ViewLayerController.hh"
 
+#include <algorithm>
 #include <cmath>
 #include <variant>
 
@@ -7,6 +8,10 @@
 #include "kke/utils/DebugLog.hh"
 
 using Microsoft::WRL::ComPtr;
+
+void ViewLayerController::beginFrame() {
+	statistics = {};
+}
 
 void ViewLayerController::pushLayer(
 	kke::D2dEngineContext const& context, kke::MaskSource const& mask, kke::LayerMode mode
@@ -25,6 +30,8 @@ void ViewLayerController::pushLayer(
 			D2D1_ANTIALIAS_MODE_ALIASED
 		);
 		pushedLayerTypes.push_back(PushedLayerType::AxisAlignedClip);
+		++statistics.axisAlignedClipCount;
+		statistics.maximumDepth = (std::max)(statistics.maximumDepth, pushedLayerTypes.size());
 		return;
 	}
 
@@ -37,6 +44,8 @@ void ViewLayerController::pushLayer(
 
 	deviceContext->PushLayer(D2D1::LayerParameters1(D2D1::InfiniteRect(), geometry.Get()), nullptr);
 	pushedLayerTypes.push_back(PushedLayerType::Layer);
+	++statistics.geometricLayerCount;
+	statistics.maximumDepth = (std::max)(statistics.maximumDepth, pushedLayerTypes.size());
 }
 
 void ViewLayerController::popLayer(kke::D2dEngineContext const& context) {
@@ -58,6 +67,10 @@ void ViewLayerController::popLayer(kke::D2dEngineContext const& context) {
 		deviceContext->PopLayer();
 		return;
 	}
+}
+
+kke::D2dLayerStatistics const& ViewLayerController::getStatistics() const {
+	return statistics;
 }
 
 kke::Rect const* ViewLayerController::axisAlignedClipRect(
