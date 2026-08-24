@@ -17,6 +17,7 @@
 #include "kke/engine/d2d/renderer/view/MatrixState.hh"
 #include "kke/engine/d2d/renderer/view/ViewLayerController.hh"
 #include "kke/engine/d2d/resource/raster_surface/D2dRasterSurface.hh"
+#include "kke/engine/d2d/resource/target_snapshot/D2dTargetSnapshot.hh"
 
 using namespace kke;
 
@@ -260,6 +261,39 @@ std::optional<CapturedEffect> D2dEngine::captureEffect(
 	);
 	impl->renderPass.invalidateCachedTargetSnapshot();
 	return captured;
+}
+
+std::shared_ptr<TargetSnapshot> D2dEngine::captureTargetSnapshot() {
+	assertD2dContext();
+	auto snapshotImage = impl->renderPass.cycleTargetSnapshot(
+		*impl->engineContext,
+		SnapshotOpacityMode::FlattenToOpaqueBlack
+	);
+	if (!snapshotImage) {
+		return nullptr;
+	}
+	return std::make_shared<D2dTargetSnapshot>(std::move(snapshotImage));
+}
+
+std::optional<CapturedEffect> D2dEngine::captureEffect(
+	std::shared_ptr<TargetSnapshot> const& source,
+	Effect const& effect,
+	EffectClipSource const& clip,
+	EffectCaptureOptions const& options
+) {
+	assertD2dContext();
+	auto d2dSource = std::dynamic_pointer_cast<D2dTargetSnapshot>(source);
+	if (!d2dSource || !d2dSource->getImage()) {
+		return std::nullopt;
+	}
+	return impl->effectRenderer.capture(
+		*impl->engineContext,
+		d2dSource->getImage(),
+		effect,
+		clip,
+		options,
+		impl->rasterSurfaceService
+	);
 }
 
 void D2dEngine::renderEffect(

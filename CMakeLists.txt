@@ -93,6 +93,7 @@ add_library(kke STATIC
     src/kke/engine/d2d/resource/texture/TextureProvider.cc
     src/kke/engine/d2d/resource/texture/factory/TextureFactory.cc
     src/kke/engine/d2d/resource/raster_surface/D2dRasterSurface.cc
+    src/kke/engine/d2d/resource/target_snapshot/D2dTargetSnapshot.cc
     src/kke/engine/d2d/transform/Matrix.cc
     src/kke/engine/d2d/transform/impl/RotateManipulator.cc
     src/kke/engine/d2d/transform/impl/ScaleManipulator.cc

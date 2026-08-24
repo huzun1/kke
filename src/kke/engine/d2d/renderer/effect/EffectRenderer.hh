@@ -56,6 +56,15 @@ class EffectRenderer {
 		RasterSurfaceService& rasterSurfaceService
 	);
 
+	std::optional<CapturedEffect> capture(
+		D2dEngineContext& context,
+		Microsoft::WRL::ComPtr<ID2D1Image> sourceImage,
+		Effect const& effect,
+		EffectClipSource const& clip,
+		EffectCaptureOptions const& options,
+		RasterSurfaceService& rasterSurfaceService
+	);
+
 	void render(
 		D2dEngineContext& context,
 		RenderPass& renderPass,

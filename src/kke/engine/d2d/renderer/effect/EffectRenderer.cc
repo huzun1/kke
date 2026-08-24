@@ -1,6 +1,7 @@
 #include "EffectRenderer.hh"
 
 #include <cmath>
+#include <utility>
 
 #include "kke/appearance/resource/effect/EffectIdentifier.hh"
 #include "kke/engine/d2d/renderer/effect/EffectClipBoundsResolver.hh"
@@ -85,6 +86,22 @@ std::optional<CapturedEffect> EffectRenderer::capture(
 	EffectCaptureOptions const& options,
 	RasterSurfaceService& rasterSurfaceService
 ) {
+	ComPtr<ID2D1Image> sourceImage =
+		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
+	if (!sourceImage) {
+		return std::nullopt;
+	}
+	return capture(context, std::move(sourceImage), effect, clip, options, rasterSurfaceService);
+}
+
+std::optional<CapturedEffect> EffectRenderer::capture(
+	D2dEngineContext& context,
+	ComPtr<ID2D1Image> sourceImage,
+	Effect const& effect,
+	EffectClipSource const& clip,
+	EffectCaptureOptions const& options,
+	RasterSurfaceService& rasterSurfaceService
+) {
 	if (!std::isfinite(options.rasterScale) || options.rasterScale <= 0.0f) {
 		return std::nullopt;
 	}
@@ -98,8 +115,6 @@ std::optional<CapturedEffect> EffectRenderer::capture(
 		return std::nullopt;
 	}
 
-	ComPtr<ID2D1Image> sourceImage =
-		renderPass.cycleTargetSnapshot(context, SnapshotOpacityMode::FlattenToOpaqueBlack);
 	if (!sourceImage) {
 		return std::nullopt;
 	}

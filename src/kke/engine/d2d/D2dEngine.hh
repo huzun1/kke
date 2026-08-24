@@ -89,6 +89,8 @@ class D2dEngine : public Engine {
 	) override;
 
 	/* ================= Effect Rendering ================== */
+	std::shared_ptr<TargetSnapshot> captureTargetSnapshot() override;
+
 	void renderEffect(
 		Effect const& effect,
 		std::optional<EffectClipSource> clip = std::nullopt,
@@ -101,6 +103,13 @@ class D2dEngine : public Engine {
 
 	std::optional<CapturedEffect> captureEffect(
 		Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
+	) override;
+
+	std::optional<CapturedEffect> captureEffect(
+		std::shared_ptr<TargetSnapshot> const& source,
+		Effect const& effect,
+		EffectClipSource const& clip,
+		EffectCaptureOptions const& options
 	) override;
 
 	void renderEffect(

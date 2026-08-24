@@ -6,6 +6,7 @@
 
 #include "kke/appearance/painting/StrokeAppearance.hh"
 #include "kke/appearance/resource/RasterSurface.hh"
+#include "kke/appearance/resource/TargetSnapshot.hh"
 #include "kke/appearance/resource/brush/Brush.hh"
 #include "kke/appearance/resource/effect/CapturedEffect.hh"
 #include "kke/appearance/resource/effect/EffectCaptureOptions.hh"
@@ -167,6 +168,11 @@ class Engine {
 
 	/* ================= Effect Rendering ================= */
 
+	/** Captures the active target for use as an explicit effect input. */
+	virtual std::shared_ptr<TargetSnapshot> captureTargetSnapshot() {
+		return nullptr;
+	}
+
 	/**
 	 * @brief Renders an effect using a single effect definition.
 	 * @param source The effect source.
@@ -189,6 +195,20 @@ class Engine {
 	virtual std::optional<CapturedEffect> captureEffect(
 		Effect const& effect, EffectClipSource const& clip, EffectCaptureOptions const& options
 	) {
+		(void)effect;
+		(void)clip;
+		(void)options;
+		return std::nullopt;
+	}
+
+	/** Captures an effect from an immutable target snapshot. */
+	virtual std::optional<CapturedEffect> captureEffect(
+		std::shared_ptr<TargetSnapshot> const& source,
+		Effect const& effect,
+		EffectClipSource const& clip,
+		EffectCaptureOptions const& options
+	) {
+		(void)source;
 		(void)effect;
 		(void)clip;
 		(void)options;
