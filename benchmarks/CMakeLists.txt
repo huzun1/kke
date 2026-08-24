@@ -1,1 +1,2 @@
 add_subdirectory(core_hot_path_benchmark)
+add_subdirectory(raw_d2d_render_pass_benchmark)

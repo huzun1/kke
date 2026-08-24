@@ -81,19 +81,6 @@ void D2dEngine::popLayer() {
 	impl->viewLayerController.popLayer(*impl->engineContext);
 }
 
-void D2dEngine::pushAxisAlignedClip(Rect const& rect) {
-	assertD2dContext();
-	impl->engineContext->getD2dContext()->getDeviceContext()->PushAxisAlignedClip(
-		D2D1::RectF(rect.min.x, rect.min.y, rect.max.x, rect.max.y),
-		D2D1_ANTIALIAS_MODE_ALIASED
-	);
-}
-
-void D2dEngine::popAxisAlignedClip() {
-	assertD2dContext();
-	impl->engineContext->getD2dContext()->getDeviceContext()->PopAxisAlignedClip();
-}
-
 std::shared_ptr<Canvas> D2dEngine::createCanvas() {
 	assertD2dContext();
 	return impl->canvasService.createCanvas(*impl->engineContext);

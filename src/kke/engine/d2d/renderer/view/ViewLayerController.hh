@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 #include <wrl/client.h>
 
 #include "kke/appearance/resource/GeometryCompose.hh"
@@ -13,6 +15,15 @@
 #include "kke/geometry/shapes/Triangle.hh"
 
 class ViewLayerController {
+  private:
+	enum class PushedLayerType {
+		NoOperation,
+		AxisAlignedClip,
+		Layer,
+	};
+
+	std::vector<PushedLayerType> pushedLayerTypes;
+
   public:
 	void pushLayer(
 		kke::D2dEngineContext const& context, kke::MaskSource const& mask, kke::LayerMode mode
@@ -21,6 +32,10 @@ class ViewLayerController {
 	void popLayer(kke::D2dEngineContext const& context);
 
   private:
+	static kke::Rect const* axisAlignedClipRect(
+		kke::D2dEngineContext const& context, kke::MaskSource const& mask, kke::LayerMode mode
+	);
+
 	Microsoft::WRL::ComPtr<ID2D1Geometry> createGeometry(
 		kke::D2dEngineContext const& context, kke::MaskSource const& mask, kke::LayerMode mode
 	);
