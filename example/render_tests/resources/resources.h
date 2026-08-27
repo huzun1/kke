@@ -1,0 +1,5 @@
+#pragma once
+
+#define TEXTURE_DYCONTRAST 201
+#define FONT_SPACE_GROTESK 202
+#define TEXTURE_MOUNTAIN 203
