@@ -6,30 +6,6 @@ This example builds an injectable Windows DLL that uses Kiero to discover the Di
 swap-chain methods, MinHook to detour them, and kke to draw through Direct2D on the current
 back buffer.
 
-## Build
-
-```powershell
-cmake -S . -B build -G Ninja `
-    -DCMAKE_C_COMPILER=clang-cl.exe `
-    -DCMAKE_CXX_COMPILER=clang-cl.exe `
-    -DCMAKE_BUILD_TYPE=RelWithDebInfo `
-    -DKKE_BUILD_EXAMPLES=ON `
-    -DKKE_BUILD_TESTS=OFF `
-    -DKKE_BUILD_BENCHMARKS=OFF
-cmake --build build --target kke_overlay_example
-```
-
-Run these commands from an x64 developer environment so clang-cl can find the Windows SDK
-and MSVC-compatible libraries. The overlay configuration rejects 32-bit toolchains.
-
-The resulting `kke_overlay_example.dll` must be loaded into a Direct3D 11 process by a DLL
-loader or injector. Loading tools are intentionally outside this example's scope. Hooks are
-removed from `DLL_PROCESS_DETACH` when the DLL is unloaded.
-
-This example builds a 64-bit DLL and must be loaded into a 64-bit target process.
-
-Only load the example into software you own or are authorized to test.
-
 ## Structure
 
 - `Hooks`: installs and removes the Present and ResizeBuffers detours.
