@@ -13,7 +13,8 @@ if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
     set(KKE_IS_TOP_LEVEL ON)
 endif()
 
-option(KKE_BUILD_TESTS "Build the kke test application" ${KKE_IS_TOP_LEVEL})
+option(KKE_BUILD_TESTS "Build the kke unit tests" ${KKE_IS_TOP_LEVEL})
+option(KKE_BUILD_EXAMPLES "Build the kke examples" OFF)
 option(KKE_BUILD_BENCHMARKS "Build the kke microbenchmarks" ${KKE_IS_TOP_LEVEL})
 option(KKE_DEBUG "Enable kke debug logging" ${KKE_IS_TOP_LEVEL})
 
@@ -172,6 +173,10 @@ install(FILES
 if(KKE_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if(KKE_BUILD_EXAMPLES)
+    add_subdirectory(example)
 endif()
 
 if(KKE_BUILD_BENCHMARKS)

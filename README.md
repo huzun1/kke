@@ -69,7 +69,10 @@ engine().fill(title, kke::SolidColorBrush({1.0f, 1.0f, 1.0f, 1.0f}));
 - `src/kke/engine/d2d`: Direct2D backend implementation
 - `src/kke/geometry`: geometry and primitive types
 - `src/kke/appearance`: brushes, text, transforms, effects, and other draw parameters
-- `test`: Windows test app and renderer demos
+- `test`: non-interactive unit tests
+- `example/render_tests`: interactive Windows rendering test application
+- `example/overlay`: injectable Direct3D 11 overlay example using Kiero and MinHook
+- `benchmarks`: focused rendering microbenchmarks
 
 ## Build
 
@@ -80,9 +83,11 @@ cmake -S . -B build
 cmake --build build --config Debug
 ```
 
-This produces the `kke` static library and the `kke_test` sample application.
+This produces the `kke` static library, unit-test executables, and benchmark executables.
+Configure with `KKE_BUILD_EXAMPLES=ON` to also build `kke_render_tests` and the overlay example.
 
-When `kke` is consumed as a subproject through `FetchContent` or `add_subdirectory`, the test application is not built by default.
+When `kke` is consumed as a subproject through `FetchContent` or `add_subdirectory`, tests,
+benchmarks, and examples are not built by default.
 
 ## CMake Package Usage
 
