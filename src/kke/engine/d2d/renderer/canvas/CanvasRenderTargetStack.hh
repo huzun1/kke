@@ -12,6 +12,7 @@ class CanvasRenderTargetStack {
 	struct RenderTargetState {
 		Microsoft::WRL::ComPtr<ID2D1Image> renderTarget;
 		D2D1_MATRIX_3X2_F transform;
+		bool isFrameCommandList;
 	};
 
 	std::stack<RenderTargetState> renderTargetStack;

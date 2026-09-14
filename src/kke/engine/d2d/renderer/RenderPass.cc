@@ -71,11 +71,27 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 	}
 
 	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
+	Microsoft::WRL::ComPtr<ID2D1Image> activeTarget;
+	deviceContext->GetTarget(&activeTarget);
 	D2D1_MATRIX_3X2_F activeTransform;
 	deviceContext->GetTransform(&activeTransform);
+	bool isFrameCommandListActive =
+		activeTarget.Get() == static_cast<ID2D1Image*>(currentTargetCommandList.Get());
+
+	Microsoft::WRL::ComPtr<ID2D1CommandList> nextTargetCommandList;
+	HRESULT createResult = deviceContext->CreateCommandList(&nextTargetCommandList);
+	if (FAILED(createResult) || !nextTargetCommandList) {
+		return nullptr;
+	}
+
 	Microsoft::WRL::ComPtr<ID2D1Image> snapshotImage = cachedTargetSnapshot;
 	HRESULT closeResult = currentTargetCommandList->Close();
 	if (FAILED(closeResult)) {
+		d2dContext->setTargetCommandList(nextTargetCommandList);
+		deviceContext->SetTarget(
+			isFrameCommandListActive ? nextTargetCommandList.Get() : activeTarget.Get()
+		);
+		deviceContext->SetTransform(activeTransform);
 		return nullptr;
 	}
 
@@ -107,20 +123,22 @@ RenderPass::cycleTargetSnapshot(D2dEngineContext& context, SnapshotOpacityMode o
 		}
 	}
 	if (!snapshotImage) {
-		return nullptr;
-	}
-
-	Microsoft::WRL::ComPtr<ID2D1CommandList> nextTargetCommandList;
-	HRESULT createResult = deviceContext->CreateCommandList(&nextTargetCommandList);
-	if (FAILED(createResult) || !nextTargetCommandList) {
+		d2dContext->setTargetCommandList(nextTargetCommandList);
+		deviceContext->SetTarget(
+			isFrameCommandListActive ? nextTargetCommandList.Get() : activeTarget.Get()
+		);
+		deviceContext->SetTransform(activeTransform);
 		return nullptr;
 	}
 
 	deviceContext->SetTarget(nextTargetCommandList.Get());
 	deviceContext->SetTransform(D2D1::Matrix3x2F::Identity());
 	deviceContext->DrawImage(snapshotImage.Get());
-	deviceContext->SetTransform(activeTransform);
 	d2dContext->setTargetCommandList(nextTargetCommandList);
+	if (!isFrameCommandListActive) {
+		deviceContext->SetTarget(activeTarget.Get());
+	}
+	deviceContext->SetTransform(activeTransform);
 	cachedTargetSnapshot.Reset();
 	shouldPreserveRenderTarget = false;
 	shouldFlattenNextTargetSnapshot = false;

@@ -21,6 +21,7 @@ class RasterSurfaceService {
 		D2D1_TEXT_ANTIALIAS_MODE textAntialiasMode;
 		float dpiX;
 		float dpiY;
+		bool isFrameCommandList;
 	};
 
 	std::stack<RenderTargetState> renderTargetStates;

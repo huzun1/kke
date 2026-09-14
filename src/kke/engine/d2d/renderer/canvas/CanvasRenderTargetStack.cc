@@ -25,7 +25,9 @@ bool CanvasRenderTargetStack::endCanvas(D2dEngineContext const& context) {
 	D2dContext* d2dContext = context.getD2dContext();
 
 	RenderTargetState state = renderTargetStack.top();
-	d2dContext->getDeviceContext()->SetTarget(state.renderTarget.Get());
+	ID2D1Image* renderTarget = state.isFrameCommandList ? d2dContext->getTargetCommandList().Get()
+														: state.renderTarget.Get();
+	d2dContext->getDeviceContext()->SetTarget(renderTarget);
 	d2dContext->getDeviceContext()->SetTransform(state.transform);
 	renderTargetStack.pop();
 	return true;
@@ -38,5 +40,11 @@ void CanvasRenderTargetStack::pushCurrentRenderTarget(D2dEngineContext const& co
 	D2D1_MATRIX_3X2_F currentTransform;
 	d2dContext->getDeviceContext()->GetTarget(&currentTarget);
 	d2dContext->getDeviceContext()->GetTransform(&currentTransform);
-	renderTargetStack.push({currentTarget, currentTransform});
+	ComPtr<ID2D1CommandList> frameCommandList = d2dContext->getTargetCommandList();
+	renderTargetStack.push({
+		.renderTarget = currentTarget,
+		.transform = currentTransform,
+		.isFrameCommandList =
+			currentTarget.Get() == static_cast<ID2D1Image*>(frameCommandList.Get()),
+	});
 }

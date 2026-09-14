@@ -86,8 +86,11 @@ bool RasterSurfaceService::end(D2dEngineContext const& context) {
 
 	RenderTargetState state = renderTargetStates.top();
 	renderTargetStates.pop();
-	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
-	deviceContext->SetTarget(state.target.Get());
+	D2dContext* d2dContext = context.getD2dContext();
+	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
+	ID2D1Image* target =
+		state.isFrameCommandList ? d2dContext->getTargetCommandList().Get() : state.target.Get();
+	deviceContext->SetTarget(target);
 	deviceContext->SetDpi(state.dpiX, state.dpiY);
 	deviceContext->SetTransform(state.transform);
 	deviceContext->SetTextAntialiasMode(state.textAntialiasMode);
@@ -115,7 +118,8 @@ void RasterSurfaceService::draw(
 }
 
 void RasterSurfaceService::pushCurrentRenderTarget(D2dEngineContext const& context) {
-	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	D2dContext* d2dContext = context.getD2dContext();
+	ID2D1DeviceContext* deviceContext = d2dContext->getDeviceContext();
 	ComPtr<ID2D1Image> target;
 	D2D1_MATRIX_3X2_F transform;
 	float dpiX = 96.0f;
@@ -129,5 +133,7 @@ void RasterSurfaceService::pushCurrentRenderTarget(D2dEngineContext const& conte
 		.textAntialiasMode = deviceContext->GetTextAntialiasMode(),
 		.dpiX = dpiX,
 		.dpiY = dpiY,
+		.isFrameCommandList =
+			target.Get() == static_cast<ID2D1Image*>(d2dContext->getTargetCommandList().Get()),
 	});
 }
