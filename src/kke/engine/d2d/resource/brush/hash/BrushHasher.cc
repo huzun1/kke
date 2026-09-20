@@ -47,6 +47,13 @@ uint64_t BrushHasher::hashGradientStops(LinearGradientBrush const& brush) {
 	return hasher.get();
 }
 
+uint64_t BrushHasher::hashTextureResource(TextureBrush const& brush) {
+	Hasher hasher;
+	hasher.combine(BrushHashTag::Texture);
+	hasher.combine(brush.getTexture().get());
+	return hasher.get();
+}
+
 uint64_t BrushHasher::hash(RasterSurfaceBrush const& brush) {
 	Hasher hasher;
 	hasher.combine(BrushHashTag::RasterSurface);
@@ -60,9 +67,7 @@ uint64_t BrushHasher::hash(RasterSurfaceBrush const& brush) {
 }
 
 uint64_t BrushHasher::hash(TextureBrush const& brush) {
-	Hasher hasher;
-	hasher.combine(BrushHashTag::Texture);
-	hasher.combine(brush.getTexture().get());
+	Hasher hasher(hashTextureResource(brush));
 	hasher.combine(brush.getDestination().min.x);
 	hasher.combine(brush.getDestination().min.y);
 	hasher.combine(brush.getDestination().max.x);

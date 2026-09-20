@@ -10,9 +10,20 @@ using Microsoft::WRL::ComPtr;
 
 ComPtr<ID2D1Brush>
 TextureBrushFactory::create(D2dContext const& context, TextureBrush const& brush) {
-	auto texture = std::dynamic_pointer_cast<D2dTexture>(brush.getTexture());
-	if (!texture || !texture->getBitmap()) {
+	ComPtr<ID2D1ImageBrush> imageBrush;
+	D2D1_IMAGE_BRUSH_PROPERTIES imageProperties{};
+	HRESULT result =
+		context.getDeviceContext()->CreateImageBrush(nullptr, imageProperties, &imageBrush);
+	if (FAILED(result) || !update(imageBrush.Get(), brush)) {
 		return nullptr;
+	}
+	return imageBrush;
+}
+
+bool TextureBrushFactory::update(ID2D1ImageBrush* imageBrush, TextureBrush const& brush) {
+	auto texture = std::dynamic_pointer_cast<D2dTexture>(brush.getTexture());
+	if (!imageBrush || !texture || !texture->getBitmap()) {
+		return false;
 	}
 	auto bitmap = texture->getBitmap();
 	auto size = bitmap->GetSize();
@@ -21,29 +32,22 @@ TextureBrushFactory::create(D2dContext const& context, TextureBrush const& brush
 	Rect const& destination = brush.getDestination();
 
 	if (!isValidRect(source) || !isValidRect(destination) || !std::isfinite(appearance.opacity)) {
-		return nullptr;
+		return false;
 	}
 	float scaleX = destination.width() / source.width();
 	float scaleY = destination.height() / source.height();
-	D2D1_IMAGE_BRUSH_PROPERTIES imageProperties{
-		{source.min.x, source.min.y, source.max.x, source.max.y},
-		D2D1_EXTEND_MODE_CLAMP,
-		D2D1_EXTEND_MODE_CLAMP,
-		TextureSampling::convert(appearance.interpolation),
-	};
-	D2D1_BRUSH_PROPERTIES properties = D2D1::BrushProperties(
-		appearance.opacity,
+	D2D1_RECT_F sourceRectangle{source.min.x, source.min.y, source.max.x, source.max.y};
+	imageBrush->SetImage(bitmap.Get());
+	imageBrush->SetSourceRectangle(&sourceRectangle);
+	imageBrush->SetExtendModeX(D2D1_EXTEND_MODE_CLAMP);
+	imageBrush->SetExtendModeY(D2D1_EXTEND_MODE_CLAMP);
+	imageBrush->SetInterpolationMode(TextureSampling::convert(appearance.interpolation));
+	imageBrush->SetOpacity(appearance.opacity);
+	imageBrush->SetTransform(
 		D2D1::Matrix3x2F::Scale(scaleX, scaleY) *
-			D2D1::Matrix3x2F::Translation(destination.min.x, destination.min.y)
+		D2D1::Matrix3x2F::Translation(destination.min.x, destination.min.y)
 	);
-	ComPtr<ID2D1ImageBrush> imageBrush;
-	if (FAILED(context.getDeviceContext()
-				   ->CreateImageBrush(bitmap.Get(), imageProperties, properties, &imageBrush))) {
-		return nullptr;
-	}
-	ComPtr<ID2D1Brush> result;
-	imageBrush.As(&result);
-	return result;
+	return true;
 }
 
 bool TextureBrushFactory::isValidRect(Rect const& rect) {

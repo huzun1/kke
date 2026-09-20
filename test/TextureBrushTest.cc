@@ -2,12 +2,16 @@
 #include <chrono>
 #include <cmath>
 #include <cstdio>
+#include <limits>
+#include <optional>
 
 #include "D2dTestTarget.hh"
 #include "kke/appearance/resource/brush/impl/TextureBrush.hh"
 #include "kke/appearance/resource/texture/RgbaBitmap.hh"
 #include "kke/engine/d2d/renderer/effect/cache/PositionIndependentBrush.hh"
+#include "kke/engine/d2d/resource/brush/BrushProvider.hh"
 #include "kke/engine/d2d/resource/brush/hash/BrushHasher.hh"
+#include "kke/engine/d2d/resource/texture/D2dTexture.hh"
 #include "kke/geometry/curved/RoundedRect.hh"
 
 namespace kke::test {
@@ -17,7 +21,8 @@ class TextureBrushTest {
 
   public:
 	bool run(bool benchmark) {
-		if (!target.initialize() || !upload() || !hashAndNormalization() || !pixels()) {
+		if (!target.initialize() || !upload() || !hashAndNormalization() || !cacheReuse() ||
+			!cacheTextureReplacement() || !repeatedDrawPixels() || !pixels()) {
 			return false;
 		}
 		if (benchmark) {
@@ -83,6 +88,130 @@ class TextureBrushTest {
 			}
 		}
 		return original != BrushHasher::hash(Brush(TextureBrush(nullptr, destination, appearance)));
+	}
+
+	bool cacheReuse() {
+		BrushProvider provider;
+		auto context = target.getContext();
+		Rect destination{{20, 30}, {100, 90}};
+		TextureDrawAppearance appearance;
+		auto first = provider.get(context, TextureBrush(texture, destination, appearance));
+		Microsoft::WRL::ComPtr<ID2D1ImageBrush> imageBrush;
+		if (!first || FAILED(first.As(&imageBrush)) ||
+			provider.get(context, TextureBrush(texture, destination, appearance)) != first) {
+			return false;
+		}
+		appearance.opacity = 0.5f;
+		appearance.interpolation = TextureInterpolation::Nearest;
+		appearance.srcRect = Rect{{4, 2}, {12, 14}};
+		destination = {{40, 50}, {80, 110}};
+		if (provider.get(context, TextureBrush(texture, destination, appearance)) != first) {
+			return false;
+		}
+		D2D1_RECT_F source{};
+		D2D1_MATRIX_3X2_F transform{};
+		imageBrush->GetSourceRectangle(&source);
+		imageBrush->GetTransform(&transform);
+		if (imageBrush->GetOpacity() != 0.5f ||
+			imageBrush->GetInterpolationMode() != D2D1_INTERPOLATION_MODE_NEAREST_NEIGHBOR ||
+			source.left != 4 || source.top != 2 || source.right != 12 || source.bottom != 14 ||
+			transform._11 != 5 || transform._22 != 5 || transform._31 != 40 ||
+			transform._32 != 50) {
+			return false;
+		}
+		for (int invalid = 0; invalid < 4; ++invalid) {
+			auto invalidAppearance = appearance;
+			auto invalidDestination = destination;
+			if (invalid == 0) {
+				invalidAppearance.opacity = std::numeric_limits<float>::quiet_NaN();
+			} else if (invalid == 1) {
+				invalidAppearance.srcRect = Rect{};
+			} else if (invalid == 2) {
+				invalidDestination = Rect{};
+			} else {
+				invalidDestination.min.x = std::numeric_limits<float>::infinity();
+			}
+			if (provider
+					.get(context, TextureBrush(texture, invalidDestination, invalidAppearance))) {
+				return false;
+			}
+		}
+		if (provider.get(context, TextureBrush(nullptr, destination)) ||
+			provider.get(context, TextureBrush(texture, destination)) != first) {
+			return false;
+		}
+		imageBrush->GetSourceRectangle(&source);
+		if (source.left != 0 || source.top != 0 || source.right != 16 || source.bottom != 16 ||
+			imageBrush->GetOpacity() != 1.0f ||
+			imageBrush->GetInterpolationMode() != D2D1_INTERPOLATION_MODE_LINEAR) {
+			return false;
+		}
+		BrushProvider uncached(0);
+		auto uncachedBrush = uncached.get(context, TextureBrush(texture, destination));
+		return uncachedBrush &&
+			   uncached.get(context, TextureBrush(texture, destination)) != uncachedBrush;
+	}
+
+	bool cacheTextureReplacement() {
+		BrushProvider provider;
+		auto context = target.getContext();
+		auto bitmap = std::dynamic_pointer_cast<D2dTexture>(texture)->getBitmap();
+		std::optional<D2dTexture> textureSlot(std::in_place, bitmap);
+		auto borrowedTexture = std::shared_ptr<Texture>(&*textureSlot, [](Texture*) {});
+		Rect destination{{0, 0}, {32, 32}};
+		auto first = provider.get(context, TextureBrush(borrowedTexture, destination));
+		Microsoft::WRL::ComPtr<ID2D1ImageBrush> imageBrush;
+		if (!first || FAILED(first.As(&imageBrush))) {
+			return false;
+		}
+		borrowedTexture.reset();
+		textureSlot.reset();
+		Microsoft::WRL::ComPtr<ID2D1Bitmap1> replacementBitmap;
+		auto properties = D2D1::BitmapProperties1(
+			D2D1_BITMAP_OPTIONS_NONE,
+			D2D1::PixelFormat(DXGI_FORMAT_B8G8R8A8_UNORM, D2D1_ALPHA_MODE_PREMULTIPLIED)
+		);
+		if (FAILED(context.getDeviceContext()
+					   ->CreateBitmap({8, 8}, nullptr, 0, properties, &replacementBitmap))) {
+			return false;
+		}
+		textureSlot.emplace(replacementBitmap);
+		borrowedTexture = std::shared_ptr<Texture>(&*textureSlot, [](Texture*) {});
+		if (provider.get(context, TextureBrush(borrowedTexture, destination)) != first) {
+			return false;
+		}
+		Microsoft::WRL::ComPtr<ID2D1Image> image;
+		imageBrush->GetImage(&image);
+		D2D1_RECT_F source{};
+		imageBrush->GetSourceRectangle(&source);
+		return image.Get() == replacementBitmap.Get() && source.right == 8 && source.bottom == 8;
+	}
+
+	bool repeatedDrawPixels() {
+		std::vector<uint8_t> reference;
+		for (bool useBrush : {false, true}) {
+			auto& engine = target.begin();
+			for (int index = 0; index < 3; ++index) {
+				float x = 16.0f + 64.0f * index;
+				Rect destination{{x, 16}, {x + 48, 64}};
+				TextureDrawAppearance appearance{
+					.opacity = 1.0f - 0.25f * index,
+					.interpolation = TextureInterpolation::Nearest,
+					.srcRect = Rect{{float(index * 2), 2}, {float(index * 2 + 8), 14}}
+				};
+				if (useBrush) {
+					engine.fill(destination, TextureBrush(texture, destination, appearance));
+				} else {
+					engine.draw(texture, destination, appearance);
+				}
+			}
+			auto pixels = target.finish();
+			if (pixels.empty() || (useBrush && pixels != reference)) {
+				return false;
+			}
+			reference = std::move(pixels);
+		}
+		return true;
 	}
 
 	std::vector<uint8_t>

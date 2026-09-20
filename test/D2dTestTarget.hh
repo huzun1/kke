@@ -78,6 +78,10 @@ class D2dTestTarget {
 		return engine;
 	}
 
+	D2dContext getContext() const {
+		return D2dContext(factory.Get(), context.Get());
+	}
+
 	std::vector<uint8_t> finish() {
 		engine.endDraw();
 		if (FAILED(readback->CopyFromBitmap(nullptr, target.Get(), nullptr))) {

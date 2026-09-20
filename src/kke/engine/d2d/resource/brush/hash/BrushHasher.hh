@@ -11,6 +11,8 @@ class BrushHasher {
 
 	static uint64_t hashGradientStops(LinearGradientBrush const& brush);
 
+	static uint64_t hashTextureResource(TextureBrush const& brush);
+
   private:
 	static uint64_t hash(SolidColorBrush const& brush);
 
