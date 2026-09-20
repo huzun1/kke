@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include <memory>
 #include <optional>
 #include <unordered_map>
 
@@ -25,6 +26,7 @@ class PositionIndependentEffectCache {
 		Point relativeDrawOffset;
 		size_t byteSize = 0;
 		uint64_t lastUsed = 0;
+		std::weak_ptr<Texture> sourceTexture;
 	};
 
 	struct SavedDeviceContextState {

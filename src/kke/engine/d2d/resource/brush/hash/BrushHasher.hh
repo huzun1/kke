@@ -11,11 +11,15 @@ class BrushHasher {
 
 	static uint64_t hashGradientStops(LinearGradientBrush const& brush);
 
+	static uint64_t hashTextureResource(TextureBrush const& brush);
+
   private:
 	static uint64_t hash(SolidColorBrush const& brush);
 
 	static uint64_t hash(LinearGradientBrush const& brush);
 
 	static uint64_t hash(RasterSurfaceBrush const& brush);
+
+	static uint64_t hash(TextureBrush const& brush);
 };
 } // namespace kke

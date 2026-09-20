@@ -186,6 +186,9 @@ void EffectRenderer::render(
 		auto result =
 			shadowEffectRenderer
 				.render(context, source, sourceAppearance, std::get<ShadowEffect>(effect), clip);
+		if (!clip.has_value() && tryDrawBitmap(context, result.image, result.targetOffset)) {
+			return;
+		}
 		drawImage(context, result.image, result.targetOffset, clip, viewLayerController);
 		return;
 	}
@@ -351,6 +354,28 @@ void EffectRenderer::renderViewportAlignedEffect(
 		);
 	}
 	deviceContext->SetTransform(activeTransform);
+}
+
+bool EffectRenderer::tryDrawBitmap(
+	D2dEngineContext const& context, ComPtr<ID2D1Image> const& image, Point const& targetOffset
+) {
+	ID2D1DeviceContext* deviceContext = context.getD2dContext()->getDeviceContext();
+	if (!image || deviceContext->GetPrimitiveBlend() != D2D1_PRIMITIVE_BLEND_SOURCE_OVER) {
+		return false;
+	}
+	ComPtr<ID2D1Bitmap> bitmap;
+	if (FAILED(image.As(&bitmap))) {
+		return false;
+	}
+	auto size = bitmap->GetSize();
+	D2D1_RECT_F destination{
+		targetOffset.x,
+		targetOffset.y,
+		targetOffset.x + size.width,
+		targetOffset.y + size.height
+	};
+	deviceContext->DrawBitmap(bitmap.Get(), &destination, 1.0f, D2D1_INTERPOLATION_MODE_LINEAR);
+	return true;
 }
 
 void EffectRenderer::drawImage(
