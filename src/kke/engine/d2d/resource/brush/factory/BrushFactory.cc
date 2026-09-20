@@ -4,6 +4,8 @@
 #include <variant>
 #include <vector>
 
+#include "TextureBrushFactory.hh"
+
 #include "kke/appearance/Color.hh"
 #include "kke/appearance/ColorQuantizer.hh"
 #include "kke/engine/d2d/resource/raster_surface/D2dRasterSurface.hh"
@@ -120,6 +122,10 @@ BrushFactory::create(D2dContext const& context, RasterSurfaceBrush const& brush)
 	ComPtr<ID2D1Brush> d2dBrush;
 	bitmapBrush.As(&d2dBrush);
 	return d2dBrush;
+}
+
+ComPtr<ID2D1Brush> BrushFactory::create(D2dContext const& context, TextureBrush const& brush) {
+	return TextureBrushFactory::create(context, brush);
 }
 
 void BrushFactory::updateGradientLine(

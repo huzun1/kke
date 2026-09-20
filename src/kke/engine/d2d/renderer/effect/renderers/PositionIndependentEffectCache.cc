@@ -38,6 +38,13 @@ PositionIndependentEffectCache::RenderResult PositionIndependentEffectCache::ren
 	Point sourceOrigin = PositionIndependentEffectSource::getOrigin(source);
 	uint64_t cacheKey = createCacheKey(source, sourceAppearance, effectHash);
 	auto cached = cache.find(cacheKey);
+	auto textureBrush = std::get_if<TextureBrush>(&sourceAppearance.brush);
+	if (cached != cache.end() && textureBrush != nullptr &&
+		cached->second.sourceTexture.lock() != textureBrush->getTexture()) {
+		cachedBytes -= cached->second.byteSize;
+		cache.erase(cached);
+		cached = cache.end();
+	}
 	if (cached == cache.end()) {
 		recordMiss();
 		EffectSource normalizedSource =
@@ -61,6 +68,9 @@ PositionIndependentEffectCache::RenderResult PositionIndependentEffectCache::ren
 		restoreDeviceContextState(context, savedState);
 		if (!cachedBitmap.bitmap) {
 			return {nullptr, {0.0f, 0.0f}};
+		}
+		if (textureBrush != nullptr) {
+			cachedBitmap.sourceTexture = textureBrush->getTexture();
 		}
 
 		if (!shouldCache(cachedBitmap)) {
@@ -212,9 +222,10 @@ void PositionIndependentEffectCache::trimCache() {
 	}
 
 	while (cachedBytes > maxCachedBytes && !cache.empty()) {
-		auto oldest = std::min_element(cache.begin(), cache.end(), [](auto const& a, auto const& b) {
-			return a.second.lastUsed < b.second.lastUsed;
-		});
+		auto oldest =
+			std::min_element(cache.begin(), cache.end(), [](auto const& a, auto const& b) {
+				return a.second.lastUsed < b.second.lastUsed;
+			});
 		cachedBytes -= oldest->second.byteSize;
 		cache.erase(oldest);
 	}

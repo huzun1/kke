@@ -58,3 +58,24 @@ uint64_t BrushHasher::hash(RasterSurfaceBrush const& brush) {
 	hasher.combine(brush.getOpacity());
 	return hasher.get();
 }
+
+uint64_t BrushHasher::hash(TextureBrush const& brush) {
+	Hasher hasher;
+	hasher.combine(BrushHashTag::Texture);
+	hasher.combine(brush.getTexture().get());
+	hasher.combine(brush.getDestination().min.x);
+	hasher.combine(brush.getDestination().min.y);
+	hasher.combine(brush.getDestination().max.x);
+	hasher.combine(brush.getDestination().max.y);
+	auto const& appearance = brush.getAppearance();
+	hasher.combine(appearance.opacity);
+	hasher.combine(appearance.interpolation);
+	hasher.combine(appearance.srcRect.has_value());
+	if (appearance.srcRect) {
+		hasher.combine(appearance.srcRect->min.x);
+		hasher.combine(appearance.srcRect->min.y);
+		hasher.combine(appearance.srcRect->max.x);
+		hasher.combine(appearance.srcRect->max.y);
+	}
+	return hasher.get();
+}

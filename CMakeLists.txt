@@ -39,6 +39,9 @@ add_library(kke STATIC
     src/kke/appearance/resource/effect/EffectCompose.cc
     src/kke/appearance/resource/effect/EffectIdentifier.cc
     src/kke/appearance/resource/brush/impl/LinearGradientBrush.cc
+    src/kke/appearance/resource/brush/impl/TextureBrush.cc
+    src/kke/engine/d2d/resource/brush/factory/TextureBrushFactory.cc
+    src/kke/engine/d2d/resource/texture/TextureSampling.cc
     src/kke/appearance/resource/brush/impl/RasterSurfaceBrush.cc
     src/kke/appearance/resource/brush/impl/SolidColorBrush.cc
     src/kke/engine/d2d/D2dEngine.cc

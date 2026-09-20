@@ -3,5 +3,5 @@
 #include <cstdint>
 
 namespace kke {
-enum class BrushHashTag : uint8_t { SolidColor, LinearGradient, RasterSurface };
+enum class BrushHashTag : uint8_t { SolidColor, LinearGradient, RasterSurface, Texture };
 } // namespace kke

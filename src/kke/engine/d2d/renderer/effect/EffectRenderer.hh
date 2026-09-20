@@ -125,6 +125,12 @@ class EffectRenderer {
 		ViewLayerController& viewLayerController
 	);
 
+	bool tryDrawBitmap(
+		D2dEngineContext const& context,
+		Microsoft::WRL::ComPtr<ID2D1Image> const& image,
+		Point const& targetOffset
+	);
+
 	void drawImage(
 		D2dEngineContext const& context,
 		Microsoft::WRL::ComPtr<ID2D1Image> image,

@@ -17,5 +17,7 @@ class BrushHasher {
 	static uint64_t hash(LinearGradientBrush const& brush);
 
 	static uint64_t hash(RasterSurfaceBrush const& brush);
+
+	static uint64_t hash(TextureBrush const& brush);
 };
 } // namespace kke

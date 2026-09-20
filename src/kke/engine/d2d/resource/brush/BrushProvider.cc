@@ -12,7 +12,8 @@ BrushProvider::BrushProvider(uint32_t limit) : storage(limit) {
 }
 
 ComPtr<ID2D1Brush> BrushProvider::get(D2dContext const& context, Brush const& brush) {
-	if (std::holds_alternative<RasterSurfaceBrush>(brush)) {
+	if (std::holds_alternative<RasterSurfaceBrush>(brush) ||
+		std::holds_alternative<TextureBrush>(brush)) {
 		return BrushFactory::create(context, brush);
 	}
 	LinearGradientBrush const* gradientBrush = std::get_if<LinearGradientBrush>(&brush);

@@ -23,11 +23,19 @@ Brush PositionIndependentBrush::normalize(Brush const& brush, Point const& origi
 				Rect destination = brushVariant.getDestination();
 				destination.min = destination.min - origin;
 				destination.max = destination.max - origin;
-				return RasterSurfaceBrush{
-					brushVariant.getSurface(),
-					destination,
-					brushVariant.getOpacity()
-				};
+				if constexpr (std::is_same_v<BrushType, TextureBrush>) {
+					return TextureBrush{
+						brushVariant.getTexture(),
+						destination,
+						brushVariant.getAppearance()
+					};
+				} else {
+					return RasterSurfaceBrush{
+						brushVariant.getSurface(),
+						destination,
+						brushVariant.getOpacity()
+					};
+				}
 			}
 		},
 		brush

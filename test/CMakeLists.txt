@@ -1,6 +1,18 @@
 cmake_minimum_required(VERSION 3.10.0)
 project(kke_unit_tests CXX)
 
+add_executable(kke_shadow_bitmap_drawing_test ShadowBitmapDrawingTest.cc)
+target_link_libraries(kke_shadow_bitmap_drawing_test PRIVATE kke d3d11)
+add_test(NAME kke_shadow_bitmap_drawing_test COMMAND kke_shadow_bitmap_drawing_test)
+
+add_executable(kke_texture_brush_test TextureBrushTest.cc)
+target_link_libraries(kke_texture_brush_test PRIVATE kke d3d11)
+add_test(NAME kke_texture_brush_test COMMAND kke_texture_brush_test)
+
+add_executable(kke_texture_brush_effect_cache_test TextureBrushEffectCacheTest.cc)
+target_link_libraries(kke_texture_brush_effect_cache_test PRIVATE kke d3d11)
+add_test(NAME kke_texture_brush_effect_cache_test COMMAND kke_texture_brush_effect_cache_test)
+
 add_executable(kke_matrix_test MatrixTest.cc)
 target_link_libraries(kke_matrix_test PRIVATE kke)
 add_test(NAME kke_matrix_test COMMAND kke_matrix_test)

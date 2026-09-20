@@ -19,7 +19,5 @@ class TextureRenderer {
 
   private:
 	static D2D1_RECT_F toD2dRect(Rect const& rect);
-
-	static D2D1_INTERPOLATION_MODE toD2dInterpolation(TextureInterpolation interpolation);
 };
 } // namespace kke
