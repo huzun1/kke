@@ -1,5 +1,7 @@
 #include "EffectRenderer.hh"
 
+#include <algorithm>
+#include <array>
 #include <cmath>
 #include <utility>
 
@@ -109,8 +111,18 @@ std::optional<CapturedEffect> EffectRenderer::capture(
 	D2D1_MATRIX_3X2_F activeTransform;
 	deviceContext->GetTransform(&activeTransform);
 	EffectClipSource viewportClip = EffectClipTransformer::transform(clip, activeTransform);
-	D2D1_RECT_F bounds = EffectClipBoundsResolver::resolve(viewportClip);
-	Scale logicalSize{bounds.right - bounds.left, bounds.bottom - bounds.top};
+	auto clippedBounds = clipCaptureBoundsToViewport(
+		EffectClipBoundsResolver::resolve(viewportClip),
+		activeTransform,
+		context.getViewportSize()
+	);
+	if (!clippedBounds.has_value()) {
+		return std::nullopt;
+	}
+	Scale logicalSize{
+		clippedBounds->right - clippedBounds->left,
+		clippedBounds->bottom - clippedBounds->top
+	};
 	if (logicalSize.x <= 0.0f || logicalSize.y <= 0.0f) {
 		return std::nullopt;
 	}
@@ -160,8 +172,8 @@ std::optional<CapturedEffect> EffectRenderer::capture(
 		0.0f,
 		0.0f,
 		1.0f,
-		-bounds.left * options.rasterScale,
-		-bounds.top * options.rasterScale
+		-clippedBounds->left * options.rasterScale,
+		-clippedBounds->top * options.rasterScale
 	));
 	deviceContext->DrawImage(effectImage.Get());
 	if (!rasterSurfaceService.end(context)) {
@@ -169,8 +181,64 @@ std::optional<CapturedEffect> EffectRenderer::capture(
 	}
 	return CapturedEffect{
 		.surface = std::move(surface),
-		.bounds = {{bounds.left, bounds.top}, {bounds.right, bounds.bottom}},
+		.bounds =
+			{{clippedBounds->left, clippedBounds->top},
+			 {clippedBounds->right, clippedBounds->bottom}},
 	};
+}
+
+std::optional<D2D1_RECT_F> EffectRenderer::clipCaptureBoundsToViewport(
+	D2D1_RECT_F bounds, D2D1_MATRIX_3X2_F const& activeTransform, D2D1_SIZE_F viewportSize
+) {
+	if (!std::isfinite(bounds.left) || !std::isfinite(bounds.top) || !std::isfinite(bounds.right) ||
+		!std::isfinite(bounds.bottom) || !std::isfinite(viewportSize.width) ||
+		!std::isfinite(viewportSize.height) || viewportSize.width <= 0.0f ||
+		viewportSize.height <= 0.0f) {
+		return std::nullopt;
+	}
+
+	std::array<D2D1_POINT_2F, 4> viewportCorners{
+		D2D1_POINT_2F{0.0f, 0.0f},
+		D2D1_POINT_2F{viewportSize.width, 0.0f},
+		D2D1_POINT_2F{viewportSize.width, viewportSize.height},
+		D2D1_POINT_2F{0.0f, viewportSize.height},
+	};
+	for (D2D1_POINT_2F& point : viewportCorners) {
+		point = {
+			point.x * activeTransform._11 + point.y * activeTransform._21 + activeTransform._31,
+			point.x * activeTransform._12 + point.y * activeTransform._22 + activeTransform._32,
+		};
+		if (!std::isfinite(point.x) || !std::isfinite(point.y)) {
+			return std::nullopt;
+		}
+	}
+
+	D2D1_RECT_F transformedViewportBounds{
+		(std::min)(
+			{viewportCorners[0].x, viewportCorners[1].x, viewportCorners[2].x, viewportCorners[3].x}
+		),
+		(std::min)(
+			{viewportCorners[0].y, viewportCorners[1].y, viewportCorners[2].y, viewportCorners[3].y}
+		),
+		(std::max)(
+			{viewportCorners[0].x, viewportCorners[1].x, viewportCorners[2].x, viewportCorners[3].x}
+		),
+		(std::max)(
+			{viewportCorners[0].y, viewportCorners[1].y, viewportCorners[2].y, viewportCorners[3].y}
+		),
+	};
+	D2D1_RECT_F clippedBounds{
+		(std::max)(bounds.left, transformedViewportBounds.left),
+		(std::max)(bounds.top, transformedViewportBounds.top),
+		(std::min)(bounds.right, transformedViewportBounds.right),
+		(std::min)(bounds.bottom, transformedViewportBounds.bottom),
+	};
+	if (!std::isfinite(clippedBounds.left) || !std::isfinite(clippedBounds.top) ||
+		!std::isfinite(clippedBounds.right) || !std::isfinite(clippedBounds.bottom) ||
+		clippedBounds.right <= clippedBounds.left || clippedBounds.bottom <= clippedBounds.top) {
+		return std::nullopt;
+	}
+	return clippedBounds;
 }
 
 void EffectRenderer::render(
