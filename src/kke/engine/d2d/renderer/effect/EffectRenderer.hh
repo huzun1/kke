@@ -146,5 +146,9 @@ class EffectRenderer {
 		std::optional<EffectClipSource> const& clip,
 		ViewLayerController& viewLayerController
 	);
+
+	static std::optional<D2D1_RECT_F> clipCaptureBoundsToViewport(
+		D2D1_RECT_F bounds, D2D1_MATRIX_3X2_F const& activeTransform, D2D1_SIZE_F viewportSize
+	);
 };
 } // namespace kke
