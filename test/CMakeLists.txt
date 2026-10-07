@@ -21,6 +21,10 @@ add_executable(kke_text_measurement_cache_test TextMeasurementCacheTest.cc)
 target_link_libraries(kke_text_measurement_cache_test PRIVATE kke)
 add_test(NAME kke_text_measurement_cache_test COMMAND kke_text_measurement_cache_test)
 
+add_executable(kke_key_cache_storage_test KeyCacheStorageTest.cc)
+target_link_libraries(kke_key_cache_storage_test PRIVATE kke)
+add_test(NAME kke_key_cache_storage_test COMMAND kke_key_cache_storage_test)
+
 add_executable(kke_font_hasher_test FontHasherTest.cc)
 target_link_libraries(kke_font_hasher_test PRIVATE kke)
 add_test(NAME kke_font_hasher_test COMMAND kke_font_hasher_test)
